@@ -983,5 +983,9 @@ declare class RtcEngine {
      * @returns Promise{cameraSupportInfo}>
      */
     static getCameraInfo(): Promise<any>;
+    /**
+     * @deprecated removeAllListeners
+     */
+    static removeAllListeners(): void;
 }
 export default RtcEngine;

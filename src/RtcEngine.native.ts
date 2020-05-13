@@ -1379,6 +1379,13 @@ class RtcEngine {
             autoFocusFaceModeSupported,
             maxZoomFactor
         }
+	}
+	
+	/**
+     * @deprecated removeAllListeners
+     */
+    static removeAllListeners() {
+        console.warn("removeAllListeners method already deprecated");
     }
 
 }
