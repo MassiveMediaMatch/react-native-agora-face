@@ -551,7 +551,7 @@ declare class RtcEngine {
      *
      * This method sets the fallback option for the locally published video stream based on the network conditions.
      *
-     * @param option {0, 1, 2}  [more details](https://docs.agora.io/en/Video/API%20Reference/java/classio_1_1agora_1_1rtc_1_1_constants.html#a3e453c93766e783a7e5eca05b1776238)
+     * @param option {0, 1, 2}  [more details](https://docs.ReactNativeAgoraFace.io/en/Video/API%20Reference/java/classio_1_1agora_1_1rtc_1_1_constants.html#a3e453c93766e783a7e5eca05b1776238)
      * @returns Promise<{success, value}>
      */
     static setLocalPublishFallbackOption(option: number): Promise<any>;
@@ -560,7 +560,7 @@ declare class RtcEngine {
      *
      * This method sets the fallback option for the remotely subscribed video stream based on the network conditions.
      *
-     * @param option {0, 1, 2} [more details](https://docs.agora.io/en/Video/API%20Reference/java/classio_1_1agora_1_1rtc_1_1_constants.html#a3e453c93766e783a7e5eca05b1776238)
+     * @param option {0, 1, 2} [more details](https://docs.ReactNativeAgoraFace.io/en/Video/API%20Reference/java/classio_1_1agora_1_1rtc_1_1_constants.html#a3e453c93766e783a7e5eca05b1776238)
      * @returns Promise<{success, value}>
      */
     static setRemoteSubscribeFallbackOption(option: number): Promise<any>;
