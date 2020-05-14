@@ -28,8 +28,8 @@ import {
 } from "./types";
 
 
-const { Agora } = NativeModules;
-const AgoraEventEmitter = new NativeEventEmitter(Agora);
+const { ReactNativeAgoraFace } = NativeModules;
+const AgoraEventEmitter = new NativeEventEmitter(ReactNativeAgoraFace);
 
 /**
  * RtcEngine is the javascript object for control agora native sdk through react native bridge.
@@ -50,7 +50,7 @@ class RtcEngine {
      * @param options Defines the property of the client, see {@link Option} for details.
      */
     public static init(options: Option): void {
-        Agora.init(options);
+        ReactNativeAgoraFace.init(options);
     }
 
     /**
@@ -64,7 +64,7 @@ class RtcEngine {
      * @param info
      */
     public static joinChannel(channelName: string, uid?: number, token?: string, info?: Object): void {
-        return Agora.joinChannel({channelName, uid, token, info});
+        return ReactNativeAgoraFace.joinChannel({channelName, uid, token, info});
     }
 
     /**
@@ -85,7 +85,7 @@ class RtcEngine {
      * @param token
      */
     public static renewToken(token: string) {
-        return Agora.renewToken(token);
+        return ReactNativeAgoraFace.renewToken(token);
     }
 
     /**
@@ -97,7 +97,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static enableWebSdkInteroperability(enabled: boolean): Promise<any> {
-        return Agora.enableWebSdkInteroperability(enabled);
+        return ReactNativeAgoraFace.enableWebSdkInteroperability(enabled);
     }
 
     /**
@@ -107,7 +107,7 @@ class RtcEngine {
      * @returns Promise<{success: true, state: (connection state)}>
      */
     public static getConnectionState() {
-        return Agora.getConnectionState();
+        return ReactNativeAgoraFace.getConnectionState();
     }
 
     /**
@@ -117,7 +117,7 @@ class RtcEngine {
      * @param role (audience: 0, host: 1)
      */
     public static setClientRole(role: number) {
-        Agora.setClientRole(role);
+        ReactNativeAgoraFace.setClientRole(role);
     }
 
     /**
@@ -129,7 +129,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static leaveChannel(): Promise<any> {
-        return Agora.leaveChannel();
+        return ReactNativeAgoraFace.leaveChannel();
     }
 
     /**
@@ -141,7 +141,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static destroy(): Promise<any> {
-        return Agora.destroy();
+        return ReactNativeAgoraFace.destroy();
     }
 
     /**
@@ -151,7 +151,7 @@ class RtcEngine {
      * @param mode
      */
     public static setLocalRenderMode(mode: number) {
-        Agora.setLocalRenderMode(mode);
+        ReactNativeAgoraFace.setLocalRenderMode(mode);
     }
 
     /**
@@ -163,7 +163,7 @@ class RtcEngine {
      * @param mode
      */
     public static setRemoteRenderMode(uid: number, mode: number) {
-        Agora.setRemoteRenderMode(uid, mode);
+        ReactNativeAgoraFace.setRemoteRenderMode(uid, mode);
     }
 
     /**
@@ -172,7 +172,7 @@ class RtcEngine {
      * This method start video preview for video.
      */
     public static startPreview() {
-        Agora.startPreview();
+        ReactNativeAgoraFace.startPreview();
     }
 
 
@@ -182,7 +182,7 @@ class RtcEngine {
      * This method stops video preview for video.
      */
     public static stopPreview() {
-        Agora.stopPreview();
+        ReactNativeAgoraFace.stopPreview();
     }
 
     /**
@@ -192,7 +192,7 @@ class RtcEngine {
      * @param enabled
      */
     public static setEnableSpeakerphone(enabled: boolean) {
-        Agora.setEnableSpeakerphone(enabled);
+        ReactNativeAgoraFace.setEnableSpeakerphone(enabled);
     }
 
     /**
@@ -202,7 +202,7 @@ class RtcEngine {
      * @param enabled
      */
     public static setDefaultAudioRouteToSpeakerphone(enabled: boolean) {
-        Agora.setDefaultAudioRouteToSpeakerphone(enabled);
+        ReactNativeAgoraFace.setDefaultAudioRouteToSpeakerphone(enabled);
     }
 
 
@@ -213,7 +213,7 @@ class RtcEngine {
      * @param enabled
      */
     public static setDefaultMuteAllRemoteAudioStreams(enabled: boolean) {
-        Agora.setDefaultMuteAllRemoteAudioStreams(enabled);
+        ReactNativeAgoraFace.setDefaultMuteAllRemoteAudioStreams(enabled);
     }
 
     /**
@@ -222,7 +222,7 @@ class RtcEngine {
      * This method enables video.
      */
     public static enableVideo() {
-        Agora.enableVideo();
+        ReactNativeAgoraFace.enableVideo();
     }
 
     /**
@@ -231,7 +231,7 @@ class RtcEngine {
      * This method disables video.
      */
     public static disableVideo() {
-        Agora.disableVideo();
+        ReactNativeAgoraFace.disableVideo();
     }
 
     /**
@@ -241,7 +241,7 @@ class RtcEngine {
      * @param enabled
      */
     public static enableLocalVideo(enabled: boolean) {
-        Agora.enableLocalVideo(enabled);
+        ReactNativeAgoraFace.enableLocalVideo(enabled);
     }
 
     /**
@@ -251,7 +251,7 @@ class RtcEngine {
      * @param muted
      */
     public static muteLocalVideoStream(muted: boolean) {
-        Agora.muteLocalVideoStream(muted);
+        ReactNativeAgoraFace.muteLocalVideoStream(muted);
     }
 
     /**
@@ -261,7 +261,7 @@ class RtcEngine {
      * @param muted
      */
     public static muteAllRemoteVideoStreams(muted: boolean) {
-        Agora.muteAllRemoteVideoStreams(muted);
+        ReactNativeAgoraFace.muteAllRemoteVideoStreams(muted);
     }
 
     /**
@@ -272,7 +272,7 @@ class RtcEngine {
      * @param muted
      */
     public static muteRemoteVideoStream(uid: number, muted: boolean) {
-        Agora.muteRemoteVideoStream(uid, muted);
+        ReactNativeAgoraFace.muteRemoteVideoStream(uid, muted);
     }
 
     /**
@@ -282,7 +282,7 @@ class RtcEngine {
      * @param muted
      */
     public static setDefaultMuteAllRemoteVideoStreams(muted: boolean) {
-        Agora.setDefaultMuteAllRemoteVideoStreams(muted);
+        ReactNativeAgoraFace.setDefaultMuteAllRemoteVideoStreams(muted);
     }
 
     /**
@@ -291,7 +291,7 @@ class RtcEngine {
      * This method enables audio
      */
     public static enableAudio() {
-        Agora.enableAudio();
+        ReactNativeAgoraFace.enableAudio();
     }
 
     /**
@@ -300,7 +300,7 @@ class RtcEngine {
      * This method disables audio
      */
     public static disableAudio() {
-        Agora.disableAudio();
+        ReactNativeAgoraFace.disableAudio();
     }
 
     /**
@@ -310,7 +310,7 @@ class RtcEngine {
      * @param enabled
      */
     public static enableLocalAudio(enabled: boolean) {
-        Agora.enableLocalAudio(enabled);
+        ReactNativeAgoraFace.enableLocalAudio(enabled);
     }
 
     /**
@@ -320,7 +320,7 @@ class RtcEngine {
      * @param muted
      */
     public static disableLocalAudio(muted: boolean) {
-        Agora.disableLocalAudio(muted);
+        ReactNativeAgoraFace.disableLocalAudio(muted);
     }
 
     /**
@@ -329,7 +329,7 @@ class RtcEngine {
      * This method mutes all remote audio streams by muted
      */
     public static muteAllRemoteAudioStreams(muted: boolean) {
-        Agora.muteAllRemoteAudioStreams(muted);
+        ReactNativeAgoraFace.muteAllRemoteAudioStreams(muted);
     }
 
     /**
@@ -340,7 +340,7 @@ class RtcEngine {
      * @param muted
      */
     public static muteRemoteAudioStream(uid: number, muted: boolean) {
-        Agora.muteRemoteAudioStream(uid, muted);
+        ReactNativeAgoraFace.muteRemoteAudioStream(uid, muted);
     }
 
     /**
@@ -350,7 +350,7 @@ class RtcEngine {
      * @param volume
      */
     public static adjustRecordingSignalVolume(volume: number) {
-        Agora.adjustRecordingSignalVolume(volume);
+        ReactNativeAgoraFace.adjustRecordingSignalVolume(volume);
     }
 
     /**
@@ -360,7 +360,7 @@ class RtcEngine {
      * @param volume
      */
     public static adjustPlaybackSignalVolume(volume: number) {
-        Agora.adjustPlaybackSignalVolume(volume);
+        ReactNativeAgoraFace.adjustPlaybackSignalVolume(volume);
     }
 
     /**
@@ -371,7 +371,7 @@ class RtcEngine {
      * @param smooth
      */
     public static enableAudioVolumeIndication(interval: number, smooth: number) {
-        Agora.enableAudioVolumeIndication(interval, smooth);
+        ReactNativeAgoraFace.enableAudioVolumeIndication(interval, smooth);
     }
 
     /**
@@ -381,7 +381,7 @@ class RtcEngine {
      * @param callback
      */
     public static methodisSpeakerphoneEnabled(callback: Callback<any>) {
-        Agora.methodisSpeakerphoneEnabled(callback);
+        ReactNativeAgoraFace.methodisSpeakerphoneEnabled(callback);
     }
 
     /**
@@ -392,7 +392,7 @@ class RtcEngine {
      * @param enabled
      */
     public static enableInEarMonitoring(enabled: boolean) {
-        Agora.enableInEarMonitoring(enabled);
+        ReactNativeAgoraFace.enableInEarMonitoring(enabled);
     }
 
     /**
@@ -403,7 +403,7 @@ class RtcEngine {
      * @param volume
      */
     public static setInEarMonitoringVolume(volume: number) {
-        Agora.setInEarMonitoringVolume(volume);
+        ReactNativeAgoraFace.setInEarMonitoringVolume(volume);
     }
 
     /**
@@ -414,7 +414,7 @@ class RtcEngine {
      * @param pitch
      */
     public static setLocalVoicePitch(pitch: number) {
-        Agora.setLocalVoicePitch(pitch);
+        ReactNativeAgoraFace.setLocalVoicePitch(pitch);
     }
 
     /**
@@ -426,7 +426,7 @@ class RtcEngine {
      * @param gain
      */
     public static setLocalVoiceEqualization(band: number, gain: number) {
-        Agora.setLocalVoiceEqualization(band ,gain);
+        ReactNativeAgoraFace.setLocalVoiceEqualization(band ,gain);
     }
 
     /**
@@ -437,7 +437,7 @@ class RtcEngine {
      * @param value
      */
     public static setLocalVoiceReverb(reverb: number, value: number) {
-        Agora.setLocalVoiceReverb(reverb, value);
+        ReactNativeAgoraFace.setLocalVoiceReverb(reverb, value);
     }
 
     /**
@@ -448,7 +448,7 @@ class RtcEngine {
      * @param options {@link AudioMixingOption}
      */
     public static startAudioMixing(options: AudioMixingOption) {
-        Agora.startAudioMixing(options);
+        ReactNativeAgoraFace.startAudioMixing(options);
     }
 
     /**
@@ -457,7 +457,7 @@ class RtcEngine {
      * This methods stops for audio mixing.
      */
     public static stopAudioMixing() {
-        Agora.stopAudioMixing();
+        ReactNativeAgoraFace.stopAudioMixing();
     }
 
     /**
@@ -466,7 +466,7 @@ class RtcEngine {
      * This method pauses for audio mixing.
      */
     public static pauseAudioMixing() {
-        Agora.pauseAudioMixing();
+        ReactNativeAgoraFace.pauseAudioMixing();
     }
 
     /**
@@ -475,7 +475,7 @@ class RtcEngine {
      * This method resumes for audio mixing.
      */
     public static resumeAudioMixing() {
-        Agora.resumeAudioMixing();
+        ReactNativeAgoraFace.resumeAudioMixing();
     }
 
     /**
@@ -485,7 +485,7 @@ class RtcEngine {
      * @param volume
      */
     public static adjustAudioMixingVolume(volume: number) {
-        Agora.adjustAudioMixingVolume(volume);
+        ReactNativeAgoraFace.adjustAudioMixingVolume(volume);
     }
 
     /**
@@ -495,7 +495,7 @@ class RtcEngine {
      * @param volume
      */
     public static adjustAudioMixingPlayoutVolume(volume: number) {
-        Agora.adjustAudioMixingPlayoutVolume(volume);
+        ReactNativeAgoraFace.adjustAudioMixingPlayoutVolume(volume);
     }
 
     /**
@@ -505,7 +505,7 @@ class RtcEngine {
      * @param volume
      */
     public static adjustAudioMixingPublishVolume(volume: number) {
-        Agora.adjustAudioMixingPublishVolume(volume);
+        ReactNativeAgoraFace.adjustAudioMixingPublishVolume(volume);
     }
 
     /**
@@ -515,7 +515,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static getAudioMixingDuration(): Promise<any> {
-        return Agora.getAudioMixingDuration();
+        return ReactNativeAgoraFace.getAudioMixingDuration();
     }
 
     /**
@@ -525,7 +525,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static getAudioMixingCurrentPosition(): Promise<any> {
-        return Agora.getAudioMixingCurrentPosition();
+        return ReactNativeAgoraFace.getAudioMixingCurrentPosition();
     }
 
     /**
@@ -535,7 +535,7 @@ class RtcEngine {
      * @param pos
      */
      public static setAudioMixingPosition(pos: number): Promise<any> {
-         return Agora.setAudioMixingPosition(pos);
+         return ReactNativeAgoraFace.setAudioMixingPosition(pos);
      }
 
      /**
@@ -545,7 +545,7 @@ class RtcEngine {
       * @returns Promise<{success, value}>
       */
      public static getEffectsVolume(): Promise<any> {
-         return Agora.getEffectsVolume();
+         return ReactNativeAgoraFace.getEffectsVolume();
      }
 
      /**
@@ -556,7 +556,7 @@ class RtcEngine {
       * @returns Promise<{success, value}>
       */
      public static setEffectsVolume(volume: number): Promise<any> {
-        return Agora.setEffectsVolume(volume);
+        return ReactNativeAgoraFace.setEffectsVolume(volume);
      }
 
      /**
@@ -566,7 +566,7 @@ class RtcEngine {
       * @returns Promise<{success, value}>
       */
      public static setVolumeOfEffect(volume: number): Promise<any> {
-        return Agora.setVolumeOfEffect(volume);
+        return ReactNativeAgoraFace.setVolumeOfEffect(volume);
      }
 
      /**
@@ -577,7 +577,7 @@ class RtcEngine {
       * @returns Promise<{success, value}>
       */
      public static playEffect(options: PlayEffectOption): Promise<any> {
-        return Agora.playEffect(options);
+        return ReactNativeAgoraFace.playEffect(options);
      }
 
      /**
@@ -588,7 +588,7 @@ class RtcEngine {
       * @returns Promise<{success, value}>
       */
      public static stopEffect(soundId: number): Promise<any> {
-        return Agora.stopEffect(soundId);
+        return ReactNativeAgoraFace.stopEffect(soundId);
      }
 
      /**
@@ -598,7 +598,7 @@ class RtcEngine {
       * @returns Promise<{success, value}>
       */
      public static stopAllEffects(): Promise<any> {
-        return Agora.stopAllEffects();
+        return ReactNativeAgoraFace.stopAllEffects();
      }
 
      /**
@@ -610,7 +610,7 @@ class RtcEngine {
       * @returns Promise<{success, value}>
       */
      public static preloadEffect(soundId: number, filepath: string): Promise<any> {
-        return Agora.preloadEffect(soundId, filepath);
+        return ReactNativeAgoraFace.preloadEffect(soundId, filepath);
      }
 
      /**
@@ -621,7 +621,7 @@ class RtcEngine {
       * @returns Promise<{success, value}>
       */
      public static unloadEffect(soundId: number): Promise<any> {
-         return Agora.unloadEffect(soundId);
+         return ReactNativeAgoraFace.unloadEffect(soundId);
      }
 
      /**
@@ -632,7 +632,7 @@ class RtcEngine {
       * @returns Promise<{success, value}>
       */
      public static pauseEffect(soundId: number): Promise<any> {
-        return Agora.pauseEffect(soundId);
+        return ReactNativeAgoraFace.pauseEffect(soundId);
      }
 
      /**
@@ -643,7 +643,7 @@ class RtcEngine {
       * @returns Promise<{success, value}>
       */
      public static pauseAllEffects(): Promise<any> {
-        return Agora.pauseAllEffects();
+        return ReactNativeAgoraFace.pauseAllEffects();
      }
 
      /**
@@ -654,7 +654,7 @@ class RtcEngine {
       * @returns Promise<{success, value}>
       */
      public static resumeEffect(soundId: number): Promise<any> {
-        return Agora.resumeEffect(soundId);
+        return ReactNativeAgoraFace.resumeEffect(soundId);
      }
 
      /**
@@ -664,7 +664,7 @@ class RtcEngine {
       * @returns Promise<{success, value}>
       */
      public static resumeAllEffects(): Promise<any> {
-        return Agora.resumeAllEffects();
+        return ReactNativeAgoraFace.resumeAllEffects();
      }
 
      /**
@@ -675,7 +675,7 @@ class RtcEngine {
       * @returns Promise<{success, value}>
       */
      public static startAudioRecording(options: AudioRecordingOption): Promise<any> {
-        return Agora.startAudioRecording(options);
+        return ReactNativeAgoraFace.startAudioRecording(options);
      }
 
      /**
@@ -685,7 +685,7 @@ class RtcEngine {
       * @returns Promise<{success, value}>
       */
      public static stopAudioRecording(): Promise<any> {
-        return Agora.stopAudioRecording();
+        return ReactNativeAgoraFace.stopAudioRecording();
      }
 
      /**
@@ -698,7 +698,7 @@ class RtcEngine {
       */
      public static setAudioSessionOperationRestriction() {
          if (Platform.OS != 'ios') throw Error(`setAudioSessionOperationRestriction is not support on your platform. Please check the details in react-native-agora docs`);
-         Agora.setAudioSessionOperationRestriction();
+         ReactNativeAgoraFace.setAudioSessionOperationRestriction();
      }
 
     /**
@@ -714,7 +714,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static stopEchoTest(): Promise<any> {
-        return Agora.stopEchoTest();
+        return ReactNativeAgoraFace.stopEchoTest();
     }
 
     /**
@@ -725,7 +725,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static enableLastmileTest(): Promise<any> {
-        return Agora.enableLastmileTest();
+        return ReactNativeAgoraFace.enableLastmileTest();
     }
 
     /**
@@ -736,7 +736,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static disableLastmileTest(): Promise<any> {
-        return Agora.disableLastmileTest();
+        return ReactNativeAgoraFace.disableLastmileTest();
     }
 
     /**
@@ -748,7 +748,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static setRecordingAudioFrameParameters(options: AudioFrameOption): Promise<any> {
-        return Agora.setRecordingAudioFrameParameters(options);
+        return ReactNativeAgoraFace.setRecordingAudioFrameParameters(options);
     }
 
     /**
@@ -760,7 +760,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static setPlaybackAudioFrameParameters(options: AudioFrameOption): Promise<any> {
-        return Agora.setPlaybackAudioFrameParameters(options);
+        return ReactNativeAgoraFace.setPlaybackAudioFrameParameters(options);
     }
 
     /**
@@ -772,7 +772,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static setMixedAudioFrameParameters(options: MixedAudioFrameOption): Promise<any> {
-        return Agora.setMixedAudioFrameParameters(options);
+        return ReactNativeAgoraFace.setMixedAudioFrameParameters(options);
     }
 
     /**
@@ -784,7 +784,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static addVideoWatermark(options: ImageOption): Promise<any> {
-        return Agora.addVideoWatermark(options);
+        return ReactNativeAgoraFace.addVideoWatermark(options);
     }
 
     /**
@@ -795,7 +795,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static removclearVideoWatermarkse(): Promise<any> {
-        return Agora.clearVideoWatermarks();
+        return ReactNativeAgoraFace.clearVideoWatermarks();
     }
 
     /**
@@ -803,11 +803,11 @@ class RtcEngine {
      *
      * This method sets the fallback option for the locally published video stream based on the network conditions.
      *
-     * @param option {0, 1, 2}  [more details](https://docs.agora.io/en/Video/API%20Reference/java/classio_1_1agora_1_1rtc_1_1_constants.html#a3e453c93766e783a7e5eca05b1776238)
+     * @param option {0, 1, 2}  [more details](https://docs.ReactNativeAgoraFace.io/en/Video/API%20Reference/java/classio_1_1agora_1_1rtc_1_1_constants.html#a3e453c93766e783a7e5eca05b1776238)
      * @returns Promise<{success, value}>
      */
     public static setLocalPublishFallbackOption(option: number): Promise<any> {
-        return Agora.setLocalPublishFallbackOption(option);
+        return ReactNativeAgoraFace.setLocalPublishFallbackOption(option);
     }
 
     /**
@@ -815,11 +815,11 @@ class RtcEngine {
      *
      * This method sets the fallback option for the remotely subscribed video stream based on the network conditions.
      *
-     * @param option {0, 1, 2} [more details](https://docs.agora.io/en/Video/API%20Reference/java/classio_1_1agora_1_1rtc_1_1_constants.html#a3e453c93766e783a7e5eca05b1776238)
+     * @param option {0, 1, 2} [more details](https://docs.ReactNativeAgoraFace.io/en/Video/API%20Reference/java/classio_1_1agora_1_1rtc_1_1_constants.html#a3e453c93766e783a7e5eca05b1776238)
      * @returns Promise<{success, value}>
      */
     public static setRemoteSubscribeFallbackOption(option: number): Promise<any> {
-        return Agora.setRemoteSubscribeFallbackOption(option);
+        return ReactNativeAgoraFace.setRemoteSubscribeFallbackOption(option);
     }
 
     /**
@@ -831,7 +831,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static enableDualStreamMode(enabled: boolean): Promise<any> {
-        return Agora.enableDualStreamMode(enabled);
+        return ReactNativeAgoraFace.enableDualStreamMode(enabled);
     }
 
     /**
@@ -843,7 +843,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static setRemoteVideoStreamType(options: VideoStreamOption): Promise<any> {
-        return Agora.setRemoteVideoStreamType(options);
+        return ReactNativeAgoraFace.setRemoteVideoStreamType(options);
     }
 
     /**
@@ -855,7 +855,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static setRemoteDefaultVideoStreamType(options: DefaultVideoStreamOption): Promise<any> {
-        return Agora.setRemoteDefaultVideoStreamType(options);
+        return ReactNativeAgoraFace.setRemoteDefaultVideoStreamType(options);
     }
 
     /**
@@ -867,7 +867,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static addInjectStreamUrl(options: InjectStreamOption): Promise<any> {
-        return Agora.addInjectStreamUrl(options);
+        return ReactNativeAgoraFace.addInjectStreamUrl(options);
     }
 
     /**
@@ -879,7 +879,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static removeInjectStreamUrl(options: RemoveInjectStreamOption): Promise<any> {
-        return Agora.removeInjectStreamUrl(options);
+        return ReactNativeAgoraFace.removeInjectStreamUrl(options);
     }
 
     /**
@@ -917,7 +917,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static setLocalVideoMirrorMode(mode: number): Promise<any> {
-        return Agora.setLocalVideoMirrorMode(mode);
+        return ReactNativeAgoraFace.setLocalVideoMirrorMode(mode);
     }
 
     /**
@@ -928,7 +928,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static switchCamera(): Promise<any> {
-        return Agora.switchCamera();
+        return ReactNativeAgoraFace.switchCamera();
     }
 
     /**
@@ -939,7 +939,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static isCameraZoomSupported(): Promise<any> {
-        return Agora.isCameraZoomSupported();
+        return ReactNativeAgoraFace.isCameraZoomSupported();
     }
 
     /**
@@ -950,7 +950,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static isCameraTorchSupported(): Promise<any> {
-        return Agora.isCameraTorchSupported();
+        return ReactNativeAgoraFace.isCameraTorchSupported();
     }
 
     /**
@@ -961,7 +961,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static isCameraFocusSupported(): Promise<any> {
-        return Agora.isCameraFocusSupported();
+        return ReactNativeAgoraFace.isCameraFocusSupported();
     }
 
     /**
@@ -972,7 +972,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static isCameraExposurePositionSupported(): Promise<any> {
-        return Agora.isCameraExposurePositionSupported();
+        return ReactNativeAgoraFace.isCameraExposurePositionSupported();
     }
 
     /**
@@ -983,7 +983,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static isCameraAutoFocusFaceModeSupported(): Promise<any> {
-        return Agora.isCameraAutoFocusFaceModeSupported();
+        return ReactNativeAgoraFace.isCameraAutoFocusFaceModeSupported();
     }
 
     /**
@@ -995,7 +995,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static setCameraZoomFactor(zoomFactor: number): Promise<any> {
-        return Agora.setCameraZoomFactor(zoomFactor);
+        return ReactNativeAgoraFace.setCameraZoomFactor(zoomFactor);
     }
 
     /**
@@ -1007,7 +1007,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static getCameraMaxZoomFactor(): Promise<any> {
-        return Agora.getCameraMaxZoomFactor();
+        return ReactNativeAgoraFace.getCameraMaxZoomFactor();
     }
 
     /**
@@ -1019,7 +1019,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static setCameraFocusPositionInPreview(options: PositionOption): Promise<any> {
-        return Agora.setCameraFocusPositionInPreview(options);
+        return ReactNativeAgoraFace.setCameraFocusPositionInPreview(options);
     }
 
     /**
@@ -1031,7 +1031,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static setCameraExposurePosition(options: PositionOption): Promise<any> {
-        return Agora.setCameraExposurePosition(options);
+        return ReactNativeAgoraFace.setCameraExposurePosition(options);
     }
 
     /**
@@ -1043,7 +1043,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static setCameraTorchOn(enabled: boolean): Promise<any> {
-        return Agora.setCameraTorchOn(enabled);
+        return ReactNativeAgoraFace.setCameraTorchOn(enabled);
     }
 
     /**
@@ -1055,7 +1055,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static setCameraAutoFocusFaceModeEnabled(enabled: boolean): Promise<any> {
-        return Agora.setCameraAutoFocusFaceModeEnabled(enabled);
+        return ReactNativeAgoraFace.setCameraAutoFocusFaceModeEnabled(enabled);
     }
 
     /**
@@ -1066,7 +1066,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static getCallId(): Promise<any> {
-        return Agora.getCallId();
+        return ReactNativeAgoraFace.getCallId();
     }
 
     /**
@@ -1080,7 +1080,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static setLog(filepath: string, level: number, maxfileSize: number): Promise<any> {
-        return Agora.setLog(filepath, level, maxfileSize)
+        return ReactNativeAgoraFace.setLog(filepath, level, maxfileSize)
     }
 
     /**
@@ -1092,7 +1092,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static addPublishStreamUrl(options: PublishStreamOption): Promise<any> {
-        return Agora.addPublishStreamUrl(options);
+        return ReactNativeAgoraFace.addPublishStreamUrl(options);
     }
 
     /**
@@ -1104,7 +1104,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static removePublishStreamUrl(options: RemovePublishStreamOption): Promise<any> {
-        return Agora.removePublishStreamUrl(options);
+        return ReactNativeAgoraFace.removePublishStreamUrl(options);
     }
 
     /**
@@ -1116,7 +1116,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     public static setLiveTranscoding(options: LiveTranscodingOption): Promise<any> {
-        return Agora.setLiveTranscoding(options);
+        return ReactNativeAgoraFace.setLiveTranscoding(options);
     }
 
     /**
@@ -1128,7 +1128,7 @@ class RtcEngine {
      * @param errorHandler to handle reject error from getSdkVersion
      */
     public static getSdkVersion(callback: Callback<any>, errorHandler?: Callback<any>) {
-        return Agora.getSdkVersion().then(callback).catch(errorHandler);
+        return ReactNativeAgoraFace.getSdkVersion().then(callback).catch(errorHandler);
     }
 
     /**
@@ -1140,7 +1140,7 @@ class RtcEngine {
      */
 
      public static muteLocalAudioStream(enabled: boolean) {
-        Agora.muteLocalAudioStream(enabled);
+        ReactNativeAgoraFace.muteLocalAudioStream(enabled);
      }
 
     /**
@@ -1153,7 +1153,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     static setBeautyEffectOptions(enabled: boolean, options: BeautyOption): Promise<any> {
-        return Agora.setBeautyEffectOptions(enabled, options);
+        return ReactNativeAgoraFace.setBeautyEffectOptions(enabled, options);
     }
 
     /**
@@ -1174,7 +1174,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     static setLocalVoiceChanger(voiceChanger: number): Promise<any> {
-        return Agora.setLocalVoiceChanger(voiceChanger);
+        return ReactNativeAgoraFace.setLocalVoiceChanger(voiceChanger);
     }
 
     /**
@@ -1186,7 +1186,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     static setLocalVoiceReverbPreset(preset: number): Promise<any> {
-        return Agora.setLocalVoiceReverbPreset(preset);
+        return ReactNativeAgoraFace.setLocalVoiceReverbPreset(preset);
     }
 
     /**
@@ -1198,7 +1198,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     static enableSoundPositionIndication(enabled: boolean): Promise<any> {
-        return Agora.enableSoundPositionIndication(enabled);
+        return ReactNativeAgoraFace.enableSoundPositionIndication(enabled);
     }
 
     /**
@@ -1216,7 +1216,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     static setRemoteVoicePosition(uid: number, pan: number, gain: number): Promise<any> {
-        return Agora.setRemoteVoicePosition(uid, pan, gain)
+        return ReactNativeAgoraFace.setRemoteVoicePosition(uid, pan, gain)
     }
 
     /**
@@ -1231,7 +1231,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     static startLastmileProbeTest(config: LastmileProbeConfig): Promise<any> {
-        return Agora.startLastmileProbeTest(config);
+        return ReactNativeAgoraFace.startLastmileProbeTest(config);
     }
 
     /**
@@ -1242,7 +1242,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     static stopLastmileProbeTest(): Promise<any> {
-        return Agora.stopLastmileProbeTest();
+        return ReactNativeAgoraFace.stopLastmileProbeTest();
     }
 
     /**
@@ -1257,7 +1257,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     static setRemoteUserPriority(uid: number, userPrority: number): Promise<any> {
-        return Agora.setRemoteUserPriority(uid, userPrority);
+        return ReactNativeAgoraFace.setRemoteUserPriority(uid, userPrority);
     }
 
     /**
@@ -1275,7 +1275,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     static startEchoTestWithInterval(interval: number): Promise<any> {
-        return Agora.startEchoTestWithInterval(interval)
+        return ReactNativeAgoraFace.startEchoTestWithInterval(interval)
     }
 
     /**
@@ -1294,7 +1294,7 @@ class RtcEngine {
      * @returns Promise<{success, value}>
      */
     static setCameraCapturerConfiguration(config: CameraCapturerConfiguration): Promise<any> {
-        return Agora.setCameraCapturerConfiguration(config);
+        return ReactNativeAgoraFace.setCameraCapturerConfiguration(config);
     }
 
     /**
@@ -1306,7 +1306,7 @@ class RtcEngine {
      * @returns Promise{<success, value}>
      */
     static getAudioMixingPlayoutVolume(): Promise<any> {
-        return Agora.getAudioMixingPlayoutVolume();
+        return ReactNativeAgoraFace.getAudioMixingPlayoutVolume();
     }
 
     /**
@@ -1318,7 +1318,7 @@ class RtcEngine {
      * @returns Promise{<success, value}>
      */
     static getAudioMixingPublishVolume(): Promise<any> {
-        return Agora.getAudioMixingPublishVolume();
+        return ReactNativeAgoraFace.getAudioMixingPublishVolume();
     }
 
     /**
@@ -1331,7 +1331,7 @@ class RtcEngine {
      * @returns Promise<{success}>
      */
     static sendMediaData(data: String): Promise<any> {
-        return Agora.sendMediaData(data);
+        return ReactNativeAgoraFace.sendMediaData(data);
     }
 
     /**
@@ -1349,7 +1349,7 @@ class RtcEngine {
      * @returns Promise{<success, value}>
      */
     static registerMediaMetadataObserver(): Promise<any> {
-        return Agora.registerMediaMetadataObserver();
+        return ReactNativeAgoraFace.registerMediaMetadataObserver();
     }
 
     /**

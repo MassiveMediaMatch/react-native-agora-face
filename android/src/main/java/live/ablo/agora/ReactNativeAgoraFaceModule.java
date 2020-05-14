@@ -23,7 +23,7 @@ public class ReactNativeAgoraFaceModule extends ReactContextBaseJavaModule {
 
 	@Override
 	public String getName() {
-		return "ReactNativeAgoraFace";
+			return "ReactNativeAgoraFace";
 	}
 
 	@ReactMethod

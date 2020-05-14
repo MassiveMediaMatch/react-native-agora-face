@@ -7,7 +7,7 @@ import com.facebook.react.uimanager.annotations.ReactProp;
 public class ReactNativeAgoraFaceViewManager extends SimpleViewManager<ReactNativeAgoraFaceView> {
 	@Override
 	public String getName() {
-		return "ReactNativeAgoraFaceViewManager";
+		return "RCTAgoraVideoView";
 	}
 
 	@Override
