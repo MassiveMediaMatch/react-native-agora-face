@@ -10,7 +10,7 @@
 #import <UIKit/UIKit.h>
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
-#import <AgoraRtcEngineKit/AgoraRtcEngineKit.h>
+#import <AgoraRtcKit/AgoraRtcEngineKit.h>
 
 @interface RCTAgora : RCTEventEmitter<RCTBridgeModule, AgoraMediaMetadataDelegate, AgoraMediaMetadataDataSource>
 - (void) sendEvent:(NSString *_Nullable)msg params:(NSDictionary *_Nullable)params;
