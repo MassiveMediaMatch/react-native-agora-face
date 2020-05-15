@@ -11,7 +11,7 @@
 #import <React/RCTBridge.h>
 #import <React/RCTUIManager.h>
 #import <React/RCTView.h>
-#import <AgoraRtcEngineKit/AgoraRtcEngineKit.h>
+#import <AgoraRtcKit/AgoraRtcEngineKit.h>
 #import "AgoraConst.h"
 
 #define MAX_DATA_LENGTH 1024
