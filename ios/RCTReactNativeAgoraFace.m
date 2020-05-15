@@ -1,12 +1,12 @@
 //
-//  ReactNativeAgoraFace.m
-//  ReactNativeAgoraFace
+//  RCTReactNativeAgoraFace.m
+//  RCTReactNativeAgoraFace
 //
 //  Created by 邓博 on 2017/6/13.
 //  Copyright © 2017年 Syan. All rights reserved.
 //
 
-#import "ReactNativeAgoraFace.h"
+#import "RCTReactNativeAgoraFace.h"
 #import <React/RCTEventDispatcher.h>
 #import <React/RCTBridge.h>
 #import <React/RCTUIManager.h>
@@ -16,13 +16,13 @@
 
 #define MAX_DATA_LENGTH 1024
 
-@interface ReactNativeAgoraFace ()
+@interface RCTReactNativeAgoraFace ()
 @property (strong, nonatomic) AgoraRtcEngineKit *rtcEngine;
 @property (strong, nonatomic) NSString *appId;
 @property (strong, nonatomic) NSData *metadata;
 @end
 
-@implementation ReactNativeAgoraFace {
+@implementation RCTReactNativeAgoraFace {
   RCTResponseSenderBlock _block;
   bool hasListeners;
 }

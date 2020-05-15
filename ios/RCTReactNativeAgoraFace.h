@@ -1,6 +1,6 @@
 //
-//  ReactNativeAgoraFace.h
-//  ReactNativeAgoraFace
+//  RCTReactNativeAgoraFace.h
+//  RCTReactNativeAgoraFace
 //
 //  Created by 邓博 on 2017/6/13.
 //  Copyright © 2017年 Syan. All rights reserved.
@@ -12,7 +12,7 @@
 #import <React/RCTEventEmitter.h>
 #import <AgoraRtcKit/AgoraRtcEngineKit.h>
 
-@interface ReactNativeAgoraFace : RCTEventEmitter<RCTBridgeModule, AgoraMediaMetadataDelegate, AgoraMediaMetadataDataSource>
+@interface RCTReactNativeAgoraFace : RCTEventEmitter<RCTBridgeModule, AgoraMediaMetadataDelegate, AgoraMediaMetadataDataSource>
 - (void) sendEvent:(NSString *_Nullable)msg params:(NSDictionary *_Nullable)params;
 - (NSInteger) metadataMaxSize;
 - (NSData *_Nullable)readyToSendMetadataAtTimestamp:(NSTimeInterval)timestamp;
