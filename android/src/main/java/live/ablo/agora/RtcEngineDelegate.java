@@ -173,10 +173,6 @@ public enum RtcEngineDelegate {
 		return this.rtcEngine.setLocalRenderMode(renderMode);
 	}
 
-	public int setRemoteRenderMode(final Integer uid, final Integer renderMode) {
-		return this.rtcEngine.setRemoteRenderMode(uid, renderMode);
-	}
-
 	private FRAME_RATE getVideoEncoderEnum(int val) {
 		FRAME_RATE type = FRAME_RATE.FRAME_RATE_FPS_1;
 		switch (val) {
