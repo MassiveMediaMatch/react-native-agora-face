@@ -1,7 +1,6 @@
 package live.ablo.agora;
 
 import android.graphics.Rect;
-import android.support.annotation.Nullable;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -26,9 +25,8 @@ public class RtcEngineEventHandler extends IRtcEngineEventHandler {
 		this.reactContext = reactContext;
 	}
 
-	private void sendEvent(ReactContext reactContext,
-						   String eventName,
-						   @Nullable WritableMap params) {
+	public static void sendEvent(ReactContext reactContext,
+						   String eventName, WritableMap params) {
 		StringBuffer agoraEvtName = new StringBuffer(AG_PREFIX);
 		agoraEvtName.append(eventName);
 		reactContext
