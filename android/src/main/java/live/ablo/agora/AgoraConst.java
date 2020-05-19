@@ -69,4 +69,5 @@ public class AgoraConst {
 	public final static String AGMediaEngineLoaded = "mediaEngineLoaded";
 	public final static String AGMediaEngineStartCall = "mediaEngineStartCall";
 	public final static String AGLastmileProbeResult = "lastmileProbeTestResult";
+	public final static String AGFirstRemoteVideoDecoded = "firstRemoteVideoDecoded";
 }

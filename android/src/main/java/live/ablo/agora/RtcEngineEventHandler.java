@@ -332,6 +332,21 @@ public class RtcEngineEventHandler extends IRtcEngineEventHandler {
 	}
 
 	@Override
+	public void onFirstRemoteVideoDecoded(final int uid, final int width, final int height, final int elapsed) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				WritableMap map = Arguments.createMap();
+				map.putInt("uid", uid);
+				map.putInt("width", width);
+				map.putInt("height", height);
+				map.putInt("elapsed", elapsed);
+				sendEvent(reactContext, AGFirstRemoteVideoDecoded, map);
+			}
+		});
+	}
+
+	@Override
 	public void onFirstRemoteVideoFrame(final int uid, final int width, final int height, final int elapsed) {
 		runOnUiThread(new Runnable() {
 			@Override
