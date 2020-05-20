@@ -16,7 +16,7 @@
 
 #define MAX_DATA_LENGTH 1024
 
-@interface RCTReactNativeAgoraFace ()
+@interface RCTReactNativeAgoraFace ()	<AgoraRtcEngineDelegate>
 @property (strong, nonatomic) AgoraRtcEngineKit *rtcEngine;
 @property (strong, nonatomic) NSString *appId;
 @property (strong, nonatomic) NSData *metadata;
@@ -1850,6 +1850,10 @@ RCT_EXPORT_METHOD(getParameters:(NSString *)paramStr
 // EVENT CALLBACKS
 - (void)rtcEngine:(AgoraRtcEngineKit *_Nonnull)engine didOccurWarning:(AgoraWarningCode)warningCode {
   [self sendEvent:AGWarning params:@{@"message": @"AgoraWarning", @"errorCode": @(warningCode)}];
+}
+
+- (void)rtcEngine:(AgoraRtcEngineKit *)engine firstRemoteVideoDecodedOfUid:(NSUInteger)uid size:(CGSize)size elapsed:(NSInteger)elapsed {
+	[self sendEvent:AGFirstRemoteVideoDecoded params:@{@"message": @"FirstRemoteVideoDecoded", @"uid": @(uid), @"elapsed": @(elapsed), @"width": @(size.width), @"height": @(size.height)}];
 }
 
 - (void)rtcEngine:(AgoraRtcEngineKit *_Nonnull)engine didOccurError:(AgoraErrorCode)errorCode {
