@@ -51,6 +51,7 @@ static AgoraConst *_person;
                                   AGFirstRemoteAudioDecoded,
                                   AGFirstLocalVideoFrame,
                                   AGFirstRemoteVideoFrame,
+								  AGFirstRemoteVideoDecoded,
                                   AGUserMuteAudio,
                                   AGVideoSizeChanged,
                                   AGRemoteVideoStateChanged,
