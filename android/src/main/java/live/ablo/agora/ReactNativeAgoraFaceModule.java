@@ -25,8 +25,6 @@ import io.agora.rtc.video.CameraCapturerConfiguration;
 
 public class ReactNativeAgoraFaceModule extends ReactContextBaseJavaModule {
 
-	private final String TAG = ReactNativeAgoraFaceModule.class.getSimpleName();
-
 	private final RtcEngineEventHandler engineEventHandler;
 	private MediaObserver mediaObserver;
 
@@ -54,22 +52,14 @@ public class ReactNativeAgoraFaceModule extends ReactContextBaseJavaModule {
 
 	@ReactMethod
 	public void enableWebSdkInteroperability(boolean enabled, Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.enableWebSdkInteroperability(enabled);
-			resolvePromiseFromResolve(res, promise, "enableWebSdkInteroperability Failed");
-		} catch (Exception e) {
-			promise.reject("131003", e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.enableWebSdkInteroperability(enabled);
+		resolvePromiseFromResolve(res, promise, "enableWebSdkInteroperability Failed");
 	}
 
 	@ReactMethod
 	public void getConnectionState(Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.getConnectionState();
-			resolvePromiseFromResolve(res, promise, "getConnectionState Failed");
-		} catch (Exception e) {
-			promise.reject("141001", e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.getConnectionState();
+		resolvePromiseFromResolve(res, promise, "getConnectionState Failed");
 	}
 
 	@ReactMethod
@@ -90,14 +80,8 @@ public class ReactNativeAgoraFaceModule extends ReactContextBaseJavaModule {
 
 	@ReactMethod
 	public void leaveChannel(Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.leaveChannel();
-			WritableMap map = Arguments.createMap();
-			map.putBoolean("success", true);
-			promise.resolve(map);
-		} catch (Exception e) {
-			promise.reject("141002", e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.leaveChannel();
+		resolvePromiseFromResolve(res, promise);
 	}
 
 	@ReactMethod
@@ -168,140 +152,91 @@ public class ReactNativeAgoraFaceModule extends ReactContextBaseJavaModule {
 
 	@ReactMethod
 	public void switchCamera(Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.switchCamera();
-			resolvePromiseFromResolve(res, promise, "switchCamera Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.switchCamera();
+		resolvePromiseFromResolve(res, promise, "switchCamera Failed");
 	}
 
 	@ReactMethod
 	public void isCameraZoomSupported(Promise promise) {
-		try {
-			boolean res = RtcEngineDelegate.INSTANCE.isCameraZoomSupported();
-			resolvePromiseFromResolve(res, promise);
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		boolean res = RtcEngineDelegate.INSTANCE.isCameraZoomSupported();
+		resolvePromiseFromResolve(res, promise);
 	}
 
 
 	@ReactMethod
 	public void isCameraTorchSupported(Promise promise) {
-		try {
-			boolean res = RtcEngineDelegate.INSTANCE.isCameraTorchSupported();
-			resolvePromiseFromResolve(res, promise);
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		boolean res = RtcEngineDelegate.INSTANCE.isCameraTorchSupported();
+		resolvePromiseFromResolve(res, promise);
 	}
 
 	@ReactMethod
 	public void isCameraFocusSupported(Promise promise) {
-		try {
-			boolean res = RtcEngineDelegate.INSTANCE.isCameraFocusSupported();
-			resolvePromiseFromResolve(res, promise);
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		boolean res = RtcEngineDelegate.INSTANCE.isCameraFocusSupported();
+		resolvePromiseFromResolve(res, promise);
 	}
 
 	@ReactMethod
 	public void isCameraExposurePositionSupported(Promise promise) {
-		try {
-			boolean res = RtcEngineDelegate.INSTANCE.isCameraExposurePositionSupported();
-			resolvePromiseFromResolve(res, promise);
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		boolean res = RtcEngineDelegate.INSTANCE.isCameraExposurePositionSupported();
+		resolvePromiseFromResolve(res, promise);
 	}
 
 
 	@ReactMethod
 	public void isCameraAutoFocusFaceModeSupported(Promise promise) {
-		try {
-			boolean res = RtcEngineDelegate.INSTANCE.isCameraAutoFocusFaceModeSupported();
-			resolvePromiseFromResolve(res, promise);
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		boolean res = RtcEngineDelegate.INSTANCE.isCameraAutoFocusFaceModeSupported();
+		resolvePromiseFromResolve(res, promise);
+
 	}
 
 	@ReactMethod
 	public void setCameraZoomFactor(float factor, Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.setCameraZoomFactor(factor);
-			resolvePromiseFromResolve(res, promise, "setCameraZoomFactor Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.setCameraZoomFactor(factor);
+		resolvePromiseFromResolve(res, promise, "setCameraZoomFactor Failed");
 	}
 
 	@ReactMethod
 	public void getCameraMaxZoomFactor(Promise promise) {
-		try {
-			double res = RtcEngineDelegate.INSTANCE.getCameraMaxZoomFactor();
-			resolvePromiseFromResolve(res, promise);
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		double res = RtcEngineDelegate.INSTANCE.getCameraMaxZoomFactor();
+		resolvePromiseFromResolve(res, promise);
 	}
 
 	@ReactMethod
 	public void setCameraFocusPositionInPreview(ReadableMap options, Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.setCameraFocusPositionInPreview(
-					(float) options.getDouble("x"),
-					(float) options.getDouble("y")
-			);
-			resolvePromiseFromResolve(res, promise, "setCameraFocusPositionInPreview Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.setCameraFocusPositionInPreview(
+				(float) options.getDouble("x"),
+				(float) options.getDouble("y")
+		);
+		resolvePromiseFromResolve(res, promise, "setCameraFocusPositionInPreview Failed");
+
 	}
 
 	@ReactMethod
 	public void setCameraExposurePosition(ReadableMap options, Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.setCameraExposurePosition(
-					(float) options.getDouble("x"),
-					(float) options.getDouble("y")
-			);
-			resolvePromiseFromResolve(res, promise, "setCameraExposurePosition Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.setCameraExposurePosition(
+				(float) options.getDouble("x"),
+				(float) options.getDouble("y")
+		);
+		resolvePromiseFromResolve(res, promise, "setCameraExposurePosition Failed");
 	}
 
 	@ReactMethod
 	public void setCameraTorchOn(boolean isOn, Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.setCameraTorchOn(isOn);
-			resolvePromiseFromResolve(res, promise, "setCameraTorchOn Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.setCameraTorchOn(isOn);
+		resolvePromiseFromResolve(res, promise, "setCameraTorchOn Failed");
 	}
 
 	@ReactMethod
 	public void setCameraAutoFocusFaceModeEnabled(boolean enabled, Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.setCameraAutoFocusFaceModeEnabled(enabled);
-			resolvePromiseFromResolve(res, promise, "setCameraAutoFocusFaceModeEnabled Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.setCameraAutoFocusFaceModeEnabled(enabled);
+		resolvePromiseFromResolve(res, promise, "setCameraAutoFocusFaceModeEnabled Failed");
+
 	}
 
 	@ReactMethod
 	public void getCallId(Promise promise) {
-		try {
-			String res = RtcEngineDelegate.INSTANCE.getCallId();
-			resolvePromiseFromResolve(res, promise);
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		String res = RtcEngineDelegate.INSTANCE.getCallId();
+		resolvePromiseFromResolve(res, promise);
 	}
 
 	@ReactMethod
@@ -486,52 +421,32 @@ public class ReactNativeAgoraFaceModule extends ReactContextBaseJavaModule {
 
 	@ReactMethod
 	public void getAudioMixingPlayoutVolume(Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.getAudioMixingPlayoutVolume();
-			resolvePromiseFromNegativeResolve(res, promise, "getAudioMixingPlayoutVolume Failed");
-		} catch (Exception e) {
-			promise.reject("-1", e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.getAudioMixingPlayoutVolume();
+		resolvePromiseFromNegativeResolve(res, promise, "getAudioMixingPlayoutVolume Failed");
 	}
 
 	@ReactMethod
 	public void getAudioMixingPublishVolume(Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.getAudioMixingPlayoutVolume();
-			resolvePromiseFromNegativeResolve(res, promise, "getAudioMixingPublishVolume Failed");
-		} catch (Exception e) {
-			promise.reject("-1", e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.getAudioMixingPlayoutVolume();
+		resolvePromiseFromNegativeResolve(res, promise, "getAudioMixingPublishVolume Failed");
 	}
 
 	@ReactMethod
 	public void getAudioMixingDuration(Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.getAudioMixingDuration();
-			resolvePromiseFromResolve(res, promise, "getAudioMixingDuration Failed");
-		} catch (Exception e) {
-			promise.reject("-1", e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.getAudioMixingDuration();
+		resolvePromiseFromResolve(res, promise, "getAudioMixingDuration Failed");
 	}
 
 	@ReactMethod
 	public void getAudioMixingCurrentPosition(Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.getAudioMixingCurrentPosition();
-			resolvePromiseFromResolve(res, promise, "getAudioMixingCurrentPosition Failed");
-		} catch (Exception e) {
-			promise.reject("131005", e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.getAudioMixingCurrentPosition();
+		resolvePromiseFromResolve(res, promise, "getAudioMixingCurrentPosition Failed");
 	}
 
 	@ReactMethod
 	public void setAudioMixingPosition(int pos, Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.setAudioMixingPosition(pos);
-			resolvePromiseFromResolve(res, promise, "setAudioMixingPosition Failed");
-		} catch (Exception e) {
-			promise.reject("131006", e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.setAudioMixingPosition(pos);
+		resolvePromiseFromResolve(res, promise, "setAudioMixingPosition Failed");
 	}
 
 	@ReactMethod
@@ -550,35 +465,24 @@ public class ReactNativeAgoraFaceModule extends ReactContextBaseJavaModule {
 
 	@ReactMethod
 	public void stopAudioRecording(Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE
-					.stopAudioRecording();
-			resolvePromiseFromResolve(res, promise, "stopAudioRecording Failed");
-		} catch (Exception e) {
-			promise.reject("131008", e);
-		}
+		int res = RtcEngineDelegate.INSTANCE
+				.stopAudioRecording();
+		resolvePromiseFromResolve(res, promise, "stopAudioRecording Failed");
 	}
 
 	@ReactMethod
 	public void stopEchoTest(Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE
-					.stopEchoTest();
-			resolvePromiseFromResolve(res, promise, "stopEchoTest Failed");
-		} catch (Exception e) {
-			promise.reject("131010", e);
-		}
+		int res = RtcEngineDelegate.INSTANCE
+				.stopEchoTest();
+		resolvePromiseFromResolve(res, promise, "stopEchoTest Failed");
+
 	}
 
 	@ReactMethod
 	public void enableLastmileTest(Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE
-					.enableLastmileTest();
-			resolvePromiseFromResolve(res, promise, "enableLastmileTest Failed");
-		} catch (Exception e) {
-			promise.reject("131021", e);
-		}
+		int res = RtcEngineDelegate.INSTANCE
+				.enableLastmileTest();
+		resolvePromiseFromResolve(res, promise, "enableLastmileTest Failed");
 	}
 
 	@ReactMethod
@@ -967,38 +871,24 @@ public class ReactNativeAgoraFaceModule extends ReactContextBaseJavaModule {
 
 	@ReactMethod
 	public void getEffectsVolume(Promise promise) {
-		try {
-			IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
-			double res = manager.getEffectsVolume();
-			if (res < 0) throw new ReactNativeAgoraException("getEffectsVolume Failed", (int) res);
-			resolvePromiseFromResolve(res, promise);
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
+		double res = manager.getEffectsVolume();
+		resolvePromiseFromResolve(res, promise, "getEffectsVolume Failed");
 	}
 
 	@ReactMethod
 	public void setEffectsVolume(double volume, Promise promise) {
-		try {
-			IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
-			int res = manager.setEffectsVolume(volume);
-			resolvePromiseFromResolve(res, promise, "setEffectsVolume Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
+		int res = manager.setEffectsVolume(volume);
+		resolvePromiseFromResolve(res, promise, "setEffectsVolume Failed");
 	}
 
 
 	@ReactMethod
 	public void setVolumeOfEffect(int soundId, double volume, Promise promise) {
-		try {
-			IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
-			int res = manager.setVolumeOfEffect(soundId, volume);
-			if (res != 0) throw new ReactNativeAgoraException("setVolumeOfEffect Failed", res);
-			resolvePromiseFromResolve(res, promise);
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
+		int res = manager.setVolumeOfEffect(soundId, volume);
+		resolvePromiseFromResolve(res, promise, "setVolumeOfEffect Failed");
 	}
 
 	@ReactMethod
@@ -1023,90 +913,58 @@ public class ReactNativeAgoraFaceModule extends ReactContextBaseJavaModule {
 
 	@ReactMethod
 	public void stopEffect(int soundId, Promise promise) {
-		try {
-			IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
-			int res = manager.stopEffect(soundId);
-			resolvePromiseFromResolve(res, promise, "stopEffect Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
+		int res = manager.stopEffect(soundId);
+		resolvePromiseFromResolve(res, promise, "stopEffect Failed");
 	}
 
 	@ReactMethod
 	public void stopAllEffects(Promise promise) {
-		try {
-			IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
-			int res = manager.stopAllEffects();
-			resolvePromiseFromResolve(res, promise, "stopAllEffects Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
+		int res = manager.stopAllEffects();
+		resolvePromiseFromResolve(res, promise, "stopAllEffects Failed");
 	}
 
 	@ReactMethod
 	public void preloadEffect(int soundId, String filePath, Promise promise) {
-		try {
-			IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
-			int res = manager.preloadEffect(soundId, filePath);
-			resolvePromiseFromResolve(res, promise, "preloadEffect Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
+		int res = manager.preloadEffect(soundId, filePath);
+		resolvePromiseFromResolve(res, promise, "preloadEffect Failed");
 	}
 
 	@ReactMethod
 	public void unloadEffect(int soundId, Promise promise) {
-		try {
-			IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
-			int res = manager.unloadEffect(soundId);
-			resolvePromiseFromResolve(res, promise, "unloadEffect Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
+		int res = manager.unloadEffect(soundId);
+		resolvePromiseFromResolve(res, promise, "unloadEffect Failed");
 	}
 
 	@ReactMethod
 	public void pauseEffect(int soundId, Promise promise) {
-		try {
-			IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
-			int res = manager.pauseEffect(soundId);
-			resolvePromiseFromResolve(res, promise, "pauseEffect Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
+		int res = manager.pauseEffect(soundId);
+		resolvePromiseFromResolve(res, promise, "pauseEffect Failed");
 	}
 
 	@ReactMethod
 	public void pauseAllEffects(Promise promise) {
-		try {
-			IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
-			int res = manager.pauseAllEffects();
-			resolvePromiseFromResolve(res, promise, "pauseAllEffects Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
+		int res = manager.pauseAllEffects();
+		resolvePromiseFromResolve(res, promise, "pauseAllEffects Failed");
 	}
 
 	@ReactMethod
 	public void resumeEffect(int soundId, Promise promise) {
-		try {
-			IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
-			int res = manager.resumeEffect(soundId);
-			resolvePromiseFromResolve(res, promise, "resumeEffect Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
+		int res = manager.resumeEffect(soundId);
+		resolvePromiseFromResolve(res, promise, "resumeEffect Failed");
 	}
 
 	@ReactMethod
 	public void resumeAllEffects(int soundId, Promise promise) {
-		try {
-			IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
-			int res = manager.resumeAllEffects();
-			resolvePromiseFromResolve(res, promise, "resumeAllEffects Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		IAudioEffectManager manager = RtcEngineDelegate.INSTANCE.getAudioEffectManager();
+		int res = manager.resumeAllEffects();
+		resolvePromiseFromResolve(res, promise, "resumeAllEffects Failed");
 	}
 
 	// set local video render mode
@@ -1117,112 +975,73 @@ public class ReactNativeAgoraFaceModule extends ReactContextBaseJavaModule {
 
 	@ReactMethod
 	public void setLocalVideoMirrorMode(int mode, Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.setLocalVideoMirrorMode(mode);
-			resolvePromiseFromResolve(res, promise, "setLocalVideoMirrorMode Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.setLocalVideoMirrorMode(mode);
+		resolvePromiseFromResolve(res, promise, "setLocalVideoMirrorMode Failed");
 	}
 
 	@ReactMethod
 	public void setBeautyEffectOptions(boolean enabled, ReadableMap options, Promise promise) {
-		try {
-			BeautyOptions beautyOption = new BeautyOptions();
-			beautyOption.lighteningContrastLevel = options.getInt("lighteningContrastLevel");
-			beautyOption.lighteningLevel = (float) options.getDouble("lighteningLevel");
-			beautyOption.smoothnessLevel = (float) options.getDouble("smoothnessLevel");
-			beautyOption.rednessLevel = (float) options.getDouble("rednessLevel");
-			int res = RtcEngineDelegate.INSTANCE.setBeautyEffectOptions(true, beautyOption);
-			resolvePromiseFromResolve(res, promise, "setBeautyEffectOptions Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		BeautyOptions beautyOption = new BeautyOptions();
+		beautyOption.lighteningContrastLevel = options.getInt("lighteningContrastLevel");
+		beautyOption.lighteningLevel = (float) options.getDouble("lighteningLevel");
+		beautyOption.smoothnessLevel = (float) options.getDouble("smoothnessLevel");
+		beautyOption.rednessLevel = (float) options.getDouble("rednessLevel");
+		int res = RtcEngineDelegate.INSTANCE.setBeautyEffectOptions(true, beautyOption);
+		resolvePromiseFromResolve(res, promise, "setBeautyEffectOptions Failed");
 	}
 
 	@ReactMethod
 	public void setLocalVoiceChanger(int voiceChanger, Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.setLocalVoiceChanger(voiceChanger);
-			resolvePromiseFromResolve(res, promise, "setLocalVoiceChanger Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.setLocalVoiceChanger(voiceChanger);
+		resolvePromiseFromResolve(res, promise, "setLocalVoiceChanger Failed");
 	}
 
 	@ReactMethod
 	public void setLocalVoiceReverbPreset(int preset, Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.setLocalVoiceReverbPreset(preset);
-			resolvePromiseFromResolve(res, promise, "setLocalVoiceReverbPreset Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.setLocalVoiceReverbPreset(preset);
+		resolvePromiseFromResolve(res, promise, "setLocalVoiceReverbPreset Failed");
 	}
 
 	@ReactMethod
 	public void enableSoundPositionIndication(boolean enabled, Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.enableSoundPositionIndication(enabled);
-			resolvePromiseFromResolve(res, promise, "enableSoundPositionIndication Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.enableSoundPositionIndication(enabled);
+		resolvePromiseFromResolve(res, promise, "enableSoundPositionIndication Failed");
 	}
 
 	@ReactMethod
 	public void setRemoteVoicePosition(int uid, int pan, int gain, Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.setRemoteVoicePosition(uid, pan, gain);
-			resolvePromiseFromResolve(res, promise, "setRemoteVoicePosition Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.setRemoteVoicePosition(uid, pan, gain);
+		resolvePromiseFromResolve(res, promise, "setRemoteVoicePosition Failed");
 	}
 
 	@ReactMethod
 	public void startLastmileProbeTest(ReadableMap config, Promise promise) {
-		try {
-			LastmileProbeConfig probeConfig = new LastmileProbeConfig();
-			probeConfig.probeUplink = config.getBoolean("probeUplink");
-			probeConfig.probeDownlink = config.getBoolean("probeDownlink");
-			probeConfig.expectedDownlinkBitrate = config.getInt("expectedDownlinkBitrate");
-			probeConfig.expectedUplinkBitrate = config.getInt("expectedUplinkBitrate");
-			int res = RtcEngineDelegate.INSTANCE.startLastmileProbeTest(probeConfig);
-			resolvePromiseFromResolve(res, promise, "startLastmileProbeTest Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		LastmileProbeConfig probeConfig = new LastmileProbeConfig();
+		probeConfig.probeUplink = config.getBoolean("probeUplink");
+		probeConfig.probeDownlink = config.getBoolean("probeDownlink");
+		probeConfig.expectedDownlinkBitrate = config.getInt("expectedDownlinkBitrate");
+		probeConfig.expectedUplinkBitrate = config.getInt("expectedUplinkBitrate");
+		int res = RtcEngineDelegate.INSTANCE.startLastmileProbeTest(probeConfig);
+		resolvePromiseFromResolve(res, promise, "startLastmileProbeTest Failed");
 	}
 
 	@ReactMethod
 	public void stopLastmileProbeTest(Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.stopLastmileProbeTest();
-			resolvePromiseFromResolve(res, promise, "stopLastmileProbeTest Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.stopLastmileProbeTest();
+		resolvePromiseFromResolve(res, promise, "stopLastmileProbeTest Failed");
+
 	}
 
 	@ReactMethod
 	public void setRemoteUserPriority(int uid, int userPrority, Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.setRemoteUserPriority(uid, userPrority);
-			resolvePromiseFromResolve(res, promise, "setRemoteUserPriority Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.setRemoteUserPriority(uid, userPrority);
+		resolvePromiseFromResolve(res, promise, "setRemoteUserPriority Failed");
 	}
 
 	@ReactMethod
 	public void startEchoTestWithInterval(int interval, Promise promise) {
-		try {
-			int res = RtcEngineDelegate.INSTANCE.startEchoTest(interval);
-			resolvePromiseFromResolve(res, promise, "startEchoTestWithInterval Failed");
-		} catch (Exception e) {
-			promise.reject(e);
-		}
+		int res = RtcEngineDelegate.INSTANCE.startEchoTest(interval);
+		resolvePromiseFromResolve(res, promise, "startEchoTestWithInterval Failed");
 	}
 
 	@ReactMethod
@@ -1279,6 +1098,17 @@ public class ReactNativeAgoraFaceModule extends ReactContextBaseJavaModule {
 		map.putBoolean("success", true);
 		map.putInt("value", res);
 		promise.resolve(map);
+	}
+
+	private void resolvePromiseFromResolve(double res, Promise promise, String error) {
+		if (res == 0) {
+			WritableMap map = Arguments.createMap();
+			map.putBoolean("success", true);
+			map.putDouble("value", res);
+			promise.resolve(map);
+		} else {
+			promise.reject(new ReactNativeAgoraException(error, (int) res));
+		}
 	}
 
 	private void resolvePromiseFromResolve(int res, Promise promise, String error) {
