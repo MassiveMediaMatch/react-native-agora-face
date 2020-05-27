@@ -2,15 +2,15 @@ package live.ablo.agora;
 
 public class ReactNativeAgoraException extends Exception {
 
-    private int code;
+	private int code;
 
-    public ReactNativeAgoraException(String message, final int code) {
-        super(message);
-        this.code = code;
-    }
+	public ReactNativeAgoraException(String message, final int code) {
+		super(message);
+		this.code = code;
+	}
 
-    public int getCode() {
-        return this.code;
-    }
+	public int getCode() {
+		return this.code;
+	}
 
 }

@@ -12,21 +12,21 @@ import java.util.List;
 
 public class AgoraPackage implements ReactPackage {
 
-    @Override
-    public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-        return Arrays.asList(new NativeModule[]{
-                new AgoraModule(reactContext),
-        });
-    }
+	@Override
+	public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
+		return Arrays.asList(new NativeModule[]{
+				new AgoraModule(reactContext),
+		});
+	}
 
-    public List<Class<? extends JavaScriptModule>> createJSModules() {
-        return Collections.emptyList();
-    }
+	public List<Class<? extends JavaScriptModule>> createJSModules() {
+		return Collections.emptyList();
+	}
 
-    @Override
-    public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-        return Arrays.<ViewManager>asList(
-                new AgoraViewManager()
-        );
-    }
+	@Override
+	public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
+		return Arrays.<ViewManager>asList(
+				new AgoraViewManager()
+		);
+	}
 }

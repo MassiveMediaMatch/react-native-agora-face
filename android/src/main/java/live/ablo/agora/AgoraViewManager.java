@@ -12,62 +12,58 @@ import com.facebook.react.uimanager.annotations.ReactProp;
 
 public class AgoraViewManager extends SimpleViewManager<AgoraVideoView> {
 
-    public static final String REACT_CLASS = "RCTAgoraVideoView";
+	public static final String REACT_CLASS = "RCTAgoraVideoView";
 
-    public SurfaceView surfaceView;
+	@Override
+	public String getName() {
+		return REACT_CLASS;
+	}
 
-    @Override
-    public String getName() {
-        return REACT_CLASS;
-    }
+	@Override
+	protected AgoraVideoView createViewInstance(ThemedReactContext reactContext) {
+		return new AgoraVideoView(reactContext);
+	}
 
-    @Override
-    protected AgoraVideoView createViewInstance(ThemedReactContext reactContext) {
-        return new AgoraVideoView(reactContext);
-    }
+	@ReactProp(name = "mode")
+	public void setRenderMode(final AgoraVideoView agoraVideoView, Integer renderMode) {
+		agoraVideoView.setRenderMode(renderMode);
+	}
 
-    @ReactProp(name = "mode")
-    public void setRenderMode(final AgoraVideoView agoraVideoView, Integer renderMode) {
-        agoraVideoView.setRenderMode(renderMode);
-    }
+	@ReactProp(name = "showLocalVideo")
+	public void setShowLocalVideo(final AgoraVideoView agoraVideoView, boolean showLocalVideo) {
+		agoraVideoView.setShowLocalVideo(showLocalVideo);
+		if (showLocalVideo) {
+			SurfaceView surfaceView = AgoraManager.getInstance().setupLocalVideo(agoraVideoView.getRenderMode());
+			surfaceView.setZOrderMediaOverlay(agoraVideoView.getZOrderMediaOverlay());
+			agoraVideoView.addView(surfaceView);
+		}
+	}
 
-    @ReactProp(name = "showLocalVideo")
-    public void setShowLocalVideo(final AgoraVideoView agoraVideoView, boolean showLocalVideo) {
-        agoraVideoView.setShowLocalVideo(showLocalVideo);
-        if (showLocalVideo) {
-            AgoraManager.getInstance().setupLocalVideo(agoraVideoView.getRenderMode());
-            surfaceView = AgoraManager.getInstance().getLocalSurfaceView();
-            surfaceView.setZOrderMediaOverlay(agoraVideoView.getZOrderMediaOverlay());
-            agoraVideoView.addView(surfaceView);
-        }
-    }
+	@ReactProp(name = "zOrderMediaOverlay")
+	public void setZOrderMediaOverlay(final AgoraVideoView agoraVideoView, boolean zOrderMediaOverlay) {
+		agoraVideoView.setZOrderMediaOverlay(zOrderMediaOverlay);
+		Integer remoteUid = agoraVideoView.getRemoteUid();
+		if (remoteUid != null) {
+			SurfaceView surfaceView = agoraVideoView.findViewById(remoteUid);
+			if (surfaceView != null) {
+				surfaceView.setZOrderMediaOverlay(zOrderMediaOverlay);
+			}
+		} else {
+			SurfaceView surfaceView = agoraVideoView.findViewById(0);
+			if (surfaceView != null) {
+				surfaceView.setZOrderMediaOverlay(zOrderMediaOverlay);
+			}
+		}
+	}
 
-    @ReactProp(name = "zOrderMediaOverlay")
-    public void setZOrderMediaOverlay(final AgoraVideoView agoraVideoView, boolean zOrderMediaOverlay) {
-        agoraVideoView.setZOrderMediaOverlay(zOrderMediaOverlay);
-        Integer remoteUid = agoraVideoView.getRemoteUid();
-        if (remoteUid != null) {
-            surfaceView = AgoraManager.getInstance().getSurfaceView(remoteUid);
-            if (surfaceView != null) {
-                surfaceView.setZOrderMediaOverlay(zOrderMediaOverlay);
-            }
-        } else {
-            surfaceView = AgoraManager.getInstance().getLocalSurfaceView();
-            if (surfaceView != null) {
-                surfaceView.setZOrderMediaOverlay(zOrderMediaOverlay);
-            }
-        }
-    }
-
-    @ReactProp(name = "remoteUid")
-    public void setRemoteUid(final AgoraVideoView agoraVideoView, final int remoteUid) {
-        agoraVideoView.setRemoteUid(remoteUid);
-        if (remoteUid != 0) {
-            AgoraManager.getInstance().setupRemoteVideo(remoteUid, agoraVideoView.getRenderMode());
-            surfaceView = AgoraManager.getInstance().getSurfaceView(remoteUid);
-            surfaceView.setZOrderMediaOverlay(agoraVideoView.getZOrderMediaOverlay());
-            agoraVideoView.addView(surfaceView);
-        }
-    }
+	@ReactProp(name = "remoteUid")
+	public void setRemoteUid(final AgoraVideoView agoraVideoView, final int remoteUid) {
+		agoraVideoView.setRemoteUid(remoteUid);
+		if (remoteUid != 0) {
+			SurfaceView surfaceView = AgoraManager.getInstance().setupRemoteVideo(remoteUid, agoraVideoView.getRenderMode());
+			surfaceView.setZOrderMediaOverlay(agoraVideoView.getZOrderMediaOverlay());
+			agoraVideoView.addView(surfaceView);
+		}
+	}
 
 }

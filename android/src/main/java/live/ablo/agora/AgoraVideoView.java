@@ -6,73 +6,70 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import io.agora.rtc.mediaio.AgoraSurfaceView;
-
 /**
  * Created by DB on 2017/6/27.
  */
 
 public class AgoraVideoView extends LinearLayout {
-    public boolean isShowLocalVideo() {
-        return showLocalVideo;
-    }
+	private boolean showLocalVideo;
+	private Integer renderMode = 1;
+	private Integer remoteUid;
+	private boolean zOrderMediaOverlay;
+	private SurfaceView surfaceView;
 
-    public void setShowLocalVideo(boolean showLocalVideo) {
-        this.showLocalVideo = showLocalVideo;
-    }
+	public AgoraVideoView(Context context) {
+		super(context);
+	}
 
-    public Integer getRenderMode() {
-        return renderMode;
-    }
+	public AgoraVideoView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+	}
 
-    public void setRenderMode(Integer renderMode) {
-        this.renderMode = renderMode;
+	public AgoraVideoView(Context context, AttributeSet attrs, int defStyleAttr) {
+		super(context, attrs, defStyleAttr);
+	}
 
-    }
+	public boolean isShowLocalVideo() {
+		return showLocalVideo;
+	}
 
-    public Integer getRemoteUid() {
-        return remoteUid;
-    }
+	public void setShowLocalVideo(boolean showLocalVideo) {
+		this.showLocalVideo = showLocalVideo;
+	}
 
-    public void setRemoteUid(Integer remoteUid) {
-        this.remoteUid = remoteUid;
-    }
+	public Integer getRenderMode() {
+		return renderMode;
+	}
 
-    public boolean getZOrderMediaOverlay() {
-        return zOrderMediaOverlay;
-    }
+	public void setRenderMode(Integer renderMode) {
+		this.renderMode = renderMode;
 
-    public void setZOrderMediaOverlay(boolean zOrderMediaOverlay) {
-        this.zOrderMediaOverlay = zOrderMediaOverlay;
-    }
+	}
 
-    private boolean showLocalVideo;
-    private Integer renderMode = 1;
-    private Integer remoteUid;
-    private boolean zOrderMediaOverlay;
-    private SurfaceView surfaceView;
+	public Integer getRemoteUid() {
+		return remoteUid;
+	}
 
-    public AgoraVideoView(Context context) {
-        super(context);
-    }
+	public void setRemoteUid(Integer remoteUid) {
+		this.remoteUid = remoteUid;
+	}
 
-    public AgoraVideoView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+	public boolean getZOrderMediaOverlay() {
+		return zOrderMediaOverlay;
+	}
 
+	public void setZOrderMediaOverlay(boolean zOrderMediaOverlay) {
+		this.zOrderMediaOverlay = zOrderMediaOverlay;
+	}
 
-    public AgoraVideoView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
-    protected void onVisibilityChanged(View changedView, int visibility) {
-        super.onVisibilityChanged(changedView, visibility);
-        if (changedView == this) {
-            if (null != remoteUid) {
-                AgoraManager.getInstance().setRemoteRenderMode(remoteUid, renderMode);
-            } else {
-                AgoraManager.getInstance().setLocalRenderMode(renderMode);
-            }
-        }
-    }
+	protected void onVisibilityChanged(View changedView, int visibility) {
+		super.onVisibilityChanged(changedView, visibility);
+		if (changedView == this) {
+			if (null != remoteUid) {
+				AgoraManager.getInstance().setRemoteRenderMode(remoteUid, renderMode);
+			} else {
+				AgoraManager.getInstance().setLocalRenderMode(renderMode);
+			}
+		}
+	}
 }
