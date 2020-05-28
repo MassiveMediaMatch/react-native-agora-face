@@ -13,13 +13,22 @@
 #import <React/RCTView.h>
 #import <AgoraRtcKit/AgoraRtcEngineKit.h>
 #import "AgoraConst.h"
+#import "AgoraMediaDataPlugin.h"
+@import FirebaseMLVision;
+#import <QuartzCore/QuartzCore.h>
 
 #define MAX_DATA_LENGTH 1024
 
-@interface RCTReactNativeAgoraFace ()	<AgoraRtcEngineDelegate>
+@interface RCTReactNativeAgoraFace ()	<AgoraRtcEngineDelegate, AgoraVideoDataPluginDelegate, AgoraAudioDataPluginDelegate, AgoraPacketDataPluginDelegate>
 @property (strong, nonatomic) AgoraRtcEngineKit *rtcEngine;
+@property (nonatomic, strong) AgoraMediaDataPlugin *agoraMediaDataPlugin;
 @property (strong, nonatomic) NSString *appId;
 @property (strong, nonatomic) NSData *metadata;
+@property (nonatomic, assign) NSUInteger remoteUserId;
+@property (nonatomic, strong) FIRVision *vision;
+@property (nonatomic, strong) CIContext *blurImageContext;
+@property (nonatomic, assign) CFTimeInterval startTime;
+@property (nonatomic, assign) BOOL hasFaces;
 @end
 
 @implementation RCTReactNativeAgoraFace {
@@ -244,6 +253,10 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
   
   //Enable Agora Native SDK be Interoperable with Agora Web SDK
   [self.rtcEngine enableWebSdkInteroperability:YES];
+	
+  [self initializeMediaDataPlugin];
+  self.vision = [FIRVision vision];
+  self.startTime = CACurrentMediaTime();
 }
 
 // renew token
@@ -1853,6 +1866,7 @@ RCT_EXPORT_METHOD(getParameters:(NSString *)paramStr
 }
 
 - (void)rtcEngine:(AgoraRtcEngineKit *)engine firstRemoteVideoDecodedOfUid:(NSUInteger)uid size:(CGSize)size elapsed:(NSInteger)elapsed {
+	self.remoteUserId = uid;
 	[self sendEvent:AGFirstRemoteVideoDecoded params:@{@"message": @"FirstRemoteVideoDecoded", @"uid": @(uid), @"elapsed": @(elapsed), @"width": @(size.width), @"height": @(size.height)}];
 }
 
@@ -2334,6 +2348,299 @@ RCT_EXPORT_METHOD(getParameters:(NSString *)paramStr
                                                              }
                                                          }
                                                      }];
+}
+
+
+#pragma mark - <AgoraVideoDataPluginDelegate>
+
+- (AgoraVideoRawData *)mediaDataPlugin:(AgoraMediaDataPlugin *)mediaDataPlugin didCapturedVideoRawData:(AgoraVideoRawData *)videoRawData
+{
+	// determine whether to do face detection
+	CFTimeInterval elapsedTime = CACurrentMediaTime() - self.startTime;
+	if (elapsedTime > 1)
+	{
+		self.startTime = CACurrentMediaTime();
+		
+		NSDictionary *pixelAttributes = @{(NSString *)kCVPixelBufferIOSurfacePropertiesKey:@{}};
+		CVPixelBufferRef pixelBuffer = NULL;
+		CVReturn result = CVPixelBufferCreate(kCFAllocatorDefault,
+											  videoRawData.width,
+											  videoRawData.height,
+											  kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,   //  NV12
+											  (__bridge CFDictionaryRef)(pixelAttributes),
+											  &pixelBuffer);
+		if (result != kCVReturnSuccess) {
+			NSLog(@"Unable to create cvpixelbuffer %d", result);
+		}
+		CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+		unsigned char *yDestPlane = (unsigned char *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
+		for (int i = 0, k = 0; i < videoRawData.height; i ++) {
+			for (int j = 0; j < videoRawData.width; j ++) {
+				yDestPlane[k++] = videoRawData.yBuffer[j + i * videoRawData.yStride];
+			}
+		}
+		unsigned char *uvDestPlane = (unsigned char *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
+		for (int i = 0, k = 0; i < videoRawData.height / 2; i ++) {
+			for (int j = 0; j < videoRawData.width / 2; j ++) {
+				uvDestPlane[k++] = videoRawData.uBuffer[j + i * videoRawData.uStride];
+				uvDestPlane[k++] = videoRawData.vBuffer[j + i * videoRawData.vStride];
+			}
+		}
+		
+		// create CIImage from pixel buffer
+		CIImage *coreImage = [CIImage imageWithCVPixelBuffer:pixelBuffer];
+		
+		// CIImage Conversion to UIImage
+		//	CIContext *MytemporaryContext = [CIContext contextWithOptions:nil];
+		//	CGImageRef MyvideoImage = [MytemporaryContext createCGImage:coreImage fromRect:CGRectMake(0, 0, videoRawData.width, videoRawData.height)];
+		//
+		//	UIImage *Mynnnimage = [[UIImage alloc] initWithCGImage:MyvideoImage scale:1.0 orientation:UIImageOrientationUp];
+		//	CVPixelBufferRelease(pixelBuffer);
+		//	CGImageRelease(MyvideoImage);
+		
+		
+		// iOS face detection
+		CIContext *context = [CIContext context];
+		NSDictionary *opts = @{ CIDetectorAccuracy : CIDetectorAccuracyHigh };
+		CIDetector *detector = [CIDetector detectorOfType:CIDetectorTypeFace context:context options:opts];
+		
+		AVCaptureDevicePosition cameraPosition = AVCaptureDevicePositionFront;
+		UIImageOrientation orientation = [self imageOrientationFromDeviceOrientation:UIDevice.currentDevice.orientation cameraPosition:cameraPosition];
+		opts = @{ CIDetectorImageOrientation: @(orientation) };
+		NSArray *features = [detector featuresInImage:coreImage options:opts];
+		BOOL hasFaces = features.count > 0;
+		NSLog(@"hasFaces %@", features.count > 0 ? @"YES" : @"NO");
+		self.hasFaces = hasFaces;
+		
+		if (self.hasFaces)
+		{
+//			// apply blur to image
+//			CIFilter *gaussianBlurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];
+//			[gaussianBlurFilter setDefaults];
+//			[gaussianBlurFilter setValue:coreImage forKey:kCIInputImageKey];
+//			[gaussianBlurFilter setValue:@20 forKey:kCIInputRadiusKey];
+//
+//			CIImage *outputBlurredImage = [gaussianBlurFilter outputImage];
+//
+//			// In the Apple documents to get the best performance in Core Image they state firstly
+//			// "Don’t create a CIContext object every time you render. Contexts store a lot of state information; it’s more efficient to reuse them."
+//			if (!self.blurImageContext) {
+//				self.blurImageContext = [CIContext contextWithOptions:nil];
+//			}
+//			CGImageRef outputBlurredImageRef = [self.blurImageContext createCGImage:outputBlurredImage fromRect:[coreImage extent]];
+//			UIImage *image = [UIImage imageWithCGImage:outputBlurredImageRef];
+//
+//			CGImageRelease(outputBlurredImageRef);
+			
+		}
+	}
+	
+    return videoRawData;
+}
+
+- (AgoraVideoRawData *)mediaDataPlugin:(AgoraMediaDataPlugin *)mediaDataPlugin willRenderVideoRawData:(AgoraVideoRawData *)videoRawData ofUid:(uint)uid {
+    return videoRawData;
+}
+
+
+#pragma mark - Face Detection
+
+- (void)initializeMediaDataPlugin {
+    self.agoraMediaDataPlugin = [AgoraMediaDataPlugin mediaDataPluginWithAgoraKit:self.rtcEngine];
+    
+    // Register audio observer
+//    ObserverAudioType audioType = ObserverAudioTypeRecordAudio | ObserverAudioTypePlaybackAudioFrameBeforeMixing | ObserverAudioTypeMixedAudio | ObserverAudioTypePlaybackAudio;
+//    [self.agoraMediaDataPlugin registerAudioRawDataObserver:audioType];
+//    self.agoraMediaDataPlugin.audioDelegate = self;
+//
+//    [self.rtcEngine setRecordingAudioFrameParametersWithSampleRate:44100
+//                                                          channel:1
+//                                                             mode:AgoraAudioRawFrameOperationModeReadWrite
+//                                                   samplesPerCall:4410];
+//    [self.rtcEngine setMixedAudioFrameParametersWithSampleRate:44100
+//                                               samplesPerCall:4410];
+//    [self.rtcEngine setPlaybackAudioFrameParametersWithSampleRate:44100
+//                                                         channel:1
+//                                                            mode:AgoraAudioRawFrameOperationModeReadWrite
+//                                                  samplesPerCall:4410];
+    
+    // Register video observer
+    ObserverVideoType videoType = ObserverVideoTypeCaptureVideo | ObserverVideoTypeRenderVideo;
+    [self.agoraMediaDataPlugin registerVideoRawDataObserver:videoType];
+    self.agoraMediaDataPlugin.videoDelegate = self;
+    
+    // Register packet observer
+//    ObserverPacketType packetType = ObserverPacketTypeSendAudio | ObserverPacketTypeSendVideo | ObserverPacketTypeReceiveAudio | ObserverPacketTypeReceiveVideo;
+//    [self.agoraMediaDataPlugin registerPacketRawDataObserver:packetType];
+//    self.agoraMediaDataPlugin.packetDelegate = self;
+}
+
+RCT_EXPORT_METHOD(detectFace:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
+{
+	[self localVideoSnapShot];
+	if (resolve) {
+		resolve(nil);
+	}
+}
+
+- (void)localVideoSnapShot
+{
+//	__weak __typeof(self)weakSelf = self;
+    [self.agoraMediaDataPlugin localSnapshot:^(AGImage * _Nonnull image) {
+		
+		// iOS face detection
+		CIContext *context = [CIContext context];
+		NSDictionary *opts = @{ CIDetectorAccuracy : CIDetectorAccuracyHigh };
+		CIDetector *detector = [CIDetector detectorOfType:CIDetectorTypeFace context:context options:opts];
+
+		opts = @{ CIDetectorImageOrientation: @(image.imageOrientation) };
+		CIImage* ciImage = [[CIImage alloc] initWithCGImage:image.CGImage];
+		NSArray *features = [detector featuresInImage:ciImage options:opts];
+		NSLog(@"hasFaces %@", features.count > 0 ? @"YES" : @"NO");
+		
+		
+		
+		// Firebase local face detection
+//		UIImage *faceImage = (UIImage*)image;
+//
+//		FIRVisionFaceDetectorOptions *options = [FIRVisionFaceDetectorOptions new];
+//		options.landmarkMode = FIRVisionFaceDetectorLandmarkModeAll;
+//		options.contourMode = FIRVisionFaceDetectorContourModeAll;
+//		options.classificationMode = FIRVisionFaceDetectorClassificationModeAll;
+//		options.performanceMode = FIRVisionFaceDetectorPerformanceModeAccurate;
+//
+//		FIRVisionFaceDetector *faceDetector = [self.vision faceDetectorWithOptions:options];
+//
+//		// Define the metadata for the image.
+//		FIRVisionImageMetadata *imageMetadata = [FIRVisionImageMetadata new];
+//		imageMetadata.orientation =	[self visionImageOrientationFromImageOrientation:faceImage.imageOrientation];
+//
+//		// Initialize a VisionImage object with the given UIImage.
+//		FIRVisionImage *visionImage = [[FIRVisionImage alloc] initWithImage:faceImage];
+//		visionImage.metadata = imageMetadata;
+//
+//		// [START detect_faces]
+//		[faceDetector processImage:visionImage completion:^(NSArray<FIRVisionFace *> *_Nullable faces, NSError *_Nullable error) {
+//			if (!faces || faces.count == 0) {
+//			  return;
+//			}
+//
+//			NSLog(@"faces detected");
+//
+//		  }];
+		
+		
+		
+		
+//		// init High-accuracy landmark detection and face classification
+//		 FIRVisionFaceDetectorOptions *options = [FIRVisionFaceDetectorOptions new];
+//		 options.landmarkMode = FIRVisionFaceDetectorLandmarkModeAll;
+//		 options.contourMode = FIRVisionFaceDetectorContourModeAll;
+//		 options.classificationMode = FIRVisionFaceDetectorClassificationModeAll;
+//		 options.performanceMode = FIRVisionFaceDetectorPerformanceModeAccurate;
+//
+//		FIRVision *vision = [FIRVision vision];
+//		FIRVisionFaceDetector *faceDetector = [vision faceDetectorWithOptions:options];
+//
+//		FIRVisionImageMetadata *metadata = [[FIRVisionImageMetadata alloc] init];
+//		AVCaptureDevicePosition cameraPosition = AVCaptureDevicePositionFront;  // Set to the capture device you used.
+//		metadata.orientation = [weakSelf imageOrientationFromDeviceOrientation:UIDevice.currentDevice.orientation cameraPosition:cameraPosition];
+//
+//		FIRVisionImage *visionImage = [[FIRVisionImage alloc] initWithImage:image];
+//		visionImage.metadata = metadata;
+//
+//		[faceDetector processImage:visionImage completion:^(NSArray<FIRVisionFace *> *faces, NSError *error) {
+//			if (error) {
+//				NSLog(@"error detecting face %@", error);
+//			} else {
+//				BOOL hasFaces = faces != nil && faces.count > 0;
+//				NSLog(@"hasFaces %@", hasFaces ? @"YES" : @"NO");
+//			}
+//		}];
+		
+    }];
+}
+
+- (void)remoteVideoSnapShot
+{
+	__weak __typeof(self)weakSelf = self;
+    [self.agoraMediaDataPlugin remoteSnapshotWithUid:self.remoteUserId image:^(AGImage * _Nonnull image) {
+
+		// TODO: implement this
+		
+    }];
+}
+
+- (UIImageOrientation)imageOrientationWithDeviceOrientation:(UIDeviceOrientation)deviceOrientation cameraPosition:(AVCaptureDevicePosition)cameraPosition
+{
+	switch (deviceOrientation)
+	{
+	  case UIDeviceOrientationPortrait:
+		return (cameraPosition == AVCaptureDevicePositionFront) ? UIImageOrientationUpMirrored : UIImageOrientationUp;
+	  case UIDeviceOrientationLandscapeLeft:
+		return (cameraPosition == AVCaptureDevicePositionFront) ? UIImageOrientationLeftMirrored : UIImageOrientationLeft;
+	  case UIDeviceOrientationPortraitUpsideDown:
+		return (cameraPosition == AVCaptureDevicePositionFront) ? UIImageOrientationDownMirrored : UIImageOrientationDown;
+	  case UIDeviceOrientationLandscapeRight:
+		return (cameraPosition == AVCaptureDevicePositionFront) ? UIImageOrientationRightMirrored : UIImageOrientationRight;
+	  default:
+		return UIImageOrientationUp;
+	}
+}
+
+- (FIRVisionDetectorImageOrientation)imageOrientationFromDeviceOrientation:(UIDeviceOrientation)deviceOrientation cameraPosition:(AVCaptureDevicePosition)cameraPosition
+{
+  switch (deviceOrientation)
+  {
+    case UIDeviceOrientationPortrait:
+      if (cameraPosition == AVCaptureDevicePositionFront){
+        return FIRVisionDetectorImageOrientationLeftTop;
+      } else {
+        return FIRVisionDetectorImageOrientationRightTop;
+      }
+    case UIDeviceOrientationLandscapeLeft:
+      if (cameraPosition == AVCaptureDevicePositionFront) {
+        return FIRVisionDetectorImageOrientationBottomLeft;
+      } else {
+        return FIRVisionDetectorImageOrientationTopLeft;
+      }
+    case UIDeviceOrientationPortraitUpsideDown:
+      if (cameraPosition == AVCaptureDevicePositionFront) {
+        return FIRVisionDetectorImageOrientationRightBottom;
+      } else {
+        return FIRVisionDetectorImageOrientationLeftBottom;
+      }
+    case UIDeviceOrientationLandscapeRight:
+      if (cameraPosition == AVCaptureDevicePositionFront) {
+        return FIRVisionDetectorImageOrientationTopRight;
+      } else {
+        return FIRVisionDetectorImageOrientationBottomRight;
+      }
+    default:
+      return FIRVisionDetectorImageOrientationTopLeft;
+  }
+}
+
+- (FIRVisionDetectorImageOrientation)visionImageOrientationFromImageOrientation:
+    (UIImageOrientation)imageOrientation {
+  switch (imageOrientation) {
+    case UIImageOrientationUp:
+      return FIRVisionDetectorImageOrientationTopLeft;
+    case UIImageOrientationDown:
+      return FIRVisionDetectorImageOrientationBottomRight;
+    case UIImageOrientationLeft:
+      return FIRVisionDetectorImageOrientationLeftBottom;
+    case UIImageOrientationRight:
+      return FIRVisionDetectorImageOrientationRightTop;
+    case UIImageOrientationUpMirrored:
+      return FIRVisionDetectorImageOrientationTopRight;
+    case UIImageOrientationDownMirrored:
+      return FIRVisionDetectorImageOrientationBottomLeft;
+    case UIImageOrientationLeftMirrored:
+      return FIRVisionDetectorImageOrientationLeftTop;
+    case UIImageOrientationRightMirrored:
+      return FIRVisionDetectorImageOrientationRightBottom;
+  }
 }
 
 @end
