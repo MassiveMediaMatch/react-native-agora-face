@@ -76,14 +76,13 @@ public class RtcEventHandler extends IRtcEngineEventHandler {
 
 	private final ReactApplicationContext reactApplicationContext;
 
-	public RtcEventHandler(ReactApplicationContext reactApplicationContext) {
+	RtcEventHandler(ReactApplicationContext reactApplicationContext) {
 		this.reactApplicationContext = reactApplicationContext;
 	}
 
-	private void sendEvent(ReactContext reactContext,
+	public static void sendEvent(ReactContext reactContext,
 						   String eventName,
 						   @Nullable WritableMap params) {
-		Log.w("AGORA", eventName + " - > " + params.toString());
 		reactContext
 				.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
 				.emit(AG_PREFIX + eventName, params);

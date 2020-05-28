@@ -22,14 +22,15 @@ import static io.agora.rtc.video.VideoEncoderConfiguration.ORIENTATION_MODE;
 
 public class AgoraManager {
 
-	public static AgoraManager sAgoraManager;
+	private static AgoraManager sAgoraManager;
 
-	public RtcEngine mRtcEngine;
-
-	private Context context;
+	private RtcEngine mRtcEngine;
 
 	private int mLocalUid = 0;
 
+	private AgoraManager() {
+
+	}
 
 	public static AgoraManager getInstance() {
 		if (sAgoraManager == null) {
@@ -117,7 +118,6 @@ public class AgoraManager {
 	public int init(Context context, IRtcEngineEventHandler mRtcEventHandler, ReadableMap options) {
 		//create rtcEngine instance and setup rtcEngine eventHandler
 		try {
-			this.context = context;
 			this.mRtcEngine = RtcEngine.create(context, options.getString("appid"), mRtcEventHandler);
 			if (options.hasKey("secret") && null != options.getString("secret")) {
 				mRtcEngine.setEncryptionSecret(options.getString("secret"));
@@ -201,9 +201,8 @@ public class AgoraManager {
 	/**
 	 * setupLocalVideo will render video from local side capture into ui layout
 	 */
-	public SurfaceView setupLocalVideo(Integer mode) {
+	public SurfaceView setupLocalVideo(Integer mode, Context context) {
 		SurfaceView surfaceView = RtcEngine.CreateRendererView(context);
-		surfaceView.setId(0);
 		mRtcEngine.setupLocalVideo(new VideoCanvas(surfaceView, mode, mLocalUid));
 		return surfaceView;
 	}
@@ -211,45 +210,11 @@ public class AgoraManager {
 	/**
 	 * setupRemoteVideo will render video from remote side capture into ui layout
 	 */
-	public SurfaceView setupRemoteVideo(final int uid, final Integer mode) {
+	public SurfaceView setupRemoteVideo(final int uid, final Integer mode, Context context) {
 		SurfaceView surfaceView = RtcEngine.CreateRendererView(context);
-		surfaceView.setId(uid);
 		mRtcEngine.setupRemoteVideo(new VideoCanvas(surfaceView, mode, uid));
 		return surfaceView;
 	}
-
-	public int setLocalRenderMode(final Integer renderMode) {
-		return mRtcEngine.setLocalRenderMode(renderMode);
-	}
-
-	public int setRemoteRenderMode(final Integer uid, final Integer renderMode) {
-		return mRtcEngine.setRemoteRenderMode(uid, renderMode);
-	}
-
-	public int setEnableSpeakerphone(boolean enabled) {
-		return mRtcEngine.setEnableSpeakerphone(enabled);
-	}
-
-	public int setDefaultAudioRouteToSpeakerphone(boolean enabled) {
-		return mRtcEngine.setDefaultAudioRoutetoSpeakerphone(enabled);
-	}
-
-	public int renewToken(String token) {
-		return mRtcEngine.renewToken(token);
-	}
-
-	public int setClientRole(int role) {
-		return mRtcEngine.setClientRole(role);
-	}
-
-	public int enableWebSdkInteroperability(boolean enabled) {
-		return mRtcEngine.enableWebSdkInteroperability(enabled);
-	}
-
-	public int getConnectionState() {
-		return mRtcEngine.getConnectionState();
-	}
-
 	public int joinChannel(ReadableMap options) {
 		String token = options.hasKey("token") ? options.getString("token") : null;
 		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
@@ -259,25 +224,7 @@ public class AgoraManager {
 		return mRtcEngine.joinChannel(token, channelName, optionalInfo, uid);
 	}
 
-	public int enableLastmileTest() {
-		return mRtcEngine.enableLastmileTest();
+	public RtcEngine getEngine() {
+		return mRtcEngine;
 	}
-
-	public int disableLastmileTest() {
-		return mRtcEngine.disableLastmileTest();
-	}
-
-	public void startPreview() {
-		mRtcEngine.startPreview();
-	}
-
-	public void stopPreview() {
-		mRtcEngine.stopPreview();
-	}
-
-	public int leaveChannel() {
-		return mRtcEngine.leaveChannel();
-	}
-
-
 }
