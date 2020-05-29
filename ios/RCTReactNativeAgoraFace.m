@@ -244,6 +244,10 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
       [self.rtcEngine setEncryptionMode:options[@"secretMode"]];
     }
   }
+	
+	if (options[@"enableFaceDetection"] != nil) {
+	  [self.rtcEngine enableFaceDetection:options[@"enableFaceDetection"]];
+	}
   
   AgoraVideoEncoderConfiguration *video_encoder_config = [[AgoraVideoEncoderConfiguration new] initWithWidth:[options[@"videoEncoderConfig"][@"width"] integerValue] height:[options[@"videoEncoderConfig"][@"height"] integerValue] frameRate:[options[@"videoEncoderConfig"][@"frameRate"] integerValue] bitrate:[options[@"videoEncoderConfig"][@"bitrate"] integerValue] orientationMode: (AgoraVideoOutputOrientationMode)[options[@"videoEncoderConfig"][@"orientationMode"] integerValue]];
   [self.rtcEngine setVideoEncoderConfiguration:video_encoder_config];
@@ -2350,11 +2354,19 @@ RCT_EXPORT_METHOD(getParameters:(NSString *)paramStr
                                                      }];
 }
 
+- (void)rtcEngine:(AgoraRtcEngineKit * _Nonnull)engine facePositionDidChangeWidth:(int)width previewHeight:(int)height faces:(NSArray<AgoraFacePositionInfo *> *_Nullable)faces
+{
+	NSLog(@"hasFaces %d", faces.count > 0);
+}
+
 
 #pragma mark - <AgoraVideoDataPluginDelegate>
 
 - (AgoraVideoRawData *)mediaDataPlugin:(AgoraMediaDataPlugin *)mediaDataPlugin didCapturedVideoRawData:(AgoraVideoRawData *)videoRawData
 {
+	// TODO: no face detection stuff
+    return videoRawData;
+	
 	// determine whether to do face detection
 	CFTimeInterval elapsedTime = CACurrentMediaTime() - self.startTime;
 	if (elapsedTime > 1)
