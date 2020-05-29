@@ -6,7 +6,6 @@ import android.view.SurfaceView;
 
 import com.facebook.react.bridge.ReadableMap;
 
-import io.agora.rtc.IRtcEngineEventHandler;
 import io.agora.rtc.RtcEngine;
 import io.agora.rtc.video.BeautyOptions;
 import io.agora.rtc.video.VideoCanvas;
@@ -27,6 +26,11 @@ public class AgoraManager {
 	private RtcEngine mRtcEngine;
 
 	private int mLocalUid = 0;
+
+	private VideoFrameProcessor mProcessor = new VideoFrameProcessor();
+	private boolean blurOnNoFaceDetected;
+	private boolean sendFaceDetectionEvent;
+
 
 	private AgoraManager() {
 
@@ -115,15 +119,24 @@ public class AgoraManager {
 	/**
 	 * initialize rtc engine
 	 */
-	public int init(Context context, IRtcEngineEventHandler mRtcEventHandler, ReadableMap options) {
+	public int init(Context context, RtcEventHandler rtcEventHandler, ReadableMap options) {
 		//create rtcEngine instance and setup rtcEngine eventHandler
 		try {
-			this.mRtcEngine = RtcEngine.create(context, options.getString("appid"), mRtcEventHandler);
+			this.mRtcEngine = RtcEngine.create(context, options.getString("appid"), rtcEventHandler);
 			if (options.hasKey("secret") && null != options.getString("secret")) {
 				mRtcEngine.setEncryptionSecret(options.getString("secret"));
 				if (options.hasKey("secretMode") && null != options.getString("secretMode")) {
 					mRtcEngine.setEncryptionMode(options.getString("secretMode"));
 				}
+			}
+			if (options.hasKey("toggleFaceDetection")) {
+				mRtcEngine.enableFaceDetection(options.getBoolean("toggleFaceDetection"));
+			}
+			if (options.hasKey("toggleFaceDetectionBlurring")) {
+				setBlurOnNoFaceDetected(options.getBoolean("toggleFaceDetectionBlurring"));
+			}
+			if (options.hasKey("toggleFaceDetectionEvents")) {
+				setSendFaceDetectionEvents(options.getBoolean("toggleFaceDetectionEvents"));
 			}
 			if (options.hasKey("channelProfile")) {
 				mRtcEngine.setChannelProfile(options.getInt("channelProfile"));
@@ -192,6 +205,7 @@ public class AgoraManager {
 			if (options.hasKey("clientRole")) {
 				mRtcEngine.setClientRole(options.getInt("clientRole"));
 			}
+			mProcessor.registerProcessing();
 			return mRtcEngine.enableWebSdkInteroperability(true);
 		} catch (Exception e) {
 			throw new RuntimeException("create rtc engine failed\n" + Log.getStackTraceString(e));
@@ -215,6 +229,7 @@ public class AgoraManager {
 		mRtcEngine.setupRemoteVideo(new VideoCanvas(surfaceView, mode, uid));
 		return surfaceView;
 	}
+
 	public int joinChannel(ReadableMap options) {
 		String token = options.hasKey("token") ? options.getString("token") : null;
 		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
@@ -226,5 +241,30 @@ public class AgoraManager {
 
 	public RtcEngine getEngine() {
 		return mRtcEngine;
+	}
+
+	public VideoFrameProcessor getProcessor() {
+		return mProcessor;
+	}
+
+	public void destroy() {
+		mProcessor.unregisterProcessing();
+		RtcEngine.destroy();
+	}
+
+	public void setSendFaceDetectionEvents(boolean sendFaceDetectionEvents) {
+		this.sendFaceDetectionEvent = sendFaceDetectionEvents;
+	}
+
+	public void setBlurOnNoFaceDetected(boolean blurOnNoFaceDetected) {
+		this.blurOnNoFaceDetected = blurOnNoFaceDetected;
+	}
+
+	public boolean blurOnNoFaceDetected() {
+		return blurOnNoFaceDetected;
+	}
+
+	public boolean sendFaceDetectionEvents() {
+		return sendFaceDetectionEvent;
 	}
 }

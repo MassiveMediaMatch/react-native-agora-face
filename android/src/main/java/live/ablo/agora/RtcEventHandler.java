@@ -71,21 +71,47 @@ import static live.ablo.agora.AgoraConst.AGVideoSizeChanged;
 import static live.ablo.agora.AgoraConst.AGVideoTransportStatsOfUid;
 import static live.ablo.agora.AgoraConst.AGWarning;
 import static live.ablo.agora.AgoraConst.AG_PREFIX;
+import static live.ablo.agora.AgoraConst.AGonFacePositionChanged;
 
 public class RtcEventHandler extends IRtcEngineEventHandler {
 
 	private final ReactApplicationContext reactApplicationContext;
+
 
 	RtcEventHandler(ReactApplicationContext reactApplicationContext) {
 		this.reactApplicationContext = reactApplicationContext;
 	}
 
 	public static void sendEvent(ReactContext reactContext,
-						   String eventName,
-						   @Nullable WritableMap params) {
+								 String eventName,
+								 @Nullable WritableMap params) {
+		Log.w("AGORA", eventName + ": " + params.toString());
 		reactContext
 				.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
 				.emit(AG_PREFIX + eventName, params);
+	}
+
+	public void onFacePositionChanged(final int imageWidth, final int imageHeight, final IRtcEngineEventHandler.AgoraFacePositionInfo[] faces) {
+		super.onFacePositionChanged(imageWidth, imageHeight, faces);
+		if (AgoraManager.getInstance().blurOnNoFaceDetected()) {
+			AgoraManager.getInstance().getProcessor().toggleBlurring(faces.length == 0);
+		}
+		if (faces.length > 0 && (AgoraManager.getInstance().sendFaceDetectionEvents())) {
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					WritableMap map = Arguments.createMap();
+					map.putInt("width", imageWidth);
+					map.putInt("height", imageHeight);
+					map.putInt("faceX", faces[0].x);
+					map.putInt("faceY", faces[0].y);
+					map.putInt("faceDistance", faces[0].distance);
+					map.putInt("faceHeight", faces[0].height);
+					map.putInt("faceWidth", faces[0].width);
+					sendEvent(reactApplicationContext, AGonFacePositionChanged, map);
+				}
+			});
+		}
 	}
 
 	@Override

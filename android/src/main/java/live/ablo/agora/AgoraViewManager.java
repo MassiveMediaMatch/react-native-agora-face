@@ -1,7 +1,5 @@
 package live.ablo.agora;
 
-import android.view.SurfaceView;
-
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;

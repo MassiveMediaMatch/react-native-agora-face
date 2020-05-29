@@ -19,7 +19,6 @@ import io.agora.rtc.Constants;
 import io.agora.rtc.IAudioEffectManager;
 import io.agora.rtc.IMetadataObserver;
 import io.agora.rtc.IRtcEngineEventHandler;
-import io.agora.rtc.RtcEngine;
 import io.agora.rtc.internal.LastmileProbeConfig;
 import io.agora.rtc.live.LiveInjectStreamConfig;
 import io.agora.rtc.live.LiveTranscoding;
@@ -60,7 +59,7 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	private static final String Reconnecting = "Reconnecting";
 	private static final String ConnectionFailed = "ConnectionFailed";
 	private static final String ConnectionChangedConnecting = "ConnectionChangedConnecting";
-	private static final String ConnectionChangedJoinSuccess =  "ConnectionChangedJoinSuccess";
+	private static final String ConnectionChangedJoinSuccess = "ConnectionChangedJoinSuccess";
 	private static final String ConnectionChangedInterrupted = "ConnectionChangedInterrupted";
 	private static final String ConnectionChangedBannedByServer = "ConnectionChangedBannedByServer";
 	private static final String ConnectionChangedJoinFailed = "ConnectionChangedJoinFailed";
@@ -258,6 +257,24 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
+	public void toggleFaceDetection(boolean enabled, Promise promise) {
+		int res = AgoraManager.getInstance().getEngine().enableFaceDetection(enabled);
+		resolvePromiseFromResolve(res, promise, "enable facedetection");
+	}
+
+	@ReactMethod
+	public void toggleFaceDetectionBlurring(boolean enabled, Promise promise) {
+		AgoraManager.getInstance().setBlurOnNoFaceDetected(enabled);
+		resolvePromiseFromResolve(0, promise);
+	}
+
+	@ReactMethod
+	public void toggleFaceDetectionEvents(boolean enabled, Promise promise) {
+		AgoraManager.getInstance().setSendFaceDetectionEvents(enabled);
+		resolvePromiseFromResolve(0, promise);
+	}
+
+	@ReactMethod
 	public void renewToken(String token,
 						   Promise promise) {
 		int res = AgoraManager.getInstance().getEngine().renewToken(token);
@@ -300,7 +317,7 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 
 	@ReactMethod
 	public void destroy() {
-		RtcEngine.destroy();
+		AgoraManager.getInstance().destroy();
 	}
 
 	@ReactMethod

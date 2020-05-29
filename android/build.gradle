@@ -53,6 +53,18 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    externalNativeBuild {
+        cmake {
+            path 'CMakeLists.txt'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path 'CMakeLists.txt'
+        }
+    }
 }
 
 repositories {
@@ -73,7 +85,7 @@ repositories {
 dependencies {
     //noinspection GradleDynamicVersion
     implementation 'com.facebook.react:react-native:+'  // From node_modules
-    implementation "io.agora.rtc:full-sdk:3.0.0.2"
+    implementation "io.agora.rtc:full-sdk:3.0.1"
 }
 
 def configureReactNativePom(def pom) {
