@@ -185,6 +185,8 @@ static NSString * _Nullable AGLocalVideoChanged = @"localVideoChanged";
 static NSString * _Nullable AGNetworkTypeChanged = @"networkTypeChanged";
 static NSString * _Nullable AGMediaMetaDataReceived = @"mediaMetaDataReceived";
 
+static NSString * _Nullable AGOnFacePositionChanged = @"onFacePositionChanged";
+
 typedef NS_ENUM(NSInteger, AgoraModeType) {
   AgoraAudioMode,
   AgoraVideoMode

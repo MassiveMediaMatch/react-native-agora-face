@@ -29,6 +29,7 @@
 @property (nonatomic, strong) CIContext *blurImageContext;
 @property (nonatomic, assign) CFTimeInterval startTime;
 @property (nonatomic, assign) BOOL hasFaces;
+@property (nonatomic, assign) BOOL shouldBlur;
 @end
 
 @implementation RCTReactNativeAgoraFace {
@@ -2357,22 +2358,85 @@ RCT_EXPORT_METHOD(getParameters:(NSString *)paramStr
 - (void)rtcEngine:(AgoraRtcEngineKit * _Nonnull)engine facePositionDidChangeWidth:(int)width previewHeight:(int)height faces:(NSArray<AgoraFacePositionInfo *> *_Nullable)faces
 {
 	NSLog(@"hasFaces %d", faces.count > 0);
+	self.hasFaces = faces.count > 0;
+	self.shouldBlur = !self.hasFaces;
+	
+	if (self.hasFaces > 0) {
+		AgoraFacePositionInfo *face = faces.firstObject;
+		NSDictionary *faceDict = @{
+			@"faceX": @(face.x),
+			@"faceY": @(face.y),
+			@"faceWidth": @(face.width),
+			@"faceHeight": @(face.height),
+			@"faceDistance": @(face.distance),
+			@"width": @(width),
+			@"height": @(height)
+		};
+		
+		[self sendEvent:AGOnFacePositionChanged params:faceDict];
+	}
 }
 
 
 #pragma mark - <AgoraVideoDataPluginDelegate>
 
+- (void)YUVfromRGB:(double)Y U:(double)U V:(double)V R:(double)R g:(double)G b:(double)B
+{
+  Y =  0.257 * R + 0.504 * G + 0.098 * B +  16;
+  U = -0.148 * R - 0.291 * G + 0.439 * B + 128;
+  V =  0.439 * R - 0.368 * G - 0.071 * B + 128;
+}
+
+
+- (CVPixelBufferRef)yuvPixelBufferWithData:(NSData *)dataFrame width:(size_t)w heigth:(size_t)h
+{
+    unsigned char* buffer = (unsigned char*) dataFrame.bytes;
+    CVPixelBufferRef getCroppedPixelBuffer = [self copyDataFromBuffer:buffer toYUVPixelBufferWithWidth:w Height:h];
+    return getCroppedPixelBuffer;
+}
+
+- (CVPixelBufferRef)copyDataFromBuffer:(const unsigned char*)buffer toYUVPixelBufferWithWidth:(size_t)w Height:(size_t)h
+{
+    NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
+                             [NSNumber numberWithBool:YES], kCVPixelBufferCGImageCompatibilityKey,
+                             [NSNumber numberWithBool:YES], kCVPixelBufferCGBitmapContextCompatibilityKey,
+                             nil];
+
+    CVPixelBufferRef pixelBuffer;
+    CVPixelBufferCreate(NULL, w, h, kCVPixelFormatType_420YpCbCr8BiPlanarFullRange, (__bridge CFDictionaryRef)(options), &pixelBuffer);
+
+    size_t count = CVPixelBufferGetPlaneCount(pixelBuffer);
+    NSLog(@"PlaneCount = %zu", count);  // 2
+
+    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+
+    size_t d = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+    const unsigned char* src = buffer;
+    unsigned char* dst = (unsigned char *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
+
+    for (unsigned int rIdx = 0; rIdx < h; ++rIdx, dst += d, src += w) {
+        memcpy(dst, src, w);
+    }
+
+    d = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
+    dst = (unsigned char *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
+    h = h >> 1;
+    for (unsigned int rIdx = 0; rIdx < h; ++rIdx, dst += d, src += w) {
+        memcpy(dst, src, w);
+    }
+
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+
+    return pixelBuffer;
+}
+
 - (AgoraVideoRawData *)mediaDataPlugin:(AgoraMediaDataPlugin *)mediaDataPlugin didCapturedVideoRawData:(AgoraVideoRawData *)videoRawData
 {
-	// TODO: no face detection stuff
-    return videoRawData;
-	
 	// determine whether to do face detection
 	CFTimeInterval elapsedTime = CACurrentMediaTime() - self.startTime;
-	if (elapsedTime > 1)
+	if (self.shouldBlur)
 	{
-		self.startTime = CACurrentMediaTime();
-		
+		// create pixelbuffer from raw video data
 		NSDictionary *pixelAttributes = @{(NSString *)kCVPixelBufferIOSurfacePropertiesKey:@{}};
 		CVPixelBufferRef pixelBuffer = NULL;
 		CVReturn result = CVPixelBufferCreate(kCFAllocatorDefault,
@@ -2412,21 +2476,19 @@ RCT_EXPORT_METHOD(getParameters:(NSString *)paramStr
 		
 		
 		// iOS face detection
-		CIContext *context = [CIContext context];
-		NSDictionary *opts = @{ CIDetectorAccuracy : CIDetectorAccuracyHigh };
-		CIDetector *detector = [CIDetector detectorOfType:CIDetectorTypeFace context:context options:opts];
+//		CIContext *context = [CIContext context];
+//		NSDictionary *opts = @{ CIDetectorAccuracy : CIDetectorAccuracyHigh };
+//		CIDetector *detector = [CIDetector detectorOfType:CIDetectorTypeFace context:context options:opts];
+//
+//		AVCaptureDevicePosition cameraPosition = AVCaptureDevicePositionFront;
+//		UIImageOrientation orientation = [self imageOrientationFromDeviceOrientation:UIDevice.currentDevice.orientation cameraPosition:cameraPosition];
+//		opts = @{ CIDetectorImageOrientation: @(orientation) };
+//		NSArray *features = [detector featuresInImage:coreImage options:opts];
+//		BOOL hasFaces = features.count > 0;
 		
-		AVCaptureDevicePosition cameraPosition = AVCaptureDevicePositionFront;
-		UIImageOrientation orientation = [self imageOrientationFromDeviceOrientation:UIDevice.currentDevice.orientation cameraPosition:cameraPosition];
-		opts = @{ CIDetectorImageOrientation: @(orientation) };
-		NSArray *features = [detector featuresInImage:coreImage options:opts];
-		BOOL hasFaces = features.count > 0;
-		NSLog(@"hasFaces %@", features.count > 0 ? @"YES" : @"NO");
-		self.hasFaces = hasFaces;
-		
-		if (self.hasFaces)
+		if (self.shouldBlur)
 		{
-//			// apply blur to image
+			// apply blur to image
 //			CIFilter *gaussianBlurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];
 //			[gaussianBlurFilter setDefaults];
 //			[gaussianBlurFilter setValue:coreImage forKey:kCIInputImageKey];
@@ -2441,9 +2503,19 @@ RCT_EXPORT_METHOD(getParameters:(NSString *)paramStr
 //			}
 //			CGImageRef outputBlurredImageRef = [self.blurImageContext createCGImage:outputBlurredImage fromRect:[coreImage extent]];
 //			UIImage *image = [UIImage imageWithCGImage:outputBlurredImageRef];
+//			NSData *blurredImageData = UIImagePNGRepresentation(image);
+//
+//
 //
 //			CGImageRelease(outputBlurredImageRef);
 			
+			// write blurred image data to YUV pixelbuffer
+			
+			// set values on videoRawData to return
+			memset(videoRawData.yBuffer, 128, videoRawData.yStride * videoRawData.height);
+			memset(videoRawData.uBuffer, 128, videoRawData.uStride * videoRawData.height / 2);
+			memset(videoRawData.vBuffer, 128, videoRawData.vStride * videoRawData.height / 2);
+			return videoRawData;
 		}
 	}
 	
@@ -2455,9 +2527,10 @@ RCT_EXPORT_METHOD(getParameters:(NSString *)paramStr
 }
 
 
-#pragma mark - Face Detection
+#pragma mark - Video Blurring
 
-- (void)initializeMediaDataPlugin {
+- (void)initializeMediaDataPlugin
+{
     self.agoraMediaDataPlugin = [AgoraMediaDataPlugin mediaDataPluginWithAgoraKit:self.rtcEngine];
     
     // Register audio observer
