@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
     s.source_files   = 'ios/*.{h,m}'
 
     s.dependency 'React'
-    s.dependency "AgoraRtcEngine_iOS", "3.0.0" # 3.0.2 has face detection in Agora
+    s.dependency "AgoraRtcEngine_iOS", "3.0.1"
 		s.dependency "Firebase/MLVision"
 		s.dependency "Firebase/MLVisionFaceModel"
 end
