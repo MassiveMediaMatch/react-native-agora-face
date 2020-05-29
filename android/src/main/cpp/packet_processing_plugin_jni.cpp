@@ -74,9 +74,7 @@ JNIEXPORT void JNICALL Java_live_ablo_agora_VideoFrameProcessor_doRegisterProces
 
 JNIEXPORT void JNICALL Java_live_ablo_agora_VideoFrameProcessor_doBlurring(JNIEnv *env, jobject obj, jboolean enable)
 {
-    if (&s_videoFrameObserver) {
-        s_videoFrameObserver.doBlurring(enable);
-    }
+    s_videoFrameObserver.doBlurring(enable);
 }
 
 #ifdef __cplusplus
