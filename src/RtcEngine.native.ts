@@ -79,6 +79,17 @@ class RtcEngine {
     }
 
     /**
+     * remove event listener
+     *
+     * This method unsubscribes specified eventType and run listener.
+     * @param eventType
+     * @param listener
+     */
+    public static off(eventType: string, listener: (...args: any[]) => any) {
+        AgoraEventEmitter.removeListener(`${RtcEngine.AG_PREFIX}${eventType}`, listener);
+    }
+
+    /**
      * renew token
      *
      * This method renews a new token.
