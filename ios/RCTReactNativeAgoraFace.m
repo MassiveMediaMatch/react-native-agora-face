@@ -2396,8 +2396,9 @@ RCT_EXPORT_METHOD(toggleFaceDetectionEvents:(BOOL)enabled resolve:(RCTPromiseRes
 	self.hasFaces = faces.count > 0;
 	self.shouldBlur = !self.hasFaces;
 	
-	if (self.hasFaces > 0) {
-		AgoraFacePositionInfo *face = faces.firstObject;
+	NSMutableArray *faceDicts = [NSMutableArray new];
+	for (AgoraFacePositionInfo *face in faces)
+	{
 		NSDictionary *faceDict = @{
 			@"faceX": @(face.x),
 			@"faceY": @(face.y),
@@ -2407,65 +2408,22 @@ RCT_EXPORT_METHOD(toggleFaceDetectionEvents:(BOOL)enabled resolve:(RCTPromiseRes
 			@"width": @(width),
 			@"height": @(height)
 		};
-		
-		if (self.toggleFaceDetectionEvents) {
-			[self sendEvent:AGOnFacePositionChanged params:faceDict];
-		}
+		[faceDicts addObject:faceDict];
+	}
+	
+	if (self.toggleFaceDetectionEvents) {
+		NSLog(@"send faces %@", faceDicts);
+		[self sendEvent:AGOnFacePositionChanged params:@{@"faces":faceDicts}];
 	}
 }
 
 
 #pragma mark - <AgoraVideoDataPluginDelegate>
 
-- (void)YUVfromRGB:(double)Y U:(double)U V:(double)V R:(double)R g:(double)G b:(double)B
-{
-  Y =  0.257 * R + 0.504 * G + 0.098 * B +  16;
-  U = -0.148 * R - 0.291 * G + 0.439 * B + 128;
-  V =  0.439 * R - 0.368 * G - 0.071 * B + 128;
-}
-
-
-- (CVPixelBufferRef)yuvPixelBufferWithData:(NSData *)dataFrame width:(size_t)w heigth:(size_t)h
-{
-    unsigned char* buffer = (unsigned char*) dataFrame.bytes;
-    CVPixelBufferRef getCroppedPixelBuffer = [self copyDataFromBuffer:buffer toYUVPixelBufferWithWidth:w Height:h];
-    return getCroppedPixelBuffer;
-}
-
-- (CVPixelBufferRef)copyDataFromBuffer:(const unsigned char*)buffer toYUVPixelBufferWithWidth:(size_t)w Height:(size_t)h
-{
-    NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
-                             [NSNumber numberWithBool:YES], kCVPixelBufferCGImageCompatibilityKey,
-                             [NSNumber numberWithBool:YES], kCVPixelBufferCGBitmapContextCompatibilityKey,
-                             nil];
-
-    CVPixelBufferRef pixelBuffer;
-    CVPixelBufferCreate(NULL, w, h, kCVPixelFormatType_420YpCbCr8BiPlanarFullRange, (__bridge CFDictionaryRef)(options), &pixelBuffer);
-
-    size_t count = CVPixelBufferGetPlaneCount(pixelBuffer);
-    NSLog(@"PlaneCount = %zu", count);  // 2
-
-    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-
-    size_t d = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
-    const unsigned char* src = buffer;
-    unsigned char* dst = (unsigned char *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
-
-    for (unsigned int rIdx = 0; rIdx < h; ++rIdx, dst += d, src += w) {
-        memcpy(dst, src, w);
-    }
-
-    d = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
-    dst = (unsigned char *)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1);
-    h = h >> 1;
-    for (unsigned int rIdx = 0; rIdx < h; ++rIdx, dst += d, src += w) {
-        memcpy(dst, src, w);
-    }
-
-    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-
-    return pixelBuffer;
-}
+#define Mask8(x) ( (x) & 0xFF )
+#define R(x) ( Mask8(x) )
+#define G(x) ( Mask8(x >> 8 ) )
+#define B(x) ( Mask8(x >> 16) )
 
 - (AgoraVideoRawData *)mediaDataPlugin:(AgoraMediaDataPlugin *)mediaDataPlugin didCapturedVideoRawData:(AgoraVideoRawData *)videoRawData
 {
@@ -2498,61 +2456,94 @@ RCT_EXPORT_METHOD(toggleFaceDetectionEvents:(BOOL)enabled resolve:(RCTPromiseRes
 				uvDestPlane[k++] = videoRawData.vBuffer[j + i * videoRawData.vStride];
 			}
 		}
+		CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
 		
 		// create CIImage from pixel buffer
 		CIImage *coreImage = [CIImage imageWithCVPixelBuffer:pixelBuffer];
-		
-		// CIImage Conversion to UIImage
-		//	CIContext *MytemporaryContext = [CIContext contextWithOptions:nil];
-		//	CGImageRef MyvideoImage = [MytemporaryContext createCGImage:coreImage fromRect:CGRectMake(0, 0, videoRawData.width, videoRawData.height)];
-		//
-		//	UIImage *Mynnnimage = [[UIImage alloc] initWithCGImage:MyvideoImage scale:1.0 orientation:UIImageOrientationUp];
-		//	CVPixelBufferRelease(pixelBuffer);
-		//	CGImageRelease(MyvideoImage);
-		
-		
-		// iOS face detection
-//		CIContext *context = [CIContext context];
-//		NSDictionary *opts = @{ CIDetectorAccuracy : CIDetectorAccuracyHigh };
-//		CIDetector *detector = [CIDetector detectorOfType:CIDetectorTypeFace context:context options:opts];
-//
-//		AVCaptureDevicePosition cameraPosition = AVCaptureDevicePositionFront;
-//		UIImageOrientation orientation = [self imageOrientationFromDeviceOrientation:UIDevice.currentDevice.orientation cameraPosition:cameraPosition];
-//		opts = @{ CIDetectorImageOrientation: @(orientation) };
-//		NSArray *features = [detector featuresInImage:coreImage options:opts];
-//		BOOL hasFaces = features.count > 0;
-		
-		if (self.shouldBlur)
-		{
-			// apply blur to image
-//			CIFilter *gaussianBlurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];
-//			[gaussianBlurFilter setDefaults];
-//			[gaussianBlurFilter setValue:coreImage forKey:kCIInputImageKey];
-//			[gaussianBlurFilter setValue:@20 forKey:kCIInputRadiusKey];
-//
-//			CIImage *outputBlurredImage = [gaussianBlurFilter outputImage];
-//
-//			// In the Apple documents to get the best performance in Core Image they state firstly
-//			// "Don’t create a CIContext object every time you render. Contexts store a lot of state information; it’s more efficient to reuse them."
-//			if (!self.blurImageContext) {
-//				self.blurImageContext = [CIContext contextWithOptions:nil];
-//			}
-//			CGImageRef outputBlurredImageRef = [self.blurImageContext createCGImage:outputBlurredImage fromRect:[coreImage extent]];
-//			UIImage *image = [UIImage imageWithCGImage:outputBlurredImageRef];
-//			NSData *blurredImageData = UIImagePNGRepresentation(image);
-//
-//
-//
-//			CGImageRelease(outputBlurredImageRef);
-			
-			// write blurred image data to YUV pixelbuffer
-			
-			// set values on videoRawData to return
-			memset(videoRawData.yBuffer, 128, videoRawData.yStride * videoRawData.height);
-			memset(videoRawData.uBuffer, 128, videoRawData.uStride * videoRawData.height / 2);
-			memset(videoRawData.vBuffer, 128, videoRawData.vStride * videoRawData.height / 2);
-			return videoRawData;
+
+		// apply blur to image
+		CIFilter *gaussianBlurFilter = [CIFilter filterWithName:@"CIPixellate"];
+		[gaussianBlurFilter setDefaults];
+		[gaussianBlurFilter setValue:coreImage forKey:kCIInputImageKey];
+//		[gaussianBlurFilter setValue:@10 forKey:kCIInputRadiusKey];
+		[gaussianBlurFilter setValue:@80 forKey:@"inputScale"];
+		CIVector *vector = [[CIVector alloc] initWithX:0 Y:0];
+		[gaussianBlurFilter setValue:vector forKey:@"inputCenter"];
+		CIImage *outputBlurredImage = [gaussianBlurFilter outputImage];
+
+		// In the Apple documents to get the best performance in Core Image they state firstly
+		// "Don’t create a CIContext object every time you render. Contexts store a lot of state information; it’s more efficient to reuse them."
+		if (!self.blurImageContext) {
+			self.blurImageContext = [CIContext contextWithOptions:nil];
 		}
+//		CGImageRef inputCGImage = [self.blurImageContext createCGImage:coreImage fromRect:[coreImage extent]];
+		CGImageRef inputCGImage = [self.blurImageContext createCGImage:outputBlurredImage fromRect:[coreImage extent]];
+//		UIImage *blurredImage = [UIImage imageWithCGImage:inputCGImage];
+//		CGImageRelease(outputBlurredImageRef);
+		
+		// write blurred image data to YUV buffers
+//		CGImageRef inputCGImage = [blurredImage CGImage];
+		NSUInteger blurredWidth = CGImageGetWidth(inputCGImage);
+		NSUInteger blurredHeight = CGImageGetHeight(inputCGImage);
+
+		NSUInteger bytesPerPixel = 4;
+		NSUInteger bytesPerRow = bytesPerPixel * blurredWidth;
+		NSUInteger bitsPerComponent = 8;
+		UInt32 * pixels = (UInt32 *) calloc(blurredHeight * blurredWidth, sizeof(UInt32));
+
+		CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+		CGContextRef context = CGBitmapContextCreate(pixels, blurredWidth, blurredHeight, bitsPerComponent, bytesPerRow, colorSpace, kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big);
+		CGContextDrawImage(context, CGRectMake(0, 0, blurredWidth, blurredHeight), inputCGImage);
+
+		UInt32 *currentPixel = pixels;
+		char yBuffer[strlen(videoRawData.yBuffer)];
+		char uBuffer[strlen(videoRawData.uBuffer)];
+		char vBuffer[strlen(videoRawData.vBuffer)];
+
+		int frameSize = videoRawData.width * videoRawData.height;
+		int yIndex = 0; // Y start index
+		int uIndex = frameSize; // U statt index
+		int vIndex = frameSize * 5 / 4; // V start index: w*h*5/4
+
+		for (int j = 0; j < blurredHeight; j++) {
+		  for (int i = 0; i < blurredWidth; i++) {
+			  UInt32 color = *currentPixel;
+			  UInt32 R = R(color);
+			  UInt32 G = G(color);
+			  UInt32 B = B(color);
+
+			  UInt32 Y = ((66 * R + 129 * G + 25 * B + 128) >> 8) + 16;
+			  UInt32 U = ((-38 * R - 74 * G + 112 * B + 128) >> 8) + 128;
+			  UInt32 V = ((112 * R - 94 * G - 18 * B + 128) >> 8) + 128;
+
+			  yBuffer[yIndex++] = Y;
+			  if (j % 2 == 0 && i % 2 == 0) {
+				  uBuffer[uIndex++] = U;
+				  vBuffer[vIndex++] = V;
+			  }
+
+			currentPixel++;
+		  }
+		}
+
+		// set new YUV values on videoRawData buffers
+		memcpy((void*)videoRawData.yBuffer, yBuffer, strlen(yBuffer));
+		memcpy((void*)videoRawData.uBuffer, uBuffer, strlen(uBuffer));
+		memcpy((void*)videoRawData.vBuffer, vBuffer, strlen(vBuffer));
+
+		// gray video frame
+//		memset(videoRawData.yBuffer, 128, videoRawData.yStride * videoRawData.height);
+//		memset(videoRawData.uBuffer, 128, videoRawData.uStride * videoRawData.height / 2);
+//		memset(videoRawData.vBuffer, 128, videoRawData.vStride * videoRawData.height / 2);
+
+		// cleanup
+		CVPixelBufferRelease(pixelBuffer);
+		CGImageRelease(inputCGImage);
+		CGColorSpaceRelease(colorSpace);
+		CGContextRelease(context);
+		free(pixels);
+		
+		return videoRawData;
 	}
 	
     return videoRawData;
