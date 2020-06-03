@@ -36,6 +36,7 @@ build/
 local.properties
 *.iml
 android/.externalNativeBuild/
+android/.cxx/
 
 # BUCK
 buck-out/
