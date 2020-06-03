@@ -82,7 +82,7 @@ public class RtcEventHandler extends IRtcEngineEventHandler {
 	}
 
 	public static void sendEvent(ReactContext reactContext,
-								 String eventName, Object params) {
+								 String eventName, WritableMap params) {
 		Log.w("AGORA", eventName + ": " + params.toString());
 		reactContext
 				.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
@@ -96,6 +96,7 @@ public class RtcEventHandler extends IRtcEngineEventHandler {
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
+					WritableMap map = Arguments.createMap();
 					WritableArray list = Arguments.createArray();
 					for (AgoraFacePositionInfo info : faces) {
 						WritableMap face = Arguments.createMap();
@@ -108,7 +109,8 @@ public class RtcEventHandler extends IRtcEngineEventHandler {
 						face.putInt("height", imageHeight);
 						list.pushMap(face);
 					}
-					sendEvent(reactApplicationContext, AGonFacePositionChanged, list);
+					map.putArray("faces", list);
+					sendEvent(reactApplicationContext, AGonFacePositionChanged, map);
 				}
 			});
 		}
