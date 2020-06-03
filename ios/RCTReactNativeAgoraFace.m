@@ -2466,8 +2466,8 @@ RCT_EXPORT_METHOD(toggleFaceDetectionEvents:(BOOL)enabled resolve:(RCTPromiseRes
 		[gaussianBlurFilter setDefaults];
 		[gaussianBlurFilter setValue:coreImage forKey:kCIInputImageKey];
 //		[gaussianBlurFilter setValue:@10 forKey:kCIInputRadiusKey];
-		[gaussianBlurFilter setValue:@80 forKey:@"inputScale"];
-		CIVector *vector = [[CIVector alloc] initWithX:0 Y:0];
+		[gaussianBlurFilter setValue:@40 forKey:@"inputScale"];
+		CIVector *vector = [[CIVector alloc] initWithX:160 Y:160]; // x & y should be multiple of 'inputScale' parameter
 		[gaussianBlurFilter setValue:vector forKey:@"inputCenter"];
 		CIImage *outputBlurredImage = [gaussianBlurFilter outputImage];
 
