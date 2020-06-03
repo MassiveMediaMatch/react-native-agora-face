@@ -67,6 +67,14 @@ declare class RtcEngine {
      */
     static on(eventType: string, listener: (...args: any[]) => any): void;
     /**
+     * remove event listener
+     *
+     * This method unsubscribes specified eventType and run listener.
+     * @param eventType
+     * @param listener
+     */
+    static off(eventType: string, listener: (...args: any[]) => any): void;
+    /**
      * renew token
      *
      * This method renews a new token.

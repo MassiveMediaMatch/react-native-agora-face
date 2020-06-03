@@ -16,6 +16,4 @@ Pod::Spec.new do |s|
 
     s.dependency 'React'
     s.dependency "AgoraRtcEngine_iOS", "3.0.1"
-		s.dependency "Firebase/MLVision"
-		s.dependency "Firebase/MLVisionFaceModel"
 end
