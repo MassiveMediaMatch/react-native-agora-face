@@ -17,6 +17,37 @@ declare class RtcEngine {
      */
     static init(options: Option): void;
     /**
+    * Toggle face detection
+    *
+    * This method used to enable or disable face detection. Make sure to also set
+    * 'toggleFaceDetectionEvents' if you want to receive updates of face visibility.
+    *
+    * @param enabled
+    * @returns Promise<{success, value}>
+    */
+    static toggleFaceDetection(enabled: boolean): Promise<any>;
+    /**
+     * Toggle face detection blurring
+     *
+     * This method used to enable or disable face detection blurring. When enabled, the
+     * stream will be blurred if no face is detected.
+     *
+     * @param enabled
+     * @returns Promise<{success, value}>
+     */
+    static toggleFaceDetectionBlurring(enabled: boolean): Promise<any>;
+    /**
+     * Toggle face detection events
+     *
+     * This method used to enable or disable face detection events. Make sure to enable
+     * face detection with 'toggleFaceDetection' first. Use this method to get info and data
+     * on the visibility of a face.
+     *
+     * @param enabled
+     * @returns Promise<{success, value}>
+     */
+    static toggleFaceDetectionEvents(enabled: boolean): Promise<any>;
+    /**
      * join specified channel
      *
      * This method joins and begin rendering the video stream. when join succeeds.

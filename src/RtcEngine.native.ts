@@ -53,6 +53,46 @@ class RtcEngine {
         ReactNativeAgoraFace.init(options);
     }
 
+     /**
+     * Toggle face detection
+     *
+     * This method used to enable or disable face detection. Make sure to also set
+     * 'toggleFaceDetectionEvents' if you want to receive updates of face visibility.
+     *
+     * @param enabled
+     * @returns Promise<{success, value}>
+     */
+    public static toggleFaceDetection(enabled: boolean): Promise<any> {
+        return ReactNativeAgoraFace.toggleFaceDetection(enabled);
+    }
+
+    /**
+     * Toggle face detection blurring
+     *
+     * This method used to enable or disable face detection blurring. When enabled, the
+     * stream will be blurred if no face is detected.
+     *
+     * @param enabled
+     * @returns Promise<{success, value}>
+     */
+    public static toggleFaceDetectionBlurring(enabled: boolean): Promise<any> {
+        return ReactNativeAgoraFace.toggleFaceDetectionBlurring(enabled);
+    }
+
+    /**
+     * Toggle face detection events
+     *
+     * This method used to enable or disable face detection events. Make sure to enable
+     * face detection with 'toggleFaceDetection' first. Use this method to get info and data
+     * on the visibility of a face.
+     *
+     * @param enabled
+     * @returns Promise<{success, value}>
+     */
+    public static toggleFaceDetectionEvents(enabled: boolean): Promise<any> {
+        return ReactNativeAgoraFace.toggleFaceDetectionEvents(enabled);
+    }
+
     /**
      * join specified channel
      *
