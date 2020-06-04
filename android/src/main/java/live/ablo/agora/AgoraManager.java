@@ -29,8 +29,6 @@ public class AgoraManager {
 
 	private int mLocalUid = 0;
 
-	private boolean blurOnNoFaceDetected;
-	private boolean sendFaceDetectionEvent;
 	private MediaDataObserverPlugin mediaDataObserverPlugin;
 	private VideoFrameObserver videoFrameObserver;
 
@@ -136,10 +134,13 @@ public class AgoraManager {
 				mRtcEngine.enableFaceDetection(options.getBoolean("toggleFaceDetection"));
 			}
 			if (options.hasKey("toggleFaceDetectionBlurring")) {
-				setBlurOnNoFaceDetected(options.getBoolean("toggleFaceDetectionBlurring"));
+				FaceDetector.getInstance().setBlurOnNoFaceDetected(options.getBoolean("toggleFaceDetectionBlurring"));
 			}
-			if (options.hasKey("toggleFaceDetectionEvents")) {
-				setSendFaceDetectionEvents(options.getBoolean("toggleFaceDetectionEvents"));
+			if (options.hasKey("toggleFaceDetectionDataEvents")) {
+				FaceDetector.getInstance().setSendFaceDetectionDataEvents(options.getBoolean("toggleFaceDetectionDataEvents"));
+			}
+			if (options.hasKey("toggleFaceDetectionStatusEvents")) {
+				FaceDetector.getInstance().setSendFaceDetectionStatusEvent(options.getBoolean("toggleFaceDetectionStatusEvents"));
 			}
 			if (options.hasKey("channelProfile")) {
 				mRtcEngine.setChannelProfile(options.getInt("channelProfile"));
@@ -215,7 +216,7 @@ public class AgoraManager {
 			mediaDataObserverPlugin.addVideoObserver(videoFrameObserver);
 			// add decode buffer for local user
 			mediaDataObserverPlugin.addDecodeBuffer(0);
-
+			FaceDetector.getInstance().init(rtcEventHandler);
 
 			return mRtcEngine.enableWebSdkInteroperability(true);
 		} catch (Exception e) {
@@ -263,21 +264,7 @@ public class AgoraManager {
 		}
 	}
 
-	public void setSendFaceDetectionEvents(boolean sendFaceDetectionEvents) {
-		this.sendFaceDetectionEvent = sendFaceDetectionEvents;
-	}
-
-	public void setBlurOnNoFaceDetected(boolean blurOnNoFaceDetected) {
-		this.blurOnNoFaceDetected = blurOnNoFaceDetected;
-	}
-
-	public boolean sendFaceDetectionEvents() {
-		return sendFaceDetectionEvent;
-	}
-
 	public void toggleBlurring(boolean enable) {
-		if (blurOnNoFaceDetected) {
-			videoFrameObserver.toggleBlurring(enable);
-		}
+		videoFrameObserver.toggleBlurring(enable);
 	}
 }

@@ -11,6 +11,8 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import java.nio.charset.Charset;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import io.agora.rtc.IRtcEngineEventHandler;
 
@@ -76,9 +78,12 @@ public class RtcEventHandler extends IRtcEngineEventHandler {
 
 	private final ReactApplicationContext reactApplicationContext;
 
-
 	RtcEventHandler(ReactApplicationContext reactApplicationContext) {
 		this.reactApplicationContext = reactApplicationContext;
+	}
+
+	public ReactApplicationContext getReactApplicationContext() {
+		return reactApplicationContext;
 	}
 
 	public static void sendEvent(ReactContext reactContext,
@@ -91,28 +96,30 @@ public class RtcEventHandler extends IRtcEngineEventHandler {
 
 	public void onFacePositionChanged(final int imageWidth, final int imageHeight, final IRtcEngineEventHandler.AgoraFacePositionInfo[] faces) {
 		super.onFacePositionChanged(imageWidth, imageHeight, faces);
-		AgoraManager.getInstance().toggleBlurring(faces.length == 0);
-		if (faces.length > 0 && (AgoraManager.getInstance().sendFaceDetectionEvents())) {
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					WritableMap map = Arguments.createMap();
-					WritableArray list = Arguments.createArray();
-					for (AgoraFacePositionInfo info : faces) {
-						WritableMap face = Arguments.createMap();
-						face.putInt("faceX", info.x);
-						face.putInt("faceY", info.y);
-						face.putInt("faceDistance", info.distance);
-						face.putInt("faceHeight", info.height);
-						face.putInt("faceWidth", info.width);
-						face.putInt("width", imageWidth);
-						face.putInt("height", imageHeight);
-						list.pushMap(face);
+		FaceDetector.getInstance().faceDataChanged(faces);
+		if (faces.length > 0) {
+			if (FaceDetector.getInstance().sendFaceDetectionDataEvents()) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						WritableMap map = Arguments.createMap();
+						WritableArray list = Arguments.createArray();
+						for (AgoraFacePositionInfo info : faces) {
+							WritableMap face = Arguments.createMap();
+							face.putInt("faceX", info.x);
+							face.putInt("faceY", info.y);
+							face.putInt("faceDistance", info.distance);
+							face.putInt("faceHeight", info.height);
+							face.putInt("faceWidth", info.width);
+							face.putInt("width", imageWidth);
+							face.putInt("height", imageHeight);
+							list.pushMap(face);
+						}
+						map.putArray("faces", list);
+						sendEvent(reactApplicationContext, AGonFacePositionChanged, map);
 					}
-					map.putArray("faces", list);
-					sendEvent(reactApplicationContext, AGonFacePositionChanged, map);
-				}
-			});
+				});
+			}
 		}
 	}
 

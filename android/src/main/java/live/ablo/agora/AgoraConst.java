@@ -73,4 +73,5 @@ public class AgoraConst {
 	public final static String AGLastmileProbeResult = "lastmileProbeTestResult";
 
 	public final static String AGonFacePositionChanged = "onFacePositionChanged";
+	public final static String AGonFaceDetected = "onFaceDetected";
 }

@@ -264,13 +264,19 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 
 	@ReactMethod
 	public void toggleFaceDetectionBlurring(boolean enabled, Promise promise) {
-		AgoraManager.getInstance().setBlurOnNoFaceDetected(enabled);
+		FaceDetector.getInstance().setBlurOnNoFaceDetected(enabled);
 		resolvePromiseFromResolve(0, promise);
 	}
 
 	@ReactMethod
-	public void toggleFaceDetectionEvents(boolean enabled, Promise promise) {
-		AgoraManager.getInstance().setSendFaceDetectionEvents(enabled);
+	public void toggleFaceDetectionDataEvents(boolean enabled, Promise promise) {
+		FaceDetector.getInstance().setSendFaceDetectionDataEvents(enabled);
+		resolvePromiseFromResolve(0, promise);
+	}
+
+	@ReactMethod
+	public void toggleFaceDetectionStatusEvents(boolean enabled, Promise promise) {
+		FaceDetector.getInstance().setSendFaceDetectionStatusEvent(enabled);
 		resolvePromiseFromResolve(0, promise);
 	}
 
@@ -318,6 +324,7 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	@ReactMethod
 	public void destroy() {
 		AgoraManager.getInstance().destroy();
+		FaceDetector.getInstance().destroy();
 	}
 
 	@ReactMethod
