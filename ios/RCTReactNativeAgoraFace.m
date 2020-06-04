@@ -2547,10 +2547,15 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 		int vIndex = frameSize * 5 / 4; // V start index: w*h*5/4
 
 		UInt32 *currentPixel = pixels;
-		char yBuffer[frameSize];
-		char uBuffer[uIndex + frameSize];
-		char vBuffer[vIndex + frameSize];
-
+		char *yBuffer = malloc( sizeof(char) * ( frameSize + 1 ) );
+		char *uBuffer = malloc( sizeof(char) * ( uIndex + frameSize + 1 ) );
+		char *vBuffer = malloc( sizeof(char) * ( vIndex + frameSize + 1 ) );
+		
+		// initialize zero values
+//		memset(yBuffer, 0, frameSize);
+//		memset(uBuffer, 0, frameSize);
+//		memset(vBuffer, 0, frameSize);
+		
 		for (int j = 0; j < blurredHeight; j++) {
 		  for (int i = 0; i < blurredWidth; i++) {
 			  UInt32 color = *currentPixel;
@@ -2572,7 +2577,7 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 		  }
 		}
 
-		// set new YUV values on videoRawData buffers
+		// copy new YUV values to videoRawData buffers
 		memcpy((void*)videoRawData.yBuffer, yBuffer, strlen(yBuffer));
 		memcpy((void*)videoRawData.uBuffer, uBuffer, strlen(uBuffer));
 		memcpy((void*)videoRawData.vBuffer, vBuffer, strlen(vBuffer));
@@ -2588,6 +2593,9 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 		CGColorSpaceRelease(colorSpace);
 		CGContextRelease(context);
 		free(pixels);
+		free(yBuffer);
+		free(uBuffer);
+		free(vBuffer);
 		
 		return videoRawData;
 	}
@@ -2605,14 +2613,18 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 - (void)startFaceDetectionTimer
 {
 	if (!self.faceDetectionTimer) {
-		self.faceDetectionTimer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(onFaceDetectionTick:) userInfo:nil repeats:YES];
+		dispatch_async(dispatch_get_main_queue(), ^{
+			self.faceDetectionTimer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(onFaceDetectionTick:) userInfo:nil repeats:YES];			
+		});
 	}
 }
 
 - (void)stopFaceDetectionTimer
 {
-	[self.faceDetectionTimer invalidate];
-	self.faceDetectionTimer = nil;
+	dispatch_async(dispatch_get_main_queue(), ^{
+		[self.faceDetectionTimer invalidate];
+		self.faceDetectionTimer = nil;
+	});
 }
 
 - (void)onFaceDetectionTick:(NSTimer*)timer
