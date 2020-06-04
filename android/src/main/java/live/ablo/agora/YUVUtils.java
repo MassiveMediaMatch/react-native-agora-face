@@ -135,6 +135,11 @@ public class YUVUtils {
 		return outputBitmap;
 	}
 
+	public static Bitmap pixelate(Bitmap image, int radius) {
+		// scale down first, then scale up again! :D
+		return  Bitmap.createScaledBitmap(Bitmap.createScaledBitmap(image, radius, radius, false), image.getWidth(), image.getHeight(), false);
+	}
+
 	public static byte[] bitmapToI420(int inputWidth, int inputHeight, Bitmap scaled) {
 		int[] argb = new int[inputWidth * inputHeight];
 		scaled.getPixels(argb, 0, inputWidth, 0, 0, inputWidth, inputHeight);

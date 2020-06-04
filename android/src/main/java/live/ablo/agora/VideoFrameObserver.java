@@ -17,7 +17,7 @@ public class VideoFrameObserver implements MediaDataVideoObserver {
 	@Override
 	public void onCaptureVideoFrame(byte[] data, int frameType, int width, int height, int bufferLength, int yStride, int uStride, int vStride, int rotation, long renderTimeMs) {
 		if (blur) {
-			Bitmap bmp = YUVUtils.blur(context, YUVUtils.i420ToBitmap(width, height, rotation, bufferLength, data, yStride, uStride, vStride), 20);
+			Bitmap bmp = YUVUtils.pixelate(YUVUtils.i420ToBitmap(width, height, rotation, bufferLength, data, yStride, uStride, vStride), 10);
 			System.arraycopy(YUVUtils.bitmapToI420(width, height, bmp), 0, data, 0, bufferLength);
 		}
 	}
