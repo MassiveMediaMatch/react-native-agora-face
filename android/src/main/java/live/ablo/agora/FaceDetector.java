@@ -9,7 +9,6 @@ import java.util.TimerTask;
 import io.agora.rtc.IRtcEngineEventHandler;
 
 import static live.ablo.agora.AgoraConst.AGonFaceDetected;
-import static live.ablo.agora.AgoraConst.AGonFacePositionChanged;
 
 public class FaceDetector {
 	private static FaceDetector detector;
@@ -19,22 +18,9 @@ public class FaceDetector {
 	private boolean sendFaceDetectionStatusEvent;
 	private boolean isTimerRunning;
 	private long lastTimeFaceSeen;
-	private int currentAmountOfFaces;
 	private RtcEventHandler eventHandler;
 	private Timer timer;
-	private TimerTask task = new TimerTask() {
-		@Override
-		public void run() {
-			if (blurOnNoFaceDetected) {
-				AgoraManager.getInstance().toggleBlurring(lastTimeFaceSeen < System.currentTimeMillis() - 500);
-			}
-			if (sendFaceDetectionStatusEvent) {
-				WritableMap map = Arguments.createMap();
-				map.putBoolean("faceDetected", currentAmountOfFaces > 0);
-				RtcEventHandler.sendEvent(eventHandler.getReactApplicationContext(), AGonFaceDetected, map);
-			}
-		}
-	};
+	private TimerTask task;
 
 	private FaceDetector() {
 
@@ -57,12 +43,14 @@ public class FaceDetector {
 	}
 
 	public void destroy() {
-		timer.cancel();
+		isTimerRunning = false;
+		if (task != null) {
+			task.cancel();
+		}
 	}
 
 	public void faceDataChanged(IRtcEngineEventHandler.AgoraFacePositionInfo[] faces) {
-		currentAmountOfFaces = faces.length;
-		if (currentAmountOfFaces > 0) {
+		if (faces.length > 0) {
 			lastTimeFaceSeen = System.currentTimeMillis();
 		}
 	}
@@ -70,10 +58,11 @@ public class FaceDetector {
 	private void checkTimerLogic() {
 		if (!isTimerRunning && (sendFaceDetectionStatusEvent || blurOnNoFaceDetected)) {
 			isTimerRunning = true;
+			task = getNewTask();
 			timer.scheduleAtFixedRate(task, 0, 100);
 		} else if (isTimerRunning && (!sendFaceDetectionStatusEvent && !blurOnNoFaceDetected)) {
 			isTimerRunning = false;
-			timer.cancel();
+			task.cancel();
 		}
 	}
 
@@ -95,9 +84,21 @@ public class FaceDetector {
 		checkTimerLogic();
 	}
 
-	public boolean blurOnNoFaceDetected() {
-		return blurOnNoFaceDetected;
+	private TimerTask getNewTask() {
+		return new TimerTask() {
+			@Override
+			public void run() {
+				boolean noFace = lastTimeFaceSeen < System.currentTimeMillis() - 500;
+				if (blurOnNoFaceDetected) {
+					AgoraManager.getInstance().toggleBlurring(noFace);
+				}
+				if (sendFaceDetectionStatusEvent) {
+					WritableMap map = Arguments.createMap();
+					map.putBoolean("faceDetected", !noFace);
+					RtcEventHandler.sendEvent(eventHandler.getReactApplicationContext(), AGonFaceDetected, map);
+				}
+			}
+		};
 	}
-
 
 }
