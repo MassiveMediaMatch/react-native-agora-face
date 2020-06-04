@@ -267,11 +267,6 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
 	if (options[@"toggleFaceDetectionStatusEvents"] != nil) {
 		self.toggleFaceDetectionStatusEvents = [options[@"toggleFaceDetectionStatusEvents"] boolValue];
 	}
-	
-	// TODO: remove this
-	[self.rtcEngine enableFaceDetection:YES];
-	self.toggleFaceDetectionBlurring = YES;
-	self.toggleFaceDetectionDataEvents = YES;
   
   AgoraVideoEncoderConfiguration *video_encoder_config = [[AgoraVideoEncoderConfiguration new] initWithWidth:[options[@"videoEncoderConfig"][@"width"] integerValue] height:[options[@"videoEncoderConfig"][@"height"] integerValue] frameRate:[options[@"videoEncoderConfig"][@"frameRate"] integerValue] bitrate:[options[@"videoEncoderConfig"][@"bitrate"] integerValue] orientationMode: (AgoraVideoOutputOrientationMode)[options[@"videoEncoderConfig"][@"orientationMode"] integerValue]];
   [self.rtcEngine setVideoEncoderConfiguration:video_encoder_config];
