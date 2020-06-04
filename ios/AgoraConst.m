@@ -97,7 +97,8 @@ static AgoraConst *_person;
                                   AGNetworkTypeChanged,
                                   AGFirstRemoteAudioFrame,
                                   AGMediaMetaDataReceived,
-                                  AGOnFacePositionChanged];
+                                  AGOnFacePositionChanged,
+								  AGOnFaceDetected];
   
   NSMutableArray<NSString *> *eventList = [NSMutableArray arrayWithCapacity:[array count]];
   [array enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {

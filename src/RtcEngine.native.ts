@@ -57,7 +57,8 @@ class RtcEngine {
      * Toggle face detection
      *
      * This method used to enable or disable face detection. Make sure to also set
-     * 'toggleFaceDetectionEvents' if you want to receive updates of face visibility.
+     * 'toggleFaceDetectionDataEvents' or 'toggleFaceDetectionStatusEvents' if you want 
+     * to receive updates of face visibility.
      *
      * @param enabled
      * @returns Promise<{success, value}>
@@ -80,6 +81,18 @@ class RtcEngine {
     }
 
     /**
+     * Toggle face detection status events
+     *
+     * Enables status updates if face is detected or not (every 100ms)
+     *
+     * @param enabled
+     * @returns Promise<{faceDetected, value}>
+     */
+    public static toggleFaceDetectionStatusEvents(enabled: boolean): Promise<any> {
+        return ReactNativeAgoraFace.toggleFaceDetectionStatusEvents(enabled);
+    }
+
+    /**
      * Toggle face detection events
      *
      * This method used to enable or disable face detection events. Make sure to enable
@@ -87,10 +100,10 @@ class RtcEngine {
      * on the visibility of a face.
      *
      * @param enabled
-     * @returns Promise<{success, value}>
+     * @returns Promise<{faces, value}>
      */
-    public static toggleFaceDetectionEvents(enabled: boolean): Promise<any> {
-        return ReactNativeAgoraFace.toggleFaceDetectionEvents(enabled);
+    public static toggleFaceDetectionDataEvents(enabled: boolean): Promise<any> {
+        return ReactNativeAgoraFace.toggleFaceDetectionDataEvents(enabled);
     }
 
     /**

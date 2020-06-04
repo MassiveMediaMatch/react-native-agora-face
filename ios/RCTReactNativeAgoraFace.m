@@ -25,15 +25,25 @@
 @property (strong, nonatomic) NSData *metadata;
 @property (nonatomic, assign) NSUInteger remoteUserId;
 @property (nonatomic, strong) CIContext *blurImageContext;
+
 @property (nonatomic, assign) BOOL hasFaces;
 @property (nonatomic, assign) BOOL shouldBlur;
 @property (nonatomic, assign) BOOL toggleFaceDetectionBlurring;
-@property (nonatomic, assign) BOOL toggleFaceDetectionEvents;
+@property (nonatomic, assign) BOOL toggleFaceDetectionDataEvents;
+@property (nonatomic, assign) BOOL toggleFaceDetectionStatusEvents;
+
+@property (nonatomic, strong) NSTimer *faceDetectionTimer;
+@property (nonatomic, assign) CFTimeInterval lastFaceDetected;
 @end
 
 @implementation RCTReactNativeAgoraFace {
   RCTResponseSenderBlock _block;
   bool hasListeners;
+}
+
+- (void)dealloc
+{
+	[self stopFaceDetectionTimer];
 }
 
 +(BOOL)requiresMainQueueSetup {
@@ -251,10 +261,17 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
 	if (options[@"toggleFaceDetectionBlurring"] != nil) {
 		self.toggleFaceDetectionBlurring = [options[@"toggleFaceDetectionBlurring"] boolValue];
 	}
-	if (options[@"toggleFaceDetectionEvents"] != nil) {
-		self.toggleFaceDetectionEvents = [options[@"toggleFaceDetectionEvents"] boolValue];
+	if (options[@"toggleFaceDetectionDataEvents"] != nil) {
+		self.toggleFaceDetectionDataEvents = [options[@"toggleFaceDetectionDataEvents"] boolValue];
+	}
+	if (options[@"toggleFaceDetectionStatusEvents"] != nil) {
+		self.toggleFaceDetectionStatusEvents = [options[@"toggleFaceDetectionStatusEvents"] boolValue];
 	}
 	
+	// TODO: remove this
+	[self.rtcEngine enableFaceDetection:YES];
+	self.toggleFaceDetectionBlurring = YES;
+	self.toggleFaceDetectionDataEvents = YES;
   
   AgoraVideoEncoderConfiguration *video_encoder_config = [[AgoraVideoEncoderConfiguration new] initWithWidth:[options[@"videoEncoderConfig"][@"width"] integerValue] height:[options[@"videoEncoderConfig"][@"height"] integerValue] frameRate:[options[@"videoEncoderConfig"][@"frameRate"] integerValue] bitrate:[options[@"videoEncoderConfig"][@"bitrate"] integerValue] orientationMode: (AgoraVideoOutputOrientationMode)[options[@"videoEncoderConfig"][@"orientationMode"] integerValue]];
   [self.rtcEngine setVideoEncoderConfiguration:video_encoder_config];
@@ -1865,20 +1882,49 @@ RCT_EXPORT_METHOD(toggleFaceDetection:(BOOL)enabled resolve:(RCTPromiseResolveBl
 RCT_EXPORT_METHOD(toggleFaceDetectionBlurring:(BOOL)enabled resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
 	self.toggleFaceDetectionBlurring = enabled;
+	
+	if (enabled) {
+		[self startFaceDetectionTimer];
+	} else if (!self.toggleFaceDetectionStatusEvents) {
+		[self stopFaceDetectionTimer];
+	}
+
 	if (resolve) {
 		resolve(nil);
 	}
 }
 
-#pragma mark - toggleFaceDetectionEvents
 
-RCT_EXPORT_METHOD(toggleFaceDetectionEvents:(BOOL)enabled resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
+#pragma mark - toggleFaceDetectionDataEvents
+
+RCT_EXPORT_METHOD(toggleFaceDetectionDataEvents:(BOOL)enabled resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-	self.toggleFaceDetectionEvents = enabled;
+	self.toggleFaceDetectionDataEvents = enabled;
 	if (resolve) {
 		resolve(nil);
 	}
 }
+
+
+#pragma mark - toggleFaceDetectionStatusEvents
+
+RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
+{
+	self.toggleFaceDetectionStatusEvents = enabled;
+
+	if (enabled) {
+		[self startFaceDetectionTimer];
+	} else if (!self.toggleFaceDetectionBlurring) {
+		[self stopFaceDetectionTimer];
+	}
+
+	if (resolve) {
+		resolve(nil);
+	}
+}
+
+
+#pragma mark - supportedEvents
 
 - (NSArray<NSString *> *)supportedEvents {
   return [AgoraConst supportEvents];
@@ -2394,7 +2440,12 @@ RCT_EXPORT_METHOD(toggleFaceDetectionEvents:(BOOL)enabled resolve:(RCTPromiseRes
 {
 	NSLog(@"hasFaces %d", faces.count > 0);
 	self.hasFaces = faces.count > 0;
-	self.shouldBlur = !self.hasFaces;
+	if (self.hasFaces) {
+		self.lastFaceDetected = CACurrentMediaTime();
+	}
+	if (self.toggleFaceDetectionBlurring) {
+		self.shouldBlur = !self.hasFaces;
+	}
 	
 	NSMutableArray *faceDicts = [NSMutableArray new];
 	for (AgoraFacePositionInfo *face in faces)
@@ -2411,7 +2462,7 @@ RCT_EXPORT_METHOD(toggleFaceDetectionEvents:(BOOL)enabled resolve:(RCTPromiseRes
 		[faceDicts addObject:faceDict];
 	}
 	
-	if (self.toggleFaceDetectionEvents) {
+	if (self.toggleFaceDetectionDataEvents) {
 		NSLog(@"send faces %@", faceDicts);
 		[self sendEvent:AGOnFacePositionChanged params:@{@"faces":faceDicts}];
 	}
@@ -2428,7 +2479,7 @@ RCT_EXPORT_METHOD(toggleFaceDetectionEvents:(BOOL)enabled resolve:(RCTPromiseRes
 - (AgoraVideoRawData *)mediaDataPlugin:(AgoraMediaDataPlugin *)mediaDataPlugin didCapturedVideoRawData:(AgoraVideoRawData *)videoRawData
 {
 	// determine whether to do face detection
-	if (self.shouldBlur && self.toggleFaceDetectionBlurring)
+	if (self.shouldBlur)
 	{
 		// create pixelbuffer from raw video data
 		NSDictionary *pixelAttributes = @{(NSString *)kCVPixelBufferIOSurfacePropertiesKey:@{}};
@@ -2551,6 +2602,37 @@ RCT_EXPORT_METHOD(toggleFaceDetectionEvents:(BOOL)enabled resolve:(RCTPromiseRes
 
 - (AgoraVideoRawData *)mediaDataPlugin:(AgoraMediaDataPlugin *)mediaDataPlugin willRenderVideoRawData:(AgoraVideoRawData *)videoRawData ofUid:(uint)uid {
     return videoRawData;
+}
+
+
+#pragma mark - face detection timer
+
+- (void)startFaceDetectionTimer
+{
+	if (!self.faceDetectionTimer) {
+		self.faceDetectionTimer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(onFaceDetectionTick:) userInfo:nil repeats:YES];
+	}
+}
+
+- (void)stopFaceDetectionTimer
+{
+	[self.faceDetectionTimer invalidate];
+	self.faceDetectionTimer = nil;
+}
+
+- (void)onFaceDetectionTick:(NSTimer*)timer
+{
+	CFTimeInterval elapsedTime = CACurrentMediaTime() - self.lastFaceDetected;
+	if (elapsedTime > 500) {
+		self.hasFaces = NO;
+		if (self.toggleFaceDetectionBlurring) {
+			self.shouldBlur = YES;
+		}
+	}
+	
+	if (self.toggleFaceDetectionStatusEvents) {
+		[self sendEvent:AGOnFaceDetected params:@{@"faceDetected":@(self.hasFaces)}];
+	}
 }
 
 

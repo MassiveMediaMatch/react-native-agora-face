@@ -44,9 +44,20 @@ declare class RtcEngine {
      * on the visibility of a face.
      *
      * @param enabled
-     * @returns Promise<{success, value}>
+     * @returns Promise<{faceDetected, value}>
      */
-    static toggleFaceDetectionEvents(enabled: boolean): Promise<any>;
+    static toggleFaceDetectionDataEvents(enabled: boolean): Promise<any>;
+    /**
+     * Toggle face detection events
+     *
+     * This method used to enable or disable face detection events. Make sure to enable
+     * face detection with 'toggleFaceDetection' first. Use this method to get info and data
+     * on the visibility of a face.
+     *
+     * @param enabled
+     * @returns Promise<{faces, value}>
+     */
+    static toggleFaceDetectionStatusEvents(enabled: boolean): Promise<any>;
     /**
      * join specified channel
      *

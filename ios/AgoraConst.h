@@ -186,6 +186,7 @@ static NSString * _Nullable AGNetworkTypeChanged = @"networkTypeChanged";
 static NSString * _Nullable AGMediaMetaDataReceived = @"mediaMetaDataReceived";
 
 static NSString * _Nullable AGOnFacePositionChanged = @"onFacePositionChanged";
+static NSString * _Nullable AGOnFaceDetected = @"onFaceDetected";
 
 typedef NS_ENUM(NSInteger, AgoraModeType) {
   AgoraAudioMode,
