@@ -2433,7 +2433,7 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 
 - (void)rtcEngine:(AgoraRtcEngineKit * _Nonnull)engine facePositionDidChangeWidth:(int)width previewHeight:(int)height faces:(NSArray<AgoraFacePositionInfo *> *_Nullable)faces
 {
-	NSLog(@"hasFaces %d", faces.count > 0);
+	// NSLog(@"hasFaces %d", faces.count > 0);
 	self.hasFaces = faces.count > 0;
 	if (self.hasFaces) {
 		self.lastFaceDetected = CACurrentMediaTime();
@@ -2458,7 +2458,7 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 	}
 	
 	if (self.toggleFaceDetectionDataEvents) {
-		NSLog(@"send faces %@", faceDicts);
+		// NSLog(@"send faces %@", faceDicts);
 		[self sendEvent:AGOnFacePositionChanged params:@{@"faces":faceDicts}];
 	}
 }
@@ -2626,7 +2626,7 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 - (void)onFaceDetectionTick:(NSTimer*)timer
 {
 	CFTimeInterval elapsedTime = CACurrentMediaTime() - self.lastFaceDetected;
-	if (elapsedTime > 500) {
+	if (elapsedTime > 0.500) {
 		self.hasFaces = NO;
 		if (self.toggleFaceDetectionBlurring) {
 			self.shouldBlur = YES;
