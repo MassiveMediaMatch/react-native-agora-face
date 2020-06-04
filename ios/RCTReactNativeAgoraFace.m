@@ -2495,15 +2495,15 @@ RCT_EXPORT_METHOD(toggleFaceDetectionEvents:(BOOL)enabled resolve:(RCTPromiseRes
 		CGContextRef context = CGBitmapContextCreate(pixels, blurredWidth, blurredHeight, bitsPerComponent, bytesPerRow, colorSpace, kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big);
 		CGContextDrawImage(context, CGRectMake(0, 0, blurredWidth, blurredHeight), inputCGImage);
 
-		UInt32 *currentPixel = pixels;
-		char yBuffer[strlen(videoRawData.yBuffer)];
-		char uBuffer[strlen(videoRawData.uBuffer)];
-		char vBuffer[strlen(videoRawData.vBuffer)];
-
 		int frameSize = videoRawData.width * videoRawData.height;
 		int yIndex = 0; // Y start index
 		int uIndex = frameSize; // U statt index
 		int vIndex = frameSize * 5 / 4; // V start index: w*h*5/4
+
+		UInt32 *currentPixel = pixels;
+		char yBuffer[frameSize];
+		char uBuffer[uIndex + frameSize];
+		char vBuffer[vIndex + frameSize];
 
 		for (int j = 0; j < blurredHeight; j++) {
 		  for (int i = 0; i < blurredWidth; i++) {
