@@ -2522,13 +2522,9 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 		if (!self.blurImageContext) {
 			self.blurImageContext = [CIContext contextWithOptions:nil];
 		}
-//		CGImageRef inputCGImage = [self.blurImageContext createCGImage:coreImage fromRect:[coreImage extent]];
 		CGImageRef inputCGImage = [self.blurImageContext createCGImage:outputBlurredImage fromRect:[coreImage extent]];
-//		UIImage *blurredImage = [UIImage imageWithCGImage:inputCGImage];
-//		CGImageRelease(outputBlurredImageRef);
 		
 		// write blurred image data to YUV buffers
-//		CGImageRef inputCGImage = [blurredImage CGImage];
 		NSUInteger blurredWidth = CGImageGetWidth(inputCGImage);
 		NSUInteger blurredHeight = CGImageGetHeight(inputCGImage);
 
