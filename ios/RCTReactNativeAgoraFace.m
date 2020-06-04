@@ -31,6 +31,8 @@
 @property (nonatomic, assign) BOOL toggleFaceDetectionBlurring;
 @property (nonatomic, assign) BOOL toggleFaceDetectionDataEvents;
 @property (nonatomic, assign) BOOL toggleFaceDetectionStatusEvents;
+@property (nonatomic, assign) BOOL hasSentFaceDetectionStatusEvents; // boolean if event was sent since last 'hasFaces' change
+//@property (nonatomic, assign) BOOL onlyFaceDetectionStatusUpdateEvents;
 
 @property (nonatomic, strong) NSTimer *faceDetectionTimer;
 @property (nonatomic, assign) CFTimeInterval lastFaceDetected;
@@ -39,6 +41,13 @@
 @implementation RCTReactNativeAgoraFace {
   RCTResponseSenderBlock _block;
   bool hasListeners;
+}
+
+- (void)setHasFaces:(BOOL)hasFaces {
+	if (_hasFaces != hasFaces) {
+		_hasSentFaceDetectionStatusEvents = NO;
+	}
+	_hasFaces = hasFaces;
 }
 
 - (void)dealloc
@@ -2626,15 +2635,17 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 - (void)onFaceDetectionTick:(NSTimer*)timer
 {
 	CFTimeInterval elapsedTime = CACurrentMediaTime() - self.lastFaceDetected;
-	if (elapsedTime > 0.500) {
+	if (self.hasFaces && elapsedTime > 0.500) {
 		self.hasFaces = NO;
 		if (self.toggleFaceDetectionBlurring) {
 			self.shouldBlur = YES;
 		}
 	}
 	
-	if (self.toggleFaceDetectionStatusEvents) {
+	BOOL shouldSendEvent = !self.hasSentFaceDetectionStatusEvents;
+	if (shouldSendEvent && self.toggleFaceDetectionStatusEvents) {
 		[self sendEvent:AGOnFaceDetected params:@{@"faceDetected":@(self.hasFaces)}];
+		self.hasSentFaceDetectionStatusEvents = YES;
 	}
 }
 
