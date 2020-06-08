@@ -73,6 +73,9 @@ public class FaceDetector {
 
 	public void setBlurOnNoFaceDetected(boolean blurOnNoFaceDetected) {
 		this.blurOnNoFaceDetected = blurOnNoFaceDetected;
+		if (!blurOnNoFaceDetected) {
+			AgoraManager.getInstance().toggleBlurring(false);
+		}
 		checkTimerLogic();
 	}
 

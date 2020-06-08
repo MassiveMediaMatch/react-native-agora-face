@@ -132,6 +132,9 @@ public class AgoraManager {
 			}
 			if (options.hasKey("toggleFaceDetection")) {
 				mRtcEngine.enableFaceDetection(options.getBoolean("toggleFaceDetection"));
+				if (!options.getBoolean("toggleFaceDetection")) {
+					FaceDetector.getInstance().setBlurOnNoFaceDetected(false);
+				}
 			}
 			if (options.hasKey("toggleFaceDetectionBlurring")) {
 				FaceDetector.getInstance().setBlurOnNoFaceDetected(options.getBoolean("toggleFaceDetectionBlurring"));
@@ -149,7 +152,7 @@ public class AgoraManager {
 				mRtcEngine.enableDualStreamMode(options.getBoolean("dualStream"));
 			}
 			if (options.hasKey("mode")) {
-				Integer mode = options.getInt("mode");
+				int mode = options.getInt("mode");
 				switch (mode) {
 					case 0: {
 						mRtcEngine.enableAudio();
@@ -180,7 +183,7 @@ public class AgoraManager {
 			if (options.hasKey("voice") && null != options.getMap("voice")) {
 				ReadableMap voice = options.getMap("voice");
 				final String voiceType = voice.getString("type");
-				final Integer voiceValue = voice.getInt("value");
+				final int voiceValue = voice.getInt("value");
 				if (voiceType.equals("changer")) {
 					mRtcEngine.setLocalVoiceChanger(voiceValue);
 				}
