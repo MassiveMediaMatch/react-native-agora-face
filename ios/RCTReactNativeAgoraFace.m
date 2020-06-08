@@ -1889,8 +1889,11 @@ RCT_EXPORT_METHOD(toggleFaceDetectionBlurring:(BOOL)enabled resolve:(RCTPromiseR
 	
 	if (enabled) {
 		[self startFaceDetectionTimer];
-	} else if (!self.toggleFaceDetectionStatusEvents) {
-		[self stopFaceDetectionTimer];
+	} else {
+		self.shouldBlur = NO;
+		if (!self.toggleFaceDetectionStatusEvents) {
+			[self stopFaceDetectionTimer];
+		}
 	}
 
 	if (resolve) {
@@ -2655,32 +2658,11 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 - (void)initializeMediaDataPlugin
 {
     self.agoraMediaDataPlugin = [AgoraMediaDataPlugin mediaDataPluginWithAgoraKit:self.rtcEngine];
-    
-    // Register audio observer
-//    ObserverAudioType audioType = ObserverAudioTypeRecordAudio | ObserverAudioTypePlaybackAudioFrameBeforeMixing | ObserverAudioTypeMixedAudio | ObserverAudioTypePlaybackAudio;
-//    [self.agoraMediaDataPlugin registerAudioRawDataObserver:audioType];
-//    self.agoraMediaDataPlugin.audioDelegate = self;
-//
-//    [self.rtcEngine setRecordingAudioFrameParametersWithSampleRate:44100
-//                                                          channel:1
-//                                                             mode:AgoraAudioRawFrameOperationModeReadWrite
-//                                                   samplesPerCall:4410];
-//    [self.rtcEngine setMixedAudioFrameParametersWithSampleRate:44100
-//                                               samplesPerCall:4410];
-//    [self.rtcEngine setPlaybackAudioFrameParametersWithSampleRate:44100
-//                                                         channel:1
-//                                                            mode:AgoraAudioRawFrameOperationModeReadWrite
-//                                                  samplesPerCall:4410];
-    
+        
     // Register video observer
     ObserverVideoType videoType = ObserverVideoTypeCaptureVideo | ObserverVideoTypeRenderVideo;
     [self.agoraMediaDataPlugin registerVideoRawDataObserver:videoType];
     self.agoraMediaDataPlugin.videoDelegate = self;
-    
-    // Register packet observer
-//    ObserverPacketType packetType = ObserverPacketTypeSendAudio | ObserverPacketTypeSendVideo | ObserverPacketTypeReceiveAudio | ObserverPacketTypeReceiveVideo;
-//    [self.agoraMediaDataPlugin registerPacketRawDataObserver:packetType];
-//    self.agoraMediaDataPlugin.packetDelegate = self;
 }
 
 @end
