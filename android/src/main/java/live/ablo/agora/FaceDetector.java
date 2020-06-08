@@ -18,7 +18,7 @@ public class FaceDetector {
 	private boolean sendFaceDetectionStatusEvent;
 	private boolean isTimerRunning;
 	private long lastTimeFaceSeen;
-	private boolean lastFaceStatus;
+	private Boolean lastFaceStatus = null;
 	private RtcEventHandler eventHandler;
 	private Timer timer;
 	private TimerTask task;
@@ -73,6 +73,7 @@ public class FaceDetector {
 
 	public void setBlurOnNoFaceDetected(boolean blurOnNoFaceDetected) {
 		this.blurOnNoFaceDetected = blurOnNoFaceDetected;
+		lastFaceStatus = null;
 		if (!blurOnNoFaceDetected) {
 			AgoraManager.getInstance().toggleBlurring(false);
 		}
@@ -97,7 +98,7 @@ public class FaceDetector {
 				if (blurOnNoFaceDetected) {
 					AgoraManager.getInstance().toggleBlurring(noFaceDetected);
 				}
-				if (sendFaceDetectionStatusEvent && lastFaceStatus != noFaceDetected) {
+				if (sendFaceDetectionStatusEvent && (lastFaceStatus == null || lastFaceStatus != noFaceDetected)) {
 					WritableMap map = Arguments.createMap();
 					map.putBoolean("faceDetected", !noFaceDetected);
 					RtcEventHandler.sendEvent(eventHandler.getReactApplicationContext(), AGonFaceDetected, map);
