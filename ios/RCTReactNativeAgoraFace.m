@@ -50,10 +50,10 @@
 	_hasFaces = hasFaces;
 }
 
-- (void)dealloc
-{
-	[self stopFaceDetectionTimer];
-}
+//- (void)dealloc
+//{
+//	[self stopFaceDetectionTimer];
+//}
 
 +(BOOL)requiresMainQueueSetup {
   return YES;
@@ -2620,18 +2620,20 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 
 - (void)startFaceDetectionTimer
 {
-	if (!self.faceDetectionTimer) {
-		dispatch_async(dispatch_get_main_queue(), ^{
-			self.faceDetectionTimer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(onFaceDetectionTick:) userInfo:nil repeats:YES];			
-		});
-	}
+	dispatch_async(dispatch_get_main_queue(), ^{
+		if (!self.faceDetectionTimer) {
+			self.faceDetectionTimer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(onFaceDetectionTick:) userInfo:nil repeats:YES];
+		}
+	});
 }
 
 - (void)stopFaceDetectionTimer
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[self.faceDetectionTimer invalidate];
-		self.faceDetectionTimer = nil;
+		if (self.faceDetectionTimer) {
+			[self.faceDetectionTimer invalidate];
+			self.faceDetectionTimer = nil;
+		}
 	});
 }
 
