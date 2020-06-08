@@ -1918,6 +1918,7 @@ RCT_EXPORT_METHOD(toggleFaceDetectionDataEvents:(BOOL)enabled resolve:(RCTPromis
 RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
 	self.toggleFaceDetectionStatusEvents = enabled;
+	self.hasSentFaceDetectionStatusEvents = NO;
 
 	if (enabled) {
 		[self startFaceDetectionTimer];
