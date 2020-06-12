@@ -93,7 +93,7 @@ public class FaceDetector {
 		return new TimerTask() {
 			@Override
 			public void run() {
-				boolean noFaceDetected = lastTimeFaceSeen < System.currentTimeMillis() - 1000;
+				boolean noFaceDetected = lastTimeFaceSeen < System.currentTimeMillis() - 1500;
 
 				if (blurOnNoFaceDetected) {
 					AgoraManager.getInstance().toggleBlurring(noFaceDetected);
