@@ -267,4 +267,5 @@ export interface LastmileProbeConfig {
  */
 export interface CameraCapturerConfiguration {
   preference: number
+  cameraDirection: number
 }
