@@ -218,27 +218,27 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
   if ([options objectForKey:@"dualStream"]) {
     [self.rtcEngine enableDualStreamMode:[options[@"dualStream"] boolValue]];
   }
-  dispatch_sync(dispatch_get_main_queue(), ^{
-    [self.rtcEngine enableVideo];
-    [self.rtcEngine enableAudio];
-  });
-  if ([options objectForKey:@"mode"]) {
-    switch([options[@"mode"] integerValue]) {
-      case AgoraAudioMode: {
-        [self.rtcEngine enableLocalAudio:true];
-        [self.rtcEngine enableLocalVideo:false];
-        break;
-      }
-      case AgoraVideoMode: {
-        [self.rtcEngine enableLocalVideo:true];
-        [self.rtcEngine enableLocalAudio:false];
-        break;
-      }
-    }
-  } else {
-    [self.rtcEngine enableLocalVideo:true];
-    [self.rtcEngine enableLocalAudio:true];
-  }
+//  dispatch_sync(dispatch_get_main_queue(), ^{
+//    [self.rtcEngine enableVideo];
+//    [self.rtcEngine enableAudio];
+//  });
+//  if ([options objectForKey:@"mode"]) {
+//    switch([options[@"mode"] integerValue]) {
+//      case AgoraAudioMode: {
+//        [self.rtcEngine enableLocalAudio:true];
+//        [self.rtcEngine enableLocalVideo:false];
+//        break;
+//      }
+//      case AgoraVideoMode: {
+//        [self.rtcEngine enableLocalVideo:true];
+//        [self.rtcEngine enableLocalAudio:false];
+//        break;
+//      }
+//    }
+//  } else {
+//    [self.rtcEngine enableLocalVideo:true];
+//    [self.rtcEngine enableLocalAudio:true];
+//  }
   
   if ([options objectForKey:@"beauty"]) {
     AgoraBeautyOptions *beautyOption = [[AgoraBeautyOptions alloc] init];
@@ -2668,7 +2668,7 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 - (void)initializeMediaDataPlugin
 {
     self.agoraMediaDataPlugin = [AgoraMediaDataPlugin mediaDataPluginWithAgoraKit:self.rtcEngine];
-        
+	
     // Register video observer
     ObserverVideoType videoType = ObserverVideoTypeCaptureVideo | ObserverVideoTypeRenderVideo;
     [self.agoraMediaDataPlugin registerVideoRawDataObserver:videoType];
