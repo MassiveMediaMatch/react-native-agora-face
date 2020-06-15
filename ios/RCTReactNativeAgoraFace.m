@@ -36,6 +36,7 @@
 
 @property (nonatomic, strong) NSTimer *faceDetectionTimer;
 @property (nonatomic, assign) CFTimeInterval lastFaceDetected;
+@property (nonatomic, assign) CFTimeInterval lastFaceDetectedEventSent;
 @end
 
 @implementation RCTReactNativeAgoraFace {
@@ -2648,10 +2649,16 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 		}
 	}
 	
-	BOOL shouldSendEvent = !self.hasSentFaceDetectionStatusEvents;
-	if (shouldSendEvent && self.toggleFaceDetectionStatusEvents) {
-		[self sendEvent:AGOnFaceDetected params:@{@"faceDetected":@(self.hasFaces)}];
-		self.hasSentFaceDetectionStatusEvents = YES;
+	if (hasListeners) {
+		CFTimeInterval elapsedTimeEventSent = CACurrentMediaTime() - self.lastFaceDetectedEventSent;
+		BOOL shouldSendEvent = !self.hasSentFaceDetectionStatusEvents || elapsedTimeEventSent >= 1.0;
+		if (shouldSendEvent && self.toggleFaceDetectionStatusEvents) {
+			[self sendEvent:AGOnFaceDetected params:@{@"faceDetected":@(self.hasFaces)}];
+			self.hasSentFaceDetectionStatusEvents = YES;
+			self.lastFaceDetectedEventSent = CACurrentMediaTime();
+		}
+	} else {
+		NSLog(@"No React event listeners have been added");
 	}
 }
 
