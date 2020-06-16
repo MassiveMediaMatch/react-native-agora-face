@@ -11,6 +11,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import io.agora.rtc.IRtcEngineEventHandler;
 
@@ -837,7 +838,7 @@ public class RtcEventHandler extends IRtcEngineEventHandler {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				String msg = new String(data, Charset.forName("UTF-8"));
+				String msg = new String(data, StandardCharsets.UTF_8);
 				WritableMap map = Arguments.createMap();
 				map.putInt("uid", uid);
 				map.putInt("streamId", streamId);

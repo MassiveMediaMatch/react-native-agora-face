@@ -11,6 +11,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -878,7 +879,7 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 		if (null == mediaObserver) {
 			promise.reject("-1", "sendMediaData failed");
 		} else {
-			mediaObserver.setMetadata(data.getBytes(Charset.forName("UTF-8")));
+			mediaObserver.setMetadata(data.getBytes(StandardCharsets.UTF_8));
 			WritableMap map = Arguments.createMap();
 			map.putBoolean("success", true);
 			promise.resolve(map);

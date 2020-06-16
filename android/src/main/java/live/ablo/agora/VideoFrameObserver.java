@@ -1,18 +1,12 @@
 package live.ablo.agora;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 
 import live.ablo.agora.data.MediaDataVideoObserver;
 
 public class VideoFrameObserver implements MediaDataVideoObserver {
 
-	private final Context context;
-	private boolean blur;
-
-	public VideoFrameObserver(Context context) {
-		this.context = context;
-	}
+	private boolean blur = false;
 
 	@Override
 	public void onCaptureVideoFrame(byte[] data, int frameType, int width, int height, int bufferLength, int yStride, int uStride, int vStride, int rotation, long renderTimeMs) {

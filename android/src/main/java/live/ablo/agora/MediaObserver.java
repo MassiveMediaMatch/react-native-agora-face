@@ -6,6 +6,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import io.agora.rtc.IMetadataObserver;
 
@@ -49,7 +50,7 @@ public class MediaObserver implements IMetadataObserver {
 	@Override
 	public void onMetadataReceived(byte[] buffer, int uid, long timeStampMs) {
 		WritableMap map = Arguments.createMap();
-		map.putString("data", new String(buffer, Charset.forName("UTF-8")));
+		map.putString("data", new String(buffer, StandardCharsets.UTF_8));
 		map.putString("uid", Integer.toString(uid));
 		map.putString("ts", Long.toString(timeStampMs));
 		reactCtx.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)

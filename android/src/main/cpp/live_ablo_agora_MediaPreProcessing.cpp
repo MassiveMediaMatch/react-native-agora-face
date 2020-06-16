@@ -91,7 +91,6 @@ public:
 
 public:
     virtual bool onCaptureVideoFrame(VideoFrame &videoFrame) override {
-        __android_log_print(ANDROID_LOG_DEBUG, "agora-raw-data-plugin", "capture frame");
         getVideoFrame(videoFrame, captureVideoMethodId, _javaDirectPlayBufferCapture, 0);
         writebackVideoFrame(videoFrame, _javaDirectPlayBufferCapture);
         return true;

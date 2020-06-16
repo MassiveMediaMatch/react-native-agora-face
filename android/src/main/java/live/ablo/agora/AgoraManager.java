@@ -10,8 +10,6 @@ import io.agora.rtc.RtcEngine;
 import io.agora.rtc.video.BeautyOptions;
 import io.agora.rtc.video.VideoCanvas;
 import io.agora.rtc.video.VideoEncoderConfiguration;
-import live.ablo.agora.data.MediaDataObserverPlugin;
-import live.ablo.agora.data.MediaPreProcessing;
 
 import static io.agora.rtc.video.VideoEncoderConfiguration.FRAME_RATE;
 import static io.agora.rtc.video.VideoEncoderConfiguration.ORIENTATION_MODE;
@@ -29,8 +27,6 @@ public class AgoraManager {
 
 	private int mLocalUid = 0;
 
-	private MediaDataObserverPlugin mediaDataObserverPlugin;
-	private VideoFrameObserver videoFrameObserver;
 
 	private AgoraManager() {
 
@@ -122,7 +118,6 @@ public class AgoraManager {
 	public int init(Context context, RtcEventHandler rtcEventHandler, ReadableMap options) {
 		//create rtcEngine instance and setup rtcEngine eventHandler
 		try {
-			this.videoFrameObserver = new VideoFrameObserver(context);
 			this.mRtcEngine = RtcEngine.create(context, options.getString("appid"), rtcEventHandler);
 			if (options.hasKey("secret") && null != options.getString("secret")) {
 				mRtcEngine.setEncryptionSecret(options.getString("secret"));
@@ -213,12 +208,6 @@ public class AgoraManager {
 				mRtcEngine.setClientRole(options.getInt("clientRole"));
 			}
 
-			mediaDataObserverPlugin = MediaDataObserverPlugin.the();
-			MediaPreProcessing.setCallback(mediaDataObserverPlugin);
-			MediaPreProcessing.setVideoCaptureByteBuffer(mediaDataObserverPlugin.byteBufferCapture);
-			mediaDataObserverPlugin.addVideoObserver(videoFrameObserver);
-			// add decode buffer for local user
-			mediaDataObserverPlugin.addDecodeBuffer(0);
 			FaceDetector.getInstance().init(rtcEventHandler);
 
 			return mRtcEngine.enableWebSdkInteroperability(true);
@@ -258,16 +247,7 @@ public class AgoraManager {
 		return mRtcEngine;
 	}
 
-
 	public void destroy() {
 		RtcEngine.destroy();
-		if (mediaDataObserverPlugin != null) {
-			mediaDataObserverPlugin.removeVideoObserver(videoFrameObserver);
-			mediaDataObserverPlugin.removeAllBuffer();
-		}
-	}
-
-	public void toggleBlurring(boolean enable) {
-		videoFrameObserver.toggleBlurring(enable);
 	}
 }
