@@ -201,10 +201,8 @@ class RtcEngine {
      *
      * This method stops event subscribe and destroy the RtcEngine instance's.
      * You should call it, when you want to destroy the engine.
-     *
-     * @returns Promise<{success, value}>
      */
-    public static destroy(): Promise<any> {
+    public static destroy() {
         return ReactNativeAgoraFace.destroy();
     }
 

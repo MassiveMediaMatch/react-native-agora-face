@@ -20,7 +20,8 @@ declare class RtcEngine {
     * Toggle face detection
     *
     * This method used to enable or disable face detection. Make sure to also set
-    * 'toggleFaceDetectionEvents' if you want to receive updates of face visibility.
+    * 'toggleFaceDetectionDataEvents' or 'toggleFaceDetectionStatusEvents' if you want
+    * to receive updates of face visibility.
     *
     * @param enabled
     * @returns Promise<{success, value}>
@@ -37,16 +38,14 @@ declare class RtcEngine {
      */
     static toggleFaceDetectionBlurring(enabled: boolean): Promise<any>;
     /**
-     * Toggle face detection events
+     * Toggle face detection status events
      *
-     * This method used to enable or disable face detection events. Make sure to enable
-     * face detection with 'toggleFaceDetection' first. Use this method to get info and data
-     * on the visibility of a face.
+     * Enables status updates if face is detected or not (every 100ms)
      *
      * @param enabled
      * @returns Promise<{faceDetected, value}>
      */
-    static toggleFaceDetectionDataEvents(enabled: boolean): Promise<any>;
+    static toggleFaceDetectionStatusEvents(enabled: boolean): Promise<any>;
     /**
      * Toggle face detection events
      *
@@ -57,7 +56,7 @@ declare class RtcEngine {
      * @param enabled
      * @returns Promise<{faces, value}>
      */
-    static toggleFaceDetectionStatusEvents(enabled: boolean): Promise<any>;
+    static toggleFaceDetectionDataEvents(enabled: boolean): Promise<any>;
     /**
      * join specified channel
      *
@@ -129,10 +128,8 @@ declare class RtcEngine {
      *
      * This method stops event subscribe and destroy the RtcEngine instance's.
      * You should call it, when you want to destroy the engine.
-     *
-     * @returns Promise<{success, value}>
      */
-    static destroy(): Promise<any>;
+    static destroy(): any;
     /**
      * set local video render mode
      *
