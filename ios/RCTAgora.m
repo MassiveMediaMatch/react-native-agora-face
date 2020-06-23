@@ -1832,7 +1832,7 @@ RCT_EXPORT_METHOD(getParameters:(NSString *)paramStr
 }
 
 - (void) sendEvent:(NSString *)msg params:(NSDictionary *)params {
-  if (hasListeners) {
+	if (hasListeners && self.bridge) {
     NSString *evtName = [NSString stringWithFormat:@"%@%@", AG_PREFIX, msg];
     [self sendEventWithName:evtName body:params];
   }

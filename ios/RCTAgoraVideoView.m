@@ -14,8 +14,8 @@
 - (instancetype)init{
   
   if (self == [super init]) {
-    _rtcEngine = [AgoraConst share].rtcEngine;
-    _renderMode = AgoraVideoRenderModeHidden;
+	  self.rtcEngine = [AgoraConst share].rtcEngine;
+	  self.renderMode = AgoraVideoRenderModeHidden;
   }
   
   return self;
