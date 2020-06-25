@@ -203,7 +203,7 @@ RCT_EXPORT_MODULE();
 
 // init
 RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
-  [self startObserving];
+//  [self startObserving];
   [AgoraConst share].appid = options[@"appid"];
   
   self.rtcEngine = [AgoraRtcEngineKit sharedEngineWithAppId:options[@"appid"] delegate:self];
