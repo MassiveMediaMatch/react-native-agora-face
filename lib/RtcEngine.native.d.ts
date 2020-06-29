@@ -17,6 +17,10 @@ declare class RtcEngine {
      */
     static init(options: Option): void;
     /**
+     * Initialize video call
+     */
+    static initVideoCall(): void;
+    /**
     * Toggle face detection
     *
     * This method used to enable or disable face detection. Make sure to also set

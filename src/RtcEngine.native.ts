@@ -53,6 +53,13 @@ class RtcEngine {
         ReactNativeAgoraFace.init(options);
     }
 
+    /**
+     * Initialize video call
+     */
+    static initVideoCall() {
+        ReactNativeAgoraFace.initVideoCall();
+    }
+
      /**
      * Toggle face detection
      *
