@@ -291,6 +291,12 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
 //  self.vision = [FIRVision vision];
 }
 
+RCT_EXPORT_METHOD(initVideoCall:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
+{
+	self.rtcEngine.delegate = self;
+	resolve(nil);
+}
+
 // renew token
 RCT_EXPORT_METHOD(renewToken
                   :(NSString *)token
