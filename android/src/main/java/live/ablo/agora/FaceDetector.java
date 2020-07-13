@@ -1,20 +1,33 @@
 package live.ablo.agora;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.face.Face;
+import com.google.mlkit.vision.face.FaceDetection;
+import com.google.mlkit.vision.face.FaceDetectorOptions;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import androidx.annotation.NonNull;
 import io.agora.rtc.IRtcEngineEventHandler;
 import live.ablo.agora.data.MediaDataObserverPlugin;
+import live.ablo.agora.data.MediaDataVideoObserver;
 import live.ablo.agora.data.MediaPreProcessing;
 
+import static com.facebook.react.bridge.UiThreadUtil.runOnUiThread;
 import static live.ablo.agora.AgoraConst.AGonFaceDetected;
+import static live.ablo.agora.AgoraConst.AGonFacePositionChanged;
 
-public class FaceDetector {
+public class FaceDetector implements MediaDataVideoObserver, OnSuccessListener<List<Face>>, OnFailureListener {
 	public static final String TAG = FaceDetector.class.getSimpleName();
 
 	private static FaceDetector detector;
@@ -28,11 +41,18 @@ public class FaceDetector {
 	private RtcEventHandler eventHandler;
 	private Timer timer;
 	private TimerTask task;
+	private boolean blur = false;
+	private boolean processingFace;
 	private MediaDataObserverPlugin mediaDataObserverPlugin;
-	private VideoFrameObserver videoFrameObserver;
+	private final com.google.mlkit.vision.face.FaceDetector mlDetector;
+	private boolean enabledFaceDetection;
 
 	private FaceDetector() {
-		this.videoFrameObserver = new VideoFrameObserver();
+		mlDetector = FaceDetection.getClient(new FaceDetectorOptions.Builder()
+				.setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
+				.enableTracking()
+				.setPerformanceMode(2)
+				.build());
 	}
 
 	public static FaceDetector getInstance() {
@@ -53,7 +73,7 @@ public class FaceDetector {
 		mediaDataObserverPlugin = MediaDataObserverPlugin.the();
 		MediaPreProcessing.setCallback(mediaDataObserverPlugin);
 		MediaPreProcessing.setVideoCaptureByteBuffer(mediaDataObserverPlugin.byteBufferCapture);
-		mediaDataObserverPlugin.addVideoObserver(videoFrameObserver);
+		mediaDataObserverPlugin.addVideoObserver(this);
 		// add decode buffer for local user
 		mediaDataObserverPlugin.addDecodeBuffer(0);
 	}
@@ -66,15 +86,8 @@ public class FaceDetector {
 			task.cancel();
 		}
 		if (mediaDataObserverPlugin != null) {
-			mediaDataObserverPlugin.removeVideoObserver(videoFrameObserver);
+			mediaDataObserverPlugin.removeVideoObserver(this);
 			mediaDataObserverPlugin.removeAllBuffer();
-		}
-	}
-
-	public void faceDataChanged(IRtcEngineEventHandler.AgoraFacePositionInfo[] faces) {
-		Log.v(TAG, "detected " + faces.length + " faces");
-		if (faces.length > 0) {
-			lastTimeFaceSeen = System.currentTimeMillis();
 		}
 	}
 
@@ -100,7 +113,7 @@ public class FaceDetector {
 		lastFaceStatus = null;
 		checkTimerLogic();
 		if (!blurOnNoFaceDetected) {
-			videoFrameObserver.toggleBlurring(false);
+			toggleBlurring(false);
 		}
 	}
 
@@ -114,14 +127,22 @@ public class FaceDetector {
 		checkTimerLogic();
 	}
 
+	public void enableFaceDetection(boolean toggleFaceDetection) {
+		enabledFaceDetection = toggleFaceDetection;
+	}
+
+	public void toggleBlurring(boolean enable) {
+		blur = enable;
+	}
+
 	private TimerTask getNewTask() {
 		return new TimerTask() {
 			@Override
 			public void run() {
-				boolean noFaceDetected = lastTimeFaceSeen < System.currentTimeMillis() - 1500;
+				boolean noFaceDetected = lastTimeFaceSeen < System.currentTimeMillis() - 500;
 
 				if (blurOnNoFaceDetected) {
-					videoFrameObserver.toggleBlurring(noFaceDetected);
+					toggleBlurring(noFaceDetected);
 				}
 				if (sendFaceDetectionStatusEvent && (lastFaceStatus == null || lastFaceStatus != noFaceDetected || lastTimeFaceSent < System.currentTimeMillis() - 1000)) {
 					Log.v(TAG, "Sending face status event to react, " + (noFaceDetected ? "no face detected." : "face detected."));
@@ -133,6 +154,54 @@ public class FaceDetector {
 				}
 			}
 		};
+	}
+
+	@Override
+	public void onCaptureVideoFrame(byte[] data, int frameType, int width, int height, int bufferLength, int yStride, int uStride, int vStride, int rotation, long renderTimeMs) {
+		Bitmap frame = YUVUtils.i420ToBitmap(width, height, rotation, bufferLength, data, yStride, uStride, vStride);
+		if (!processingFace && enabledFaceDetection) {
+			processingFace = true;
+			mlDetector.process(InputImage.fromBitmap(Bitmap.createScaledBitmap(frame,frame.getWidth()/2,frame.getHeight()/2, true), 0)).addOnSuccessListener(this).addOnFailureListener(this);
+		}
+		if (blur) {
+			Bitmap bmp = YUVUtils.pixelate(frame, 10);
+			System.arraycopy(YUVUtils.bitmapToI420(width, height, bmp), 0, data, 0, bufferLength);
+		}
+	}
+
+	@Override
+	public void onRenderVideoFrame(int uid, byte[] data, int frameType, int width, int height, int bufferLength, int yStride, int uStride, int vStride, int rotation, long renderTimeMs) {
+
+	}
+
+	@Override
+	public void onSuccess(final List<Face> faces) {
+		Log.v(TAG, "detected " + faces.size() + " faces");
+		if (!faces.isEmpty()) {
+			lastTimeFaceSeen = System.currentTimeMillis();
+		}
+		if (FaceDetector.getInstance().sendFaceDetectionDataEvents()) {
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					WritableMap map = Arguments.createMap();
+					WritableArray list = Arguments.createArray();
+					for (Face info : faces) {
+						WritableMap face = Arguments.createMap();
+						list.pushMap(face);
+					}
+					map.putArray("faces", list);
+					RtcEventHandler.sendEvent(eventHandler.getReactApplicationContext(), AGonFacePositionChanged, map);
+				}
+			});
+		}
+		processingFace = false;
+	}
+
+	@Override
+	public void onFailure(@NonNull Exception e) {
+		Log.e(TAG, "Failed detecting face", e);
+		processingFace = false;
 	}
 
 }

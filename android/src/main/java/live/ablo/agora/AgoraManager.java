@@ -117,6 +117,7 @@ public class AgoraManager {
 	 */
 	public int init(Context context, RtcEventHandler rtcEventHandler, ReadableMap options) {
 		//create rtcEngine instance and setup rtcEngine eventHandler
+		Log.v("Agora", "init :" + options.toString());
 		try {
 			this.mRtcEngine = RtcEngine.create(context, options.getString("appid"), rtcEventHandler);
 			if (options.hasKey("secret") && null != options.getString("secret")) {
@@ -126,7 +127,7 @@ public class AgoraManager {
 				}
 			}
 			if (options.hasKey("toggleFaceDetection")) {
-				mRtcEngine.enableFaceDetection(options.getBoolean("toggleFaceDetection"));
+				FaceDetector.getInstance().enableFaceDetection(options.getBoolean("toggleFaceDetection"));
 				if (!options.getBoolean("toggleFaceDetection")) {
 					FaceDetector.getInstance().setBlurOnNoFaceDetected(false);
 				}

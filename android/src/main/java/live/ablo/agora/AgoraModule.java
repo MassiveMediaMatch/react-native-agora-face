@@ -259,8 +259,8 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 
 	@ReactMethod
 	public void toggleFaceDetection(boolean enabled, Promise promise) {
-		int res = AgoraManager.getInstance().getEngine().enableFaceDetection(enabled);
-		resolvePromiseFromResolve(res, promise, "enable facedetection");
+		FaceDetector.getInstance().enableFaceDetection(enabled);
+		resolvePromiseFromResolve(0, promise, "enable facedetection");
 	}
 
 	@ReactMethod

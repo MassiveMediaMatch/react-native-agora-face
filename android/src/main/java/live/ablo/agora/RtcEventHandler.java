@@ -95,7 +95,6 @@ public class RtcEventHandler extends IRtcEngineEventHandler {
 
 	public void onFacePositionChanged(final int imageWidth, final int imageHeight, final IRtcEngineEventHandler.AgoraFacePositionInfo[] faces) {
 		super.onFacePositionChanged(imageWidth, imageHeight, faces);
-		FaceDetector.getInstance().faceDataChanged(faces);
 		if (FaceDetector.getInstance().sendFaceDetectionDataEvents()) {
 			runOnUiThread(new Runnable() {
 				@Override
