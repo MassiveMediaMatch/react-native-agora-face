@@ -54,11 +54,6 @@ android {
         abortOnError false
     }
 
-    externalNativeBuild {
-        cmake {
-            path 'CMakeLists.txt'
-        }
-    }
 }
 
 repositories {
@@ -80,7 +75,7 @@ dependencies {
     //noinspection GradleDynamicVersion
     implementation 'com.facebook.react:react-native:+'  // From node_modules
     implementation "io.agora.rtc:full-sdk:3.0.1"
-    implementation 'com.google.android.gms:play-services-mlkit-face-detection:16.0.0'
+    implementation 'com.google.android.gms:play-services-mlkit-face-detection:16.1.0'
 }
 
 def configureReactNativePom(def pom) {

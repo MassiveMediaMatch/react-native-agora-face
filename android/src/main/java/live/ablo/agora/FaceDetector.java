@@ -18,7 +18,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import androidx.annotation.NonNull;
-import io.agora.rtc.IRtcEngineEventHandler;
 import live.ablo.agora.data.MediaDataObserverPlugin;
 import live.ablo.agora.data.MediaDataVideoObserver;
 import live.ablo.agora.data.MediaPreProcessing;
@@ -31,7 +30,7 @@ public class FaceDetector implements MediaDataVideoObserver, OnSuccessListener<L
 	public static final String TAG = FaceDetector.class.getSimpleName();
 
 	private static FaceDetector detector;
-
+	private final com.google.mlkit.vision.face.FaceDetector mlDetector;
 	private boolean blurOnNoFaceDetected;
 	private boolean sendFaceDetectionDataEvent;
 	private boolean sendFaceDetectionStatusEvent;
@@ -44,14 +43,15 @@ public class FaceDetector implements MediaDataVideoObserver, OnSuccessListener<L
 	private boolean blur = false;
 	private boolean processingFace;
 	private MediaDataObserverPlugin mediaDataObserverPlugin;
-	private final com.google.mlkit.vision.face.FaceDetector mlDetector;
 	private boolean enabledFaceDetection;
 
 	private FaceDetector() {
 		mlDetector = FaceDetection.getClient(new FaceDetectorOptions.Builder()
-				.setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
+				.setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_NONE)
+				.setContourMode(FaceDetectorOptions.CONTOUR_MODE_NONE)
+				.setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
+				.setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
 				.enableTracking()
-				.setPerformanceMode(2)
 				.build());
 	}
 
@@ -161,7 +161,8 @@ public class FaceDetector implements MediaDataVideoObserver, OnSuccessListener<L
 		Bitmap frame = YUVUtils.i420ToBitmap(width, height, rotation, bufferLength, data, yStride, uStride, vStride);
 		if (!processingFace && enabledFaceDetection) {
 			processingFace = true;
-			mlDetector.process(InputImage.fromBitmap(Bitmap.createScaledBitmap(frame,frame.getWidth()/2,frame.getHeight()/2, true), 0)).addOnSuccessListener(this).addOnFailureListener(this);
+			InputImage image = InputImage.fromBitmap(Bitmap.createScaledBitmap(frame, frame.getWidth() / 2, frame.getHeight() / 2, true), 0);
+			mlDetector.process(image).addOnSuccessListener(this).addOnFailureListener(this);
 		}
 		if (blur) {
 			Bitmap bmp = YUVUtils.pixelate(frame, 10);
