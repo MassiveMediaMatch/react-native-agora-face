@@ -1,4 +1,4 @@
-import { Option, Callback, AudioMixingOption, PlayEffectOption, AudioRecordingOption, AudioFrameOption, MixedAudioFrameOption, ImageOption, VideoStreamOption, DefaultVideoStreamOption, InjectStreamOption, RemoveInjectStreamOption, PublishStreamOption, RemovePublishStreamOption, LiveTranscodingOption, PositionOption, BeautyOption, LastmileProbeConfig, CameraCapturerConfiguration } from "./types";
+import { Option, Callback, AudioMixingOption, PlayEffectOption, AudioRecordingOption, AudioFrameOption, MixedAudioFrameOption, ImageOption, VideoStreamOption, DefaultVideoStreamOption, InjectStreamOption, RemoveInjectStreamOption, PublishStreamOption, RemovePublishStreamOption, LiveTranscodingOption, PositionOption, BeautyOption, LastmileProbeConfig, CameraCapturerConfiguration, EncryptionConfig } from "./types";
 /**
  * RtcEngine is the javascript object for control agora native sdk through react native bridge.
  *
@@ -1021,6 +1021,11 @@ declare class RtcEngine {
      * @returns Promise{<success, value}>
      */
     static registerMediaMetadataObserver(): Promise<any>;
+    /**
+     * Enable Encryption
+     * Check https://docs.agora.io/en/Video/API%20Reference/cocos_creator/modules/agora.html#enableencryption for more info.
+     */
+    static enableEncryption(enabled: boolean, config: EncryptionConfig): Promise<any>;
     /**
      * Get local device camera support info
      *

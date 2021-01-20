@@ -7,6 +7,7 @@ import android.view.SurfaceView;
 import com.facebook.react.bridge.ReadableMap;
 
 import io.agora.rtc.RtcEngine;
+import io.agora.rtc.internal.EncryptionConfig;
 import io.agora.rtc.video.BeautyOptions;
 import io.agora.rtc.video.VideoCanvas;
 import io.agora.rtc.video.VideoEncoderConfiguration;
@@ -241,6 +242,18 @@ public class AgoraManager {
 		int uid = options.hasKey("uid") ? options.getInt("uid") : 0;
 		this.mLocalUid = uid;
 		return mRtcEngine.joinChannel(token, channelName, optionalInfo, uid);
+	}
+	public EncryptionConfig.EncryptionMode getNameByCode(int code){
+		for(EncryptionConfig.EncryptionMode e : EncryptionConfig.EncryptionMode.values()){
+			if(code == e.getValue()) return e;
+		}
+		return null;
+	}
+	public int enableEncryption(boolean enable, ReadableMap options) {
+		EncryptionConfig config = new EncryptionConfig();
+		config.encryptionKey = options.hasKey("encryptionKey") ? options.getString("encryptionKey"): null;
+		config.encryptionMode = options.hasKey("encryptionMode") ? getNameByCode(options.getInt("encryptionMode")) : EncryptionConfig.EncryptionMode.AES_128_XTS;
+		return mRtcEngine.enableEncryption(enable, config);
 	}
 
 	public RtcEngine getEngine() {

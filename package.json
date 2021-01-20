@@ -1,5 +1,5 @@
 {
-  "name": "react-native-react-native-agora-face",
+  "name": "react-native-agora-face",
   "title": "React Native React Native Agora Library with Face Detection and automatic client-side blurring",
   "version": "1.0.0",
   "description": "React Native around the Agora RTC SDKs for Android and iOS agora",

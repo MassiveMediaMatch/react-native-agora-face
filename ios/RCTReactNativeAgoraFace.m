@@ -360,6 +360,25 @@ RCT_EXPORT_METHOD(joinChannel:(NSDictionary *)options
   }
 }
 
+// enable encryption
+RCT_EXPORT_METHOD(enableEncryption:(BOOL)enabled options:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject) {
+		// check if AgoraRtcEngine delegate is set to this instance
+	if (self.rtcEngine.delegate != self) {
+		self.rtcEngine.delegate = self;
+	}
+    AgoraEncryptionConfig *config = [[AgoraEncryptionConfig alloc] init];
+    config.encryptionKey = [options objectForKey:@"encryptionKey"];
+    config.encryptionMode = [[options objectForKey:@"encryptionMode"] integerValue];
+    NSInteger res = [self.rtcEngine enableEncryption:[options[@"enabled"] boolValue] encryptionConfig:config];
+  if (res == 0) {
+    resolve(nil);
+  } else {
+    reject(@(-1).stringValue, @(res).stringValue, nil);
+  }
+}
+
 // switch channel
 RCT_EXPORT_METHOD(switchChannel:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve

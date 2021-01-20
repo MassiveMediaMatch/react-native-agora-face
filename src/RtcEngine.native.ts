@@ -24,7 +24,8 @@ import {
     PositionOption,
     BeautyOption,
     LastmileProbeConfig,
-    CameraCapturerConfiguration
+		CameraCapturerConfiguration,
+		EncryptionConfig
 } from "./types";
 
 
@@ -1419,7 +1420,15 @@ class RtcEngine {
      */
     static registerMediaMetadataObserver(): Promise<any> {
         return ReactNativeAgoraFace.registerMediaMetadataObserver();
-    }
+		}
+		
+		/**
+		 * Enable Encryption 
+		 * Check https://docs.agora.io/en/Video/API%20Reference/cocos_creator/modules/agora.html#enableencryption for more info.
+		 */
+		static enableEncryption(enabled: boolean, config: EncryptionConfig): Promise<any> {
+			return ReactNativeAgoraFace.enableEncryption(enabled, config);
+		}
 
     /**
      * Get local device camera support info
