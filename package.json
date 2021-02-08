@@ -1,5 +1,5 @@
 {
-  "name": "react-native-react-native-agora-face",
+  "name": "react-native-agora-face",
   "title": "React Native React Native Agora Library with Face Detection and automatic client-side blurring",
   "version": "1.0.0",
   "description": "React Native around the Agora RTC SDKs for Android and iOS agora",
@@ -33,16 +33,16 @@
   "readmeFilename": "README.md",
   "homepage": "https://www.massivemedia.eu",
   "peerDependencies": {
-    "react": "^16.8.1",
-    "react-native": ">=0.60.0-rc.0 <1.0.x"
+    "react": "^16.13.1",
+    "react-native": ">=0.63.4 <1.0.x"
   },
   "devDependencies": {
-    "react": "^16.9.0",
-	"react-native": "^0.61.5",
-	"@types/react": "^16.3.0",
+    "react": "^16.13.1",
+    "react-native": "^0.63.4",
+    "@types/react": "^16.3.0",
     "@types/react-native": "^0.55.0",
     "@types/react-test-renderer": "^16.0.3",
-	"ts-jest": "^23.10.5",
+    "ts-jest": "^23.10.5",
     "tslint": "^5.12.1",
     "typedoc": "^0.14.2",
     "typescript": "^3.2.4",

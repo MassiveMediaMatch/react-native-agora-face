@@ -1,5 +1,9 @@
 package live.ablo.agora;
 
+import android.util.Log;
+
+import androidx.core.util.LogWriter;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
@@ -1281,6 +1285,12 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	public void startEchoTestWithInterval(int interval, Promise promise) {
 		int res = AgoraManager.getInstance().getEngine().startEchoTest(interval);
 		resolvePromiseFromResolve(res, promise, "startEchoTestWithInterval Failed");
+	}
+	
+	@ReactMethod
+	public void enableEncryption(boolean enabled, ReadableMap config, Promise promise) {
+		int res = AgoraManager.getInstance().enableEncryption(enabled, config);
+		resolvePromiseFromResolve(res, promise, "enableEncryption Failed");
 	}
 
 	@ReactMethod

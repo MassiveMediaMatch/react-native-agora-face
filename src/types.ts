@@ -269,3 +269,17 @@ export interface CameraCapturerConfiguration {
   preference: number
   cameraDirection: number
 }
+
+export enum EncryptionMode {
+	NONE = 0,
+	AES_128_XTS = 1,
+	AES_128_ECB = 2,
+	AES_256_XTS = 3,
+	SM4_128_ECB = 4,
+	MODE_END = 5
+}
+
+export interface EncryptionConfig {
+	encryptionKey: String
+	encryptionMode?: EncryptionMode
+}
