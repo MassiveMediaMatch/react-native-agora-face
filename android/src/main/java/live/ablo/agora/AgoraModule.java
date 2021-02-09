@@ -20,6 +20,7 @@ import io.agora.rtc.Constants;
 import io.agora.rtc.IAudioEffectManager;
 import io.agora.rtc.IMetadataObserver;
 import io.agora.rtc.IRtcEngineEventHandler;
+import io.agora.rtc.internal.EncryptionConfig;
 import io.agora.rtc.internal.LastmileProbeConfig;
 import io.agora.rtc.live.LiveInjectStreamConfig;
 import io.agora.rtc.live.LiveTranscoding;
@@ -255,6 +256,15 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	@ReactMethod
 	public void init(ReadableMap options) {
 		AgoraManager.getInstance().init(getReactApplicationContext(), engineEventHandler, options);
+	}
+
+	@ReactMethod
+	public void enableEncryption(boolean enable, String key, Promise promise) {
+		EncryptionConfig config = new EncryptionConfig();
+		config.encryptionKey = key;
+		config.encryptionMode = EncryptionConfig.EncryptionMode.AES_128_XTS;
+		int res = AgoraManager.getInstance().getEngine().enableEncryption(enable, config);
+		resolvePromiseFromResolve(res, promise);
 	}
 
 	@ReactMethod

@@ -54,6 +54,26 @@ public class AgoraManager {
 			public boolean onPlaybackFrame(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec) {
 				return observer.onPlaybackFrame(samples, numOfSamples, bytesPerSample, channels, samplesPerSec);
 			}
+
+			@Override
+			public boolean onPlaybackFrameBeforeMixing(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec, int uid) {
+				return false;
+			}
+
+			@Override
+			public boolean onMixedFrame(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec) {
+				return false;
+			}
+
+			@Override
+			public boolean isMultipleChannelFrameWanted() {
+				return false;
+			}
+
+			@Override
+			public boolean onPlaybackFrameBeforeMixingEx(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec, int uid, String channelId) {
+				return false;
+			}
 		});
 		if (res < 0) {
 			throw new ReactNativeAgoraException("registerAudioFrameObserver Failed", res);
