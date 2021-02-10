@@ -20,6 +20,7 @@ declare class RtcEngine {
      * Initialize video call
      */
     static initVideoCall(): void;
+    static enableEncryption(enabled: boolean, key: string): Promise<any>;
     /**
     * Toggle face detection
     *

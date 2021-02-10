@@ -60,6 +60,10 @@ class RtcEngine {
         ReactNativeAgoraFace.initVideoCall();
     }
 
+    public static enableEncryption(enabled: boolean, key:string): Promise<any> {
+        return ReactNativeAgoraFace.enableEncryption(enabled, key);
+    }
+
      /**
      * Toggle face detection
      *
