@@ -297,6 +297,24 @@ RCT_EXPORT_METHOD(initVideoCall:(RCTPromiseResolveBlock)resolve reject:(RCTPromi
 	resolve(nil);
 }
 
+// enabl encryption
+RCT_EXPORT_METHOD(enableEncryption:
+                  (BOOL)enabled
+                  key:(NSString *)key
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject) {
+
+  AgoraEncryptionConfig *config = [[AgoraEncryptionConfig alloc] init];
+  config.encryptionKey = key;
+    
+  NSInteger res = [self.rtcEngine enableEncryption:enabled encryptionConfig:config];
+  if (res == 0) {
+    resolve(nil);
+  } else {
+    reject(@(-1).stringValue, @(res).stringValue, nil);
+  }
+}
+
 // renew token
 RCT_EXPORT_METHOD(renewToken
                   :(NSString *)token
