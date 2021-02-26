@@ -10,9 +10,9 @@ extern "C" {
 /*
  * Class:     live_ablo_agora_MediaPreProcessing
  * Method:    setCallback
- * Signature: (Lio/agora/advancedvideo/rawdata/MediaPreProcessing/ProgressCallback;)V
+ * Signature: (Llive/ablo/agora/MediaPreProcessing/ProgressCallback;)V
  */
-JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setCallback
+JNIEXPORT void JNICALL Java_live_ablo_agora_MediaPreProcessing_setCallback
   (JNIEnv *, jclass, jobject);
 
 /*
@@ -20,7 +20,7 @@ JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setCallback
  * Method:    setVideoCaptureByteBuffer
  * Signature: (Ljava/nio/ByteBuffer;)V
  */
-JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setVideoCaptureByteBuffer
+JNIEXPORT void JNICALL Java_live_ablo_agora_MediaPreProcessing_setVideoCaptureByteBuffer
   (JNIEnv *, jclass, jobject);
 
 /*
@@ -28,7 +28,7 @@ JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setVideoCapt
  * Method:    setAudioRecordByteBuffer
  * Signature: (Ljava/nio/ByteBuffer;)V
  */
-JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setAudioRecordByteBuffer
+JNIEXPORT void JNICALL Java_live_ablo_agora_MediaPreProcessing_setAudioRecordByteBuffer
   (JNIEnv *, jclass, jobject);
 
 /*
@@ -36,7 +36,7 @@ JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setAudioReco
  * Method:    setAudioPlayByteBuffer
  * Signature: (Ljava/nio/ByteBuffer;)V
  */
-JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setAudioPlayByteBuffer
+JNIEXPORT void JNICALL Java_live_ablo_agora_MediaPreProcessing_setAudioPlayByteBuffer
   (JNIEnv *, jclass, jobject);
 
 /*
@@ -44,7 +44,7 @@ JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setAudioPlay
  * Method:    setBeforeAudioMixByteBuffer
  * Signature: (Ljava/nio/ByteBuffer;)V
  */
-JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setBeforeAudioMixByteBuffer
+JNIEXPORT void JNICALL Java_live_ablo_agora_MediaPreProcessing_setBeforeAudioMixByteBuffer
   (JNIEnv *, jclass, jobject);
 
 /*
@@ -52,7 +52,7 @@ JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setBeforeAud
  * Method:    setAudioMixByteBuffer
  * Signature: (Ljava/nio/ByteBuffer;)V
  */
-JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setAudioMixByteBuffer
+JNIEXPORT void JNICALL Java_live_ablo_agora_MediaPreProcessing_setAudioMixByteBuffer
   (JNIEnv *, jclass, jobject);
 
 /*
@@ -60,7 +60,7 @@ JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setAudioMixB
  * Method:    setVideoDecodeByteBuffer
  * Signature: (ILjava/nio/ByteBuffer;)V
  */
-JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setVideoDecodeByteBuffer
+JNIEXPORT void JNICALL Java_live_ablo_agora_MediaPreProcessing_setVideoDecodeByteBuffer
   (JNIEnv *, jclass, jint, jobject);
 
 /*
@@ -68,7 +68,7 @@ JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setVideoDeco
  * Method:    releasePoint
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_releasePoint
+JNIEXPORT void JNICALL Java_live_ablo_agora_MediaPreProcessing_releasePoint
   (JNIEnv *, jclass);
 
 #ifdef __cplusplus

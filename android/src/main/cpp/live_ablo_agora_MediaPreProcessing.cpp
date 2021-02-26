@@ -10,25 +10,22 @@
 #include <map>
 
 using namespace std;
+// Global variables
 
 jobject gCallBack = nullptr;
 jclass gCallbackClass = nullptr;
-jmethodID recordAudioMethodId = nullptr;
-jmethodID playbackAudioMethodId = nullptr;
-jmethodID playBeforeMixAudioMethodId = nullptr;
-jmethodID mixAudioMethodId = nullptr;
+// Method ID at the Java level
 jmethodID captureVideoMethodId = nullptr;
 jmethodID renderVideoMethodId = nullptr;
+jmethodID preEncodeVideoMethodId = nullptr;
 void *_javaDirectPlayBufferCapture = nullptr;
-void *_javaDirectPlayBufferRecordAudio = nullptr;
-void *_javaDirectPlayBufferPlayAudio = nullptr;
-void *_javaDirectPlayBufferBeforeMixAudio = nullptr;
-void *_javaDirectPlayBufferMixAudio = nullptr;
 map<int, void *> decodeBufferMap;
 
 static JavaVM *gJVM = nullptr;
 
+// Implement the IVideoFrameObserver class and related callbacks
 class AgoraVideoFrameObserver : public agora::media::IVideoFrameObserver {
+
 
 public:
     AgoraVideoFrameObserver() {
@@ -39,9 +36,9 @@ public:
 
     }
 
-    void
-    getVideoFrame(VideoFrame &videoFrame, _jmethodID *jmethodID, void *_byteBufferObject,
-                  unsigned int uid) {
+    // Get video frame data from the VideoFrame object, copy to the ByteBuffer, and call Java method via the method ID
+    void getVideoFrame(VideoFrame &videoFrame, _jmethodID *jmethodID, void *_byteBufferObject,
+                       unsigned int uid) {
         if (_byteBufferObject == nullptr) {
             return;
         }
@@ -74,6 +71,7 @@ public:
         }
     }
 
+    // Copy video frame data from ByteBuffer to the VideoFrame object
     void writebackVideoFrame(VideoFrame &videoFrame, void *byteBuffer) {
         if (byteBuffer == nullptr) {
             return;
@@ -90,112 +88,55 @@ public:
     }
 
 public:
+    // Implement the onCaptureVideoFrame callback
     virtual bool onCaptureVideoFrame(VideoFrame &videoFrame) override {
+        // Get captured video frames
         getVideoFrame(videoFrame, captureVideoMethodId, _javaDirectPlayBufferCapture, 0);
+        __android_log_print(ANDROID_LOG_DEBUG, "AgoraVideoFrameObserver", "onCaptureVideoFrame");
+        // Send the video frames back to the SDK
         writebackVideoFrame(videoFrame, _javaDirectPlayBufferCapture);
         return true;
     }
 
+    // Implement the onRenderVideoFrame callback
     virtual bool onRenderVideoFrame(unsigned int uid, VideoFrame &videoFrame) override {
+        __android_log_print(ANDROID_LOG_DEBUG, "AgoraVideoFrameObserver", "onRenderVideoFrame");
         map<int, void *>::iterator it_find;
         it_find = decodeBufferMap.find(uid);
 
         if (it_find != decodeBufferMap.end()) {
             if (it_find->second != nullptr) {
+                // Get the video frame rendered by the SDK
                 getVideoFrame(videoFrame, renderVideoMethodId, it_find->second, uid);
+                // Send the video frames back to the SDK
                 writebackVideoFrame(videoFrame, it_find->second);
             }
         }
+        return true;
+    }
 
+    // Implement the onPreEncodeVideoFrame callback
+    virtual bool onPreEncodeVideoFrame(VideoFrame &videoFrame) override {
+        // Get the pre-encoded video frame
+        getVideoFrame(videoFrame, preEncodeVideoMethodId, _javaDirectPlayBufferCapture, 0);
+        __android_log_print(ANDROID_LOG_DEBUG, "AgoraVideoFrameObserver", "onPreEncodeVideoFrame");
+        // Send the video frames back to the SDK
+        writebackVideoFrame(videoFrame, _javaDirectPlayBufferCapture);
         return true;
     }
 
 };
 
 
-class AgoraAudioFrameObserver : public agora::media::IAudioFrameObserver {
-
-public:
-    AgoraAudioFrameObserver() {
-        gCallBack = nullptr;
-    }
-
-    ~AgoraAudioFrameObserver() {
-    }
-
-    void getAudioFrame(AudioFrame &audioFrame, _jmethodID *jmethodID, void *_byteBufferObject,
-                       unsigned int uid) {
-        if (_byteBufferObject == nullptr) {
-            return;
-        }
-
-        AttachThreadScoped ats(gJVM);
-        JNIEnv *env = ats.env();
-        if (env == nullptr) {
-            return;
-        }
-        int len = audioFrame.samples * audioFrame.bytesPerSample;
-        memcpy(_byteBufferObject, audioFrame.buffer, (size_t) len); // * sizeof(int16_t)
-
-        if (uid == 0) {
-            env->CallVoidMethod(gCallBack, jmethodID, audioFrame.type, audioFrame.samples,
-                                audioFrame.bytesPerSample,
-                                audioFrame.channels, audioFrame.samplesPerSec,
-                                audioFrame.renderTimeMs, len);
-        } else {
-            env->CallVoidMethod(gCallBack, jmethodID, uid, audioFrame.type, audioFrame.samples,
-                                audioFrame.bytesPerSample,
-                                audioFrame.channels, audioFrame.samplesPerSec,
-                                audioFrame.renderTimeMs, len);
-        }
-    }
-
-    void writebackAudioFrame(AudioFrame &audioFrame, void *byteBuffer) {
-        if (byteBuffer == nullptr) {
-            return;
-        }
-
-        int len = audioFrame.samples * audioFrame.bytesPerSample;
-        memcpy(audioFrame.buffer, byteBuffer, (size_t) len);
-    }
-
-public:
-    virtual bool onRecordAudioFrame(AudioFrame &audioFrame) override {
-        getAudioFrame(audioFrame, recordAudioMethodId, _javaDirectPlayBufferRecordAudio, 0);
-        writebackAudioFrame(audioFrame, _javaDirectPlayBufferRecordAudio);
-        return true;
-    }
-
-    virtual bool onPlaybackAudioFrame(AudioFrame &audioFrame) override {
-        getAudioFrame(audioFrame, playbackAudioMethodId, _javaDirectPlayBufferPlayAudio, 0);
-        writebackAudioFrame(audioFrame, _javaDirectPlayBufferPlayAudio);
-        return true;
-    }
-
-    virtual bool
-    onPlaybackAudioFrameBeforeMixing(unsigned int uid, AudioFrame &audioFrame) override {
-        getAudioFrame(audioFrame, playBeforeMixAudioMethodId, _javaDirectPlayBufferBeforeMixAudio,
-                      uid);
-        writebackAudioFrame(audioFrame, _javaDirectPlayBufferBeforeMixAudio);
-        return true;
-    }
-
-    virtual bool onMixedAudioFrame(AudioFrame &audioFrame) override {
-        getAudioFrame(audioFrame, mixAudioMethodId, _javaDirectPlayBufferMixAudio, 0);
-        writebackAudioFrame(audioFrame, _javaDirectPlayBufferMixAudio);
-        return true;
-    }
-};
-
-
-static AgoraAudioFrameObserver s_audioFrameObserver;
-
+// AgoraVideoFrameObserver object
 static AgoraVideoFrameObserver s_videoFrameObserver;
+// rtcEngine object
 static agora::rtc::IRtcEngine *rtcEngine = nullptr;
-
+// Set up the C++ interface
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 int __attribute__((visibility("default")))
 loadAgoraRtcEnginePlugin(agora::rtc::IRtcEngine *engine) {
@@ -211,69 +152,46 @@ unloadAgoraRtcEnginePlugin(agora::rtc::IRtcEngine *engine) {
     rtcEngine = nullptr;
 }
 
+
+// For the Java interface file, use the JNI to export corresponding C++.
+// The Java_live_ablo_agora_data_MediaPreProcessing_setCallback method corresponds to the setCallback method in the Java interface file.
 JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setCallback
         (JNIEnv *env, jclass, jobject callback) {
     if (!rtcEngine) return;
 
     env->GetJavaVM(&gJVM);
-
+    // Create an AutoPtr instance that uses the IMediaEngine class as the template
     agora::util::AutoPtr<agora::media::IMediaEngine> mediaEngine;
+    // The AutoPtr instance calls the queryInterface method to get a pointer to the IMediaEngine instance from the IID.
+    // The AutoPtr instance accesses the pointer to the IMediaEngine instance via the arrow operator and calls the registerVideoFrameObserver via the IMediaEngine instance.
     mediaEngine.queryInterface(rtcEngine, agora::INTERFACE_ID_TYPE::AGORA_IID_MEDIA_ENGINE);
     if (mediaEngine) {
-        mediaEngine->registerVideoFrameObserver(&s_videoFrameObserver);
-        mediaEngine->registerAudioFrameObserver(&s_audioFrameObserver);
-        __android_log_print(ANDROID_LOG_DEBUG, "agora-raw-data-plugin", "added to media engine");
+        // Register the video frame observer
+        int code = mediaEngine->registerVideoFrameObserver(&s_videoFrameObserver);
+
     }
 
     if (gCallBack == nullptr) {
         gCallBack = env->NewGlobalRef(callback);
         gCallbackClass = env->GetObjectClass(gCallBack);
-
-        recordAudioMethodId = env->GetMethodID(gCallbackClass, "onRecordAudioFrame", "(IIIIIJI)V");
-        playbackAudioMethodId = env->GetMethodID(gCallbackClass, "onPlaybackAudioFrame",
-                                                 "(IIIIIJI)V");
-        playBeforeMixAudioMethodId = env->GetMethodID(gCallbackClass,
-                                                      "onPlaybackAudioFrameBeforeMixing",
-                                                      "(IIIIIIJI)V");
-        mixAudioMethodId = env->GetMethodID(gCallbackClass, "onMixedAudioFrame", "(IIIIIJI)V");
-
+        // Get the method ID of callback functions
         captureVideoMethodId = env->GetMethodID(gCallbackClass, "onCaptureVideoFrame",
                                                 "(IIIIIIIIJ)V");
         renderVideoMethodId = env->GetMethodID(gCallbackClass, "onRenderVideoFrame",
                                                "(IIIIIIIIIJ)V");
 
-        __android_log_print(ANDROID_LOG_DEBUG, "agora-raw-data-plugin", "setCallback done successfully");
+        __android_log_print(ANDROID_LOG_DEBUG, "setCallback", "setCallback done successfully");
     }
 }
 
+// C++ implementation of the setVideoCaptureByteBuffer method in the Java interface file
 JNIEXPORT void JNICALL
 Java_live_ablo_agora_data_MediaPreProcessing_setVideoCaptureByteBuffer
         (JNIEnv *env, jclass, jobject bytebuffer) {
     _javaDirectPlayBufferCapture = env->GetDirectBufferAddress(bytebuffer);
 }
 
-JNIEXPORT void JNICALL
-Java_live_ablo_agora_data_MediaPreProcessing_setAudioRecordByteBuffer
-        (JNIEnv *env, jclass, jobject bytebuffer) {
-    _javaDirectPlayBufferRecordAudio = env->GetDirectBufferAddress(bytebuffer);
-}
-
-JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setAudioPlayByteBuffer
-        (JNIEnv *env, jclass, jobject bytebuffer) {
-    _javaDirectPlayBufferPlayAudio = env->GetDirectBufferAddress(bytebuffer);
-}
-
-JNIEXPORT void JNICALL
-Java_live_ablo_agora_data_MediaPreProcessing_setBeforeAudioMixByteBuffer
-        (JNIEnv *env, jclass, jobject bytebuffer) {
-    _javaDirectPlayBufferBeforeMixAudio = env->GetDirectBufferAddress(bytebuffer);
-}
-
-JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setAudioMixByteBuffer
-        (JNIEnv *env, jclass, jobject bytebuffer) {
-    _javaDirectPlayBufferMixAudio = env->GetDirectBufferAddress(bytebuffer);
-}
-
+// C++ implementation of the setVideoDecodeByteBuffer method in the Java interface file
 JNIEXPORT void JNICALL
 Java_live_ablo_agora_data_MediaPreProcessing_setVideoDecodeByteBuffer
         (JNIEnv *env, jclass, jint uid, jobject byteBuffer) {
@@ -288,37 +206,6 @@ Java_live_ablo_agora_data_MediaPreProcessing_setVideoDecodeByteBuffer
     }
 }
 
-JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_releasePoint
-        (JNIEnv *env, jclass) {
-    agora::util::AutoPtr<agora::media::IMediaEngine> mediaEngine;
-    mediaEngine.queryInterface(rtcEngine, agora::INTERFACE_ID_TYPE::AGORA_IID_MEDIA_ENGINE);
-
-    if (mediaEngine) {
-        mediaEngine->registerVideoFrameObserver(NULL);
-        mediaEngine->registerAudioFrameObserver(NULL);
-    }
-
-    if (gCallBack != nullptr) {
-        env->DeleteGlobalRef(gCallBack);
-        gCallBack = nullptr;
-    }
-    gCallbackClass = nullptr;
-
-    recordAudioMethodId = nullptr;
-    playbackAudioMethodId = nullptr;
-    playBeforeMixAudioMethodId = nullptr;
-    mixAudioMethodId = nullptr;
-    captureVideoMethodId = nullptr;
-    renderVideoMethodId = nullptr;
-
-    _javaDirectPlayBufferCapture = nullptr;
-    _javaDirectPlayBufferRecordAudio = nullptr;
-    _javaDirectPlayBufferPlayAudio = nullptr;
-    _javaDirectPlayBufferBeforeMixAudio = nullptr;
-    _javaDirectPlayBufferMixAudio = nullptr;
-
-    decodeBufferMap.clear();
-}
 
 #ifdef __cplusplus
 }

@@ -100,6 +100,7 @@ public class MediaDataObserverPlugin implements MediaPreProcessing.ProgressCallb
 		releaseBuffer();
 	}
 
+	// Get the captured video frame
 	@Override
 	public void onCaptureVideoFrame(int videoFrameType, int width, int height, int bufferLength, int yStride, int uStride, int vStride, int rotation, long renderTimeMs) {
 		byte[] buf = new byte[bufferLength];
@@ -120,30 +121,48 @@ public class MediaDataObserverPlugin implements MediaPreProcessing.ProgressCallb
 			getVideoSnapshot(width, height, rotation, bufferLength, buf, captureFilePath, yStride, uStride, vStride);
 		}
 	}
+	// Get the pre-encoded video frame
+	@Override
+	public void onPreEncodeVideoFrame(int videoFrameType, int width, int height, int bufferLength, int yStride, int uStride, int vStride, int rotation, long renderTimeMs) {
+		byte[] buf = new byte[bufferLength];
+		byteBufferCapture.limit(bufferLength);
+		byteBufferCapture.get(buf);
+		byteBufferCapture.flip();
 
+		for (MediaDataVideoObserver observer : videoObserverList) {
+			observer.onPreEncodeVideoFrame(buf, videoFrameType, width, height, bufferLength, yStride, uStride, vStride, rotation, renderTimeMs);
+		}
+
+		byteBufferCapture.put(buf);
+		byteBufferCapture.flip();
+
+		if (beCaptureVideoShot) {
+			beCaptureVideoShot = false;
+
+			getVideoSnapshot(width, height, rotation, bufferLength, buf, captureFilePath, yStride, uStride, vStride);
+		}
+	}
+	// Get the video frame rendered by the SDK
 	@Override
 	public void onRenderVideoFrame(int uid, int videoFrameType, int width, int height, int bufferLength, int yStride, int uStride, int vStride, int rotation, long renderTimeMs) {
 		for (MediaDataVideoObserver observer : videoObserverList) {
-			Iterator<DecodeDataBuffer> it = decodeBufferList.iterator();
-			while (it.hasNext()) {
-				DecodeDataBuffer tmp = it.next();
-				if (tmp.getUid() == uid) {
-					byte[] buf = new byte[bufferLength];
-					tmp.getByteBuffer().limit(bufferLength);
-					tmp.getByteBuffer().get(buf);
-					tmp.getByteBuffer().flip();
+			ByteBuffer tmp = decodeBufferList.get(uid).getByteBuffer();
+			if (tmp != null) {
+				byte[] buf = new byte[bufferLength];
+				tmp.limit(bufferLength);
+				tmp.get(buf);
+				tmp.flip();
 
-					observer.onRenderVideoFrame(uid, buf, videoFrameType, width, height, bufferLength, yStride, uStride, vStride, rotation, renderTimeMs);
+				observer.onRenderVideoFrame(uid, buf, videoFrameType, width, height, bufferLength, yStride, uStride, vStride, rotation, renderTimeMs);
 
-					tmp.getByteBuffer().put(buf);
-					tmp.getByteBuffer().flip();
+				tmp.put(buf);
+				tmp.flip();
 
-					if (beRenderVideoShot) {
-						if (uid == renderVideoShotUid) {
-							beRenderVideoShot = false;
+				if (beRenderVideoShot) {
+					if (uid == renderVideoShotUid) {
+						beRenderVideoShot = false;
 
-							getVideoSnapshot(width, height, rotation, bufferLength, buf, renderFilePath, yStride, uStride, vStride);
-						}
+						getVideoSnapshot(width, height, rotation, bufferLength, buf, renderFilePath, yStride, uStride, vStride);
 					}
 				}
 			}
