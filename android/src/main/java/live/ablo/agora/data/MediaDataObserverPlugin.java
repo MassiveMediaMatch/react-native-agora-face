@@ -13,8 +13,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -22,288 +22,272 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class MediaDataObserverPlugin implements MediaPreProcessing.ProgressCallback {
 
-    private final CopyOnWriteArrayList<MediaDataVideoObserver> videoObserverList = new CopyOnWriteArrayList<>();
-    private final CopyOnWriteArrayList<MediaDataAudioObserver> audioObserverList = new CopyOnWriteArrayList<>();
+	private static final int VIDEO_DEFAULT_BUFFER_SIZE = 3240 * 1080; // default maximum video size Full HD+
+	private static final int AUDIO_DEFAULT_BUFFER_SIZE = 2048;
+	private static MediaDataObserverPlugin myAgent = null;
+	private final CopyOnWriteArrayList<MediaDataVideoObserver> videoObserverList = new CopyOnWriteArrayList<>();
+	private final CopyOnWriteArrayList<MediaDataAudioObserver> audioObserverList = new CopyOnWriteArrayList<>();
+	private final ArrayList<DecodeDataBuffer> decodeBufferList = new ArrayList<>();
+	public ByteBuffer byteBufferCapture = ByteBuffer.allocateDirect(VIDEO_DEFAULT_BUFFER_SIZE);
+	public ByteBuffer byteBufferRender = ByteBuffer.allocateDirect(VIDEO_DEFAULT_BUFFER_SIZE);
+	public ByteBuffer byteBufferAudioRecord = ByteBuffer.allocateDirect(AUDIO_DEFAULT_BUFFER_SIZE);
+	public ByteBuffer byteBufferAudioPlay = ByteBuffer.allocateDirect(AUDIO_DEFAULT_BUFFER_SIZE);
+	public ByteBuffer byteBufferBeforeAudioMix = ByteBuffer.allocateDirect(AUDIO_DEFAULT_BUFFER_SIZE);
+	public ByteBuffer byteBufferAudioMix = ByteBuffer.allocateDirect(AUDIO_DEFAULT_BUFFER_SIZE);
+	private boolean beCaptureVideoShot = false;
+	private boolean beRenderVideoShot = false;
+	private String captureFilePath = null;
+	private String renderFilePath = null;
+	private int renderVideoShotUid;
 
-    private static final int VIDEO_DEFAULT_BUFFER_SIZE = 3240 * 1080; // default maximum video size Full HD+
-    private static final int AUDIO_DEFAULT_BUFFER_SIZE = 2048;
+	public static MediaDataObserverPlugin the() {
+		if (myAgent == null) {
+			synchronized (MediaDataObserverPlugin.class) {
+				if (myAgent == null)
+					myAgent = new MediaDataObserverPlugin();
+			}
+		}
+		return myAgent;
+	}
 
-    public ByteBuffer byteBufferCapture = ByteBuffer.allocateDirect(VIDEO_DEFAULT_BUFFER_SIZE);
-    public ByteBuffer byteBufferAudioRecord = ByteBuffer.allocateDirect(AUDIO_DEFAULT_BUFFER_SIZE);
-    public ByteBuffer byteBufferAudioPlay = ByteBuffer.allocateDirect(AUDIO_DEFAULT_BUFFER_SIZE);
-    public ByteBuffer byteBufferBeforeAudioMix = ByteBuffer.allocateDirect(AUDIO_DEFAULT_BUFFER_SIZE);
-    public ByteBuffer byteBufferAudioMix = ByteBuffer.allocateDirect(AUDIO_DEFAULT_BUFFER_SIZE);
+	public void addVideoObserver(MediaDataVideoObserver observer) {
+		videoObserverList.add(observer);
+	}
 
-    private final Map<Integer, ByteBuffer> decodeBufferList = new HashMap<>();
+	public void removeVideoObserver(MediaDataVideoObserver observer) {
+		videoObserverList.remove(observer);
+	}
 
-    private static MediaDataObserverPlugin myAgent = null;
+	public void addAudioObserver(MediaDataAudioObserver observer) {
+		audioObserverList.add(observer);
+	}
 
-    private boolean beCaptureVideoShot = false;
-    private boolean beRenderVideoShot = false;
-    private String captureFilePath = null;
-    private String renderFilePath = null;
-    private int renderVideoShotUid;
+	public void removeAudioObserver(MediaDataAudioObserver observer) {
+		audioObserverList.remove(observer);
+	}
 
-    public static MediaDataObserverPlugin the() {
-        if (myAgent == null) {
-            synchronized (MediaDataObserverPlugin.class) {
-                if (myAgent == null) {
-                    myAgent = new MediaDataObserverPlugin();
-                }
-            }
-        }
-        return myAgent;
-    }
+	public void saveCaptureVideoSnapshot(String filePath) {
+		beCaptureVideoShot = true;
+		captureFilePath = filePath;
+	}
 
-    public void addVideoObserver(MediaDataVideoObserver observer) {
-        videoObserverList.add(observer);
-    }
+	public void saveRenderVideoSnapshot(String filePath, int uid) {
+		beRenderVideoShot = true;
+		renderFilePath = filePath;
+		renderVideoShotUid = uid;
+	}
 
-    public void removeVideoObserver(MediaDataVideoObserver observer) {
-        videoObserverList.remove(observer);
-    }
+	public void addDecodeBuffer(int uid) {
+		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(VIDEO_DEFAULT_BUFFER_SIZE);
+		decodeBufferList.add(new DecodeDataBuffer(uid, byteBuffer));
+		MediaPreProcessing.setVideoDecodeByteBuffer(uid, byteBuffer);
+	}
 
-    public void addAudioObserver(MediaDataAudioObserver observer) {
-        audioObserverList.add(observer);
-    }
+	public void removeDecodeBuffer(int uid) {
+		Iterator<DecodeDataBuffer> it = decodeBufferList.iterator();
+		while (it.hasNext()) {
+			DecodeDataBuffer buffer = it.next();
+			if (buffer.getUid() == uid) {
+				it.remove();
+			}
+		}
 
-    public void removeAudioObserver(MediaDataAudioObserver observer) {
-        audioObserverList.remove(observer);
-    }
+		MediaPreProcessing.setVideoDecodeByteBuffer(uid, null);
+	}
 
-    public void saveCaptureVideoSnapshot(String filePath) {
-        beCaptureVideoShot = true;
-        captureFilePath = filePath;
-    }
+	public void removeAllBuffer() {
+		decodeBufferList.removeAll(decodeBufferList);
+		releaseBuffer();
+	}
 
-    public void saveRenderVideoSnapshot(String filePath, int uid) {
-        beRenderVideoShot = true;
-        renderFilePath = filePath;
-        renderVideoShotUid = uid;
-    }
+	@Override
+	public void onCaptureVideoFrame(int videoFrameType, int width, int height, int bufferLength, int yStride, int uStride, int vStride, int rotation, long renderTimeMs) {
+		byte[] buf = new byte[bufferLength];
+		byteBufferCapture.limit(bufferLength);
+		byteBufferCapture.get(buf);
+		byteBufferCapture.flip();
 
-    public void addDecodeBuffer(int uid) {
-        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(VIDEO_DEFAULT_BUFFER_SIZE);
-        decodeBufferList.put(uid, byteBuffer);
-        MediaPreProcessing.setVideoDecodeByteBuffer(uid, byteBuffer);
-    }
+		for (MediaDataVideoObserver observer : videoObserverList) {
+			observer.onCaptureVideoFrame(buf, videoFrameType, width, height, bufferLength, yStride, uStride, vStride, rotation, renderTimeMs);
+		}
 
-    public void removeDecodeBuffer(int uid) {
-        decodeBufferList.remove(uid);
+		byteBufferCapture.put(buf);
+		byteBufferCapture.flip();
 
-        MediaPreProcessing.setVideoDecodeByteBuffer(uid, null);
-    }
+		if (beCaptureVideoShot) {
+			beCaptureVideoShot = false;
 
-    public void removeAllBuffer() {
-        decodeBufferList.clear();
-        releaseBuffer();
-    }
+			getVideoSnapshot(width, height, rotation, bufferLength, buf, captureFilePath, yStride, uStride, vStride);
+		}
+	}
 
-    @Override
-    public void onCaptureVideoFrame(int videoFrameType, int width, int height, int bufferLength, int yStride, int uStride, int vStride, int rotation, long renderTimeMs) {
-        byte[] buf = new byte[bufferLength];
-        byteBufferCapture.limit(bufferLength);
-        byteBufferCapture.get(buf);
-        byteBufferCapture.flip();
+	@Override
+	public void onRenderVideoFrame(int uid, int videoFrameType, int width, int height, int bufferLength, int yStride, int uStride, int vStride, int rotation, long renderTimeMs) {
+		for (MediaDataVideoObserver observer : videoObserverList) {
+			Iterator<DecodeDataBuffer> it = decodeBufferList.iterator();
+			while (it.hasNext()) {
+				DecodeDataBuffer tmp = it.next();
+				if (tmp.getUid() == uid) {
+					byte[] buf = new byte[bufferLength];
+					tmp.getByteBuffer().limit(bufferLength);
+					tmp.getByteBuffer().get(buf);
+					tmp.getByteBuffer().flip();
 
-        for (MediaDataVideoObserver observer : videoObserverList) {
-            observer.onCaptureVideoFrame(buf, videoFrameType, width, height, bufferLength, yStride, uStride, vStride, rotation, renderTimeMs);
-        }
+					observer.onRenderVideoFrame(uid, buf, videoFrameType, width, height, bufferLength, yStride, uStride, vStride, rotation, renderTimeMs);
 
-        byteBufferCapture.put(buf);
-        byteBufferCapture.flip();
+					tmp.getByteBuffer().put(buf);
+					tmp.getByteBuffer().flip();
 
-        if (beCaptureVideoShot) {
-            beCaptureVideoShot = false;
+					if (beRenderVideoShot) {
+						if (uid == renderVideoShotUid) {
+							beRenderVideoShot = false;
 
-            getVideoSnapshot(width, height, rotation, bufferLength, buf, captureFilePath, yStride, uStride, vStride);
-        }
-    }
+							getVideoSnapshot(width, height, rotation, bufferLength, buf, renderFilePath, yStride, uStride, vStride);
+						}
+					}
+				}
+			}
+		}
+	}
 
-    @Override
-    public void onPreEncodeVideoFrame(int videoFrameType, int width, int height, int bufferLength, int yStride, int uStride, int vStride, int rotation, long renderTimeMs) {
-        byte[] buf = new byte[bufferLength];
-        byteBufferCapture.limit(bufferLength);
-        byteBufferCapture.get(buf);
-        byteBufferCapture.flip();
+	@Override
+	public void onRecordAudioFrame(int audioFrameType, int samples, int bytesPerSample, int channels, int samplesPerSec, long renderTimeMs, int bufferLength) {
+		byte[] buf = new byte[bufferLength];
+		byteBufferAudioRecord.limit(bufferLength);
+		byteBufferAudioRecord.get(buf);
+		byteBufferAudioRecord.flip();
 
-        for (MediaDataVideoObserver observer : videoObserverList) {
-            observer.onPreEncodeVideoFrame(buf, videoFrameType, width, height, bufferLength, yStride, uStride, vStride, rotation, renderTimeMs);
-        }
+		for (MediaDataAudioObserver observer : audioObserverList) {
+			observer.onRecordAudioFrame(buf, audioFrameType, samples, bytesPerSample, channels, samplesPerSec, renderTimeMs, bufferLength);
+		}
 
-        byteBufferCapture.put(buf);
-        byteBufferCapture.flip();
+		byteBufferAudioRecord.put(buf);
+		byteBufferAudioRecord.flip();
+	}
 
-        if (beCaptureVideoShot) {
-            beCaptureVideoShot = false;
+	@Override
+	public void onPlaybackAudioFrame(int audioFrameType, int samples, int bytesPerSample, int channels, int samplesPerSec, long renderTimeMs, int bufferLength) {
+		byte[] buf = new byte[bufferLength];
+		byteBufferAudioPlay.limit(bufferLength);
+		byteBufferAudioPlay.get(buf);
+		byteBufferAudioPlay.flip();
 
-            getVideoSnapshot(width, height, rotation, bufferLength, buf, captureFilePath, yStride, uStride, vStride);
-        }
-    }
+		for (MediaDataAudioObserver observer : audioObserverList) {
+			observer.onPlaybackAudioFrame(buf, audioFrameType, samples, bytesPerSample, channels, samplesPerSec, renderTimeMs, bufferLength);
+		}
 
-    @Override
-    public void onRenderVideoFrame(int uid, int videoFrameType, int width, int height, int bufferLength, int yStride, int uStride, int vStride, int rotation, long renderTimeMs) {
-        for (MediaDataVideoObserver observer : videoObserverList) {
-            ByteBuffer tmp = decodeBufferList.get(uid);
-            if (tmp != null) {
-                byte[] buf = new byte[bufferLength];
-                tmp.limit(bufferLength);
-                tmp.get(buf);
-                tmp.flip();
+		byteBufferAudioPlay.put(buf);
+		byteBufferAudioPlay.flip();
+	}
 
-                observer.onRenderVideoFrame(uid, buf, videoFrameType, width, height, bufferLength, yStride, uStride, vStride, rotation, renderTimeMs);
+	@Override
+	public void onPlaybackAudioFrameBeforeMixing(int uid, int audioFrameType, int samples, int bytesPerSample, int channels, int samplesPerSec, long renderTimeMs, int bufferLength) {
+		byte[] buf = new byte[bufferLength];
+		byteBufferBeforeAudioMix.limit(bufferLength);
+		byteBufferBeforeAudioMix.get(buf);
+		byteBufferBeforeAudioMix.flip();
 
-                tmp.put(buf);
-                tmp.flip();
+		for (MediaDataAudioObserver observer : audioObserverList) {
+			observer.onPlaybackAudioFrameBeforeMixing(uid, buf, audioFrameType, samples, bytesPerSample, channels, samplesPerSec, renderTimeMs, bufferLength);
+		}
 
-                if (beRenderVideoShot) {
-                    if (uid == renderVideoShotUid) {
-                        beRenderVideoShot = false;
+		byteBufferBeforeAudioMix.put(buf);
+		byteBufferBeforeAudioMix.flip();
+	}
 
-                        getVideoSnapshot(width, height, rotation, bufferLength, buf, renderFilePath, yStride, uStride, vStride);
-                    }
-                }
-            }
-        }
-    }
+	@Override
+	public void onMixedAudioFrame(int audioFrameType, int samples, int bytesPerSample, int channels, int samplesPerSec, long renderTimeMs, int bufferLength) {
+		byte[] buf = new byte[bufferLength];
+		byteBufferAudioMix.limit(bufferLength);
+		byteBufferAudioMix.get(buf);
+		byteBufferAudioMix.flip();
 
-    @Override
-    public void onRecordAudioFrame(int audioFrameType, int samples, int bytesPerSample, int channels, int samplesPerSec, long renderTimeMs, int bufferLength) {
-        byte[] buf = new byte[bufferLength];
-        byteBufferAudioRecord.limit(bufferLength);
-        byteBufferAudioRecord.get(buf);
-        byteBufferAudioRecord.flip();
+		for (MediaDataAudioObserver observer : audioObserverList) {
+			observer.onMixedAudioFrame(buf, audioFrameType, samples, bytesPerSample, channels, samplesPerSec, renderTimeMs, bufferLength);
+		}
 
-        for (MediaDataAudioObserver observer : audioObserverList) {
-            observer.onRecordAudioFrame(buf, audioFrameType, samples, bytesPerSample, channels, samplesPerSec, renderTimeMs, bufferLength);
-        }
+		byteBufferAudioMix.put(buf);
+		byteBufferAudioMix.flip();
+	}
 
-        byteBufferAudioRecord.put(buf);
-        byteBufferAudioRecord.flip();
-    }
+	private void getVideoSnapshot(int width, int height, int rotation, int bufferLength, byte[] buffer, String filePath, int yStride, int uStride, int vStride) {
+		File file = new File(filePath);
 
-    @Override
-    public void onPlaybackAudioFrame(int audioFrameType, int samples, int bytesPerSample, int channels, int samplesPerSec, long renderTimeMs, int bufferLength) {
-        byte[] buf = new byte[bufferLength];
-        byteBufferAudioPlay.limit(bufferLength);
-        byteBufferAudioPlay.get(buf);
-        byteBufferAudioPlay.flip();
+		byte[] NV21 = new byte[bufferLength];
+		swapYU12toYUV420SemiPlanar(buffer, NV21, width, height, yStride, uStride, vStride);
 
-        for (MediaDataAudioObserver observer : audioObserverList) {
-            observer.onPlaybackAudioFrame(buf, audioFrameType, samples, bytesPerSample, channels, samplesPerSec, renderTimeMs, bufferLength);
-        }
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        byteBufferAudioPlay.put(buf);
-        byteBufferAudioPlay.flip();
-    }
+		int[] strides = {yStride, yStride};
+		YuvImage image = new YuvImage(NV21, ImageFormat.NV21, width, height, strides);
 
-    @Override
-    public void onPlaybackAudioFrameBeforeMixing(int uid, int audioFrameType, int samples, int bytesPerSample, int channels, int samplesPerSec, long renderTimeMs, int bufferLength) {
-        byte[] buf = new byte[bufferLength];
-        byteBufferBeforeAudioMix.limit(bufferLength);
-        byteBufferBeforeAudioMix.get(buf);
-        byteBufferBeforeAudioMix.flip();
+		image.compressToJpeg(
+				new Rect(0, 0, image.getWidth(), image.getHeight()),
+				100, baos);
 
-        for (MediaDataAudioObserver observer : audioObserverList) {
-            observer.onPlaybackAudioFrameBeforeMixing(uid, buf, audioFrameType, samples, bytesPerSample, channels, samplesPerSec, renderTimeMs, bufferLength);
-        }
+		// rotate picture when saving to file
+		Matrix matrix = new Matrix();
+		matrix.postRotate(rotation);
+		byte[] bytes = baos.toByteArray();
+		try {
+			baos.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+		Bitmap target = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
-        byteBufferBeforeAudioMix.put(buf);
-        byteBufferBeforeAudioMix.flip();
-    }
+		File fileParent = file.getParentFile();
+		if (!fileParent.exists()) {
+			fileParent.mkdirs();
+		}
+		if (file.exists()) {
+			file.delete();
+		}
 
-    @Override
-    public void onMixedAudioFrame(int audioFrameType, int samples, int bytesPerSample, int channels, int samplesPerSec, long renderTimeMs, int bufferLength) {
-        byte[] buf = new byte[bufferLength];
-        byteBufferAudioMix.limit(bufferLength);
-        byteBufferAudioMix.get(buf);
-        byteBufferAudioMix.flip();
+		try {
+			file.createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
-        for (MediaDataAudioObserver observer : audioObserverList) {
-            observer.onMixedAudioFrame(buf, audioFrameType, samples, bytesPerSample, channels, samplesPerSec, renderTimeMs, bufferLength);
-        }
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(file);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 
-        byteBufferAudioMix.put(buf);
-        byteBufferAudioMix.flip();
-    }
+		target.compress(Bitmap.CompressFormat.JPEG, 100, fos);
 
-    private void getVideoSnapshot(int width, int height, int rotation, int bufferLength, byte[] buffer, String filePath, int yStride, int uStride, int vStride) {
-        File file = new File(filePath);
+		target.recycle();
+		bitmap.recycle();
 
-        byte[] NV21 = new byte[bufferLength];
-        swapYU12toYUV420SemiPlanar(buffer, NV21, width, height, yStride, uStride, vStride);
+		try {
+			fos.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	private void swapYU12toYUV420SemiPlanar(byte[] yu12bytes, byte[] i420bytes, int width, int height, int yStride, int uStride, int vStride) {
+		System.arraycopy(yu12bytes, 0, i420bytes, 0, yStride * height);
+		int startPos = yStride * height;
+		int yv_start_pos_u = startPos;
+		int yv_start_pos_v = startPos + startPos / 4;
+		for (int i = 0; i < startPos / 4; i++) {
+			i420bytes[startPos + 2 * i + 0] = yu12bytes[yv_start_pos_v + i];
+			i420bytes[startPos + 2 * i + 1] = yu12bytes[yv_start_pos_u + i];
+		}
+	}
 
-        int[] strides = {yStride, yStride};
-        YuvImage image = new YuvImage(NV21, ImageFormat.NV21, width, height, strides);
-
-        image.compressToJpeg(
-                new Rect(0, 0, image.getWidth(), image.getHeight()),
-                100, baos);
-
-        // rotate picture when saving to file
-        Matrix matrix = new Matrix();
-        matrix.postRotate(rotation);
-        byte[] bytes = baos.toByteArray();
-        try {
-            baos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-        Bitmap target = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-
-        File fileParent = file.getParentFile();
-        if (!fileParent.exists()) {
-            fileParent.mkdirs();
-        }
-        if (file.exists()) {
-            file.delete();
-        }
-
-        try {
-            file.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(file);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        target.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-
-        target.recycle();
-        bitmap.recycle();
-
-        try {
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void swapYU12toYUV420SemiPlanar(byte[] yu12bytes, byte[] i420bytes, int width, int height, int yStride, int uStride, int vStride) {
-        System.arraycopy(yu12bytes, 0, i420bytes, 0, yStride * height);
-        int startPos = yStride * height;
-        int yv_start_pos_u = startPos;
-        int yv_start_pos_v = startPos + startPos / 4;
-        for (int i = 0; i < startPos / 4; i++) {
-            i420bytes[startPos + 2 * i + 0] = yu12bytes[yv_start_pos_v + i];
-            i420bytes[startPos + 2 * i + 1] = yu12bytes[yv_start_pos_u + i];
-        }
-    }
-
-    public void releaseBuffer() {
-        byteBufferCapture.clear();
-        byteBufferAudioRecord.clear();
-        byteBufferAudioPlay.clear();
-        byteBufferBeforeAudioMix.clear();
-        byteBufferAudioMix.clear();
-    }
+	public void releaseBuffer() {
+		byteBufferCapture.clear();
+		byteBufferRender.clear();
+		byteBufferAudioRecord.clear();
+		byteBufferAudioPlay.clear();
+		byteBufferBeforeAudioMix.clear();
+		byteBufferAudioMix.clear();
+	}
 
 }

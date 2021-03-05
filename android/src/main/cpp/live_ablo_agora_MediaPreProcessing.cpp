@@ -1,9 +1,8 @@
 #include <jni.h>
 #include <android/log.h>
 #include <cstring>
-#include "include/IAgoraMediaEngine.h"
-
 #include "include/IAgoraRtcEngine.h"
+#include "include/IAgoraMediaEngine.h"
 #include <string.h>
 #include "live_ablo_agora_MediaPreProcessing.h"
 #include "include/VMUtil.h"
@@ -19,7 +18,6 @@ jmethodID playbackAudioMethodId = nullptr;
 jmethodID playBeforeMixAudioMethodId = nullptr;
 jmethodID mixAudioMethodId = nullptr;
 jmethodID captureVideoMethodId = nullptr;
-jmethodID preEncodeVideoMethodId = nullptr;
 jmethodID renderVideoMethodId = nullptr;
 void *_javaDirectPlayBufferCapture = nullptr;
 void *_javaDirectPlayBufferRecordAudio = nullptr;
@@ -30,7 +28,6 @@ map<int, void *> decodeBufferMap;
 
 static JavaVM *gJVM = nullptr;
 
-/**Listener to get video frame*/
 class AgoraVideoFrameObserver : public agora::media::IVideoFrameObserver {
 
 public:
@@ -86,50 +83,20 @@ public:
         int height = videoFrame.height;
         size_t widthAndHeight = (size_t) videoFrame.yStride * height;
 
-        memcpy(byteBuffer, videoFrame.yBuffer, widthAndHeight);
-        memcpy((uint8_t *) byteBuffer + widthAndHeight, videoFrame.uBuffer, widthAndHeight / 4);
-        memcpy((uint8_t *) byteBuffer + widthAndHeight * 5 / 4, videoFrame.vBuffer,
+        memcpy(videoFrame.yBuffer, byteBuffer, widthAndHeight);
+        memcpy(videoFrame.uBuffer, (uint8_t *) byteBuffer + widthAndHeight, widthAndHeight / 4);
+        memcpy(videoFrame.vBuffer, (uint8_t *) byteBuffer + widthAndHeight * 5 / 4,
                widthAndHeight / 4);
     }
 
 public:
-    /**Occurs each time the SDK receives a video frame captured by the local camera.
-     * After you successfully register the video frame observer, the SDK triggers this callback each
-     *  time a video frame is received. In this callback, you can get the video data captured by the
-     *  local camera. You can then pre-process the data according to your scenarios.
-     * After pre-processing, you can send the processed video data back to the SDK by setting the
-     *  videoFrame parameter in this callback.
-     * @param videoFrame
-     * @return
-     *   Whether or not to ignore the current video frame if the pre-processing fails:
-     *     true: Do not ignore.
-     *     false: Ignore the current video frame, and do not send it back to the SDK.
-     * PS:
-     *   This callback does not support sending processed RGBA video data back to the SDK.*/
     virtual bool onCaptureVideoFrame(VideoFrame &videoFrame) override {
         getVideoFrame(videoFrame, captureVideoMethodId, _javaDirectPlayBufferCapture, 0);
-        __android_log_print(ANDROID_LOG_DEBUG, "AgoraVideoFrameObserver", "onCaptureVideoFrame");
         writebackVideoFrame(videoFrame, _javaDirectPlayBufferCapture);
         return true;
     }
 
-    /**Occurs each time the SDK receives a video frame sent by the remote user.
-     * After you successfully register the video frame observer and isMultipleChannelFrameWanted
-     *  return false, the SDK triggers this callback each time a video frame is received. In this
-     *  callback, you can get the video data sent by the remote user. You can then post-process the
-     *  data according to your scenarios.
-     * After post-processing, you can send the processed data back to the SDK by setting the videoFrame
-     *  parameter in this callback.
-     * @param uid ID of the remote user who sends the current video frame.
-     * @param videoFrame
-     * @return
-     *   Whether or not to ignore the current video frame if the post-processing fails:
-     *    true: Do not ignore.
-     *    false: Ignore the current video frame, and do not send it back to the SDK.
-     * PS:
-     *   This callback does not support sending processed RGBA video data back to the SDK.*/
     virtual bool onRenderVideoFrame(unsigned int uid, VideoFrame &videoFrame) override {
-        __android_log_print(ANDROID_LOG_DEBUG, "AgoraVideoFrameObserver", "onRenderVideoFrame");
         map<int, void *>::iterator it_find;
         it_find = decodeBufferMap.find(uid);
 
@@ -139,28 +106,13 @@ public:
                 writebackVideoFrame(videoFrame, it_find->second);
             }
         }
-        return true;
-    }
 
-
-    /**Occurs each time the SDK receives a video frame before encoding.
-     * @param videoFrame
-     * @return
-     *   Whether or not to ignore the current video frame if the pre-processing fails:
-     *     true: Do not ignore.
-     *     false: Ignore the current video frame, and do not send it back to the SDK.
-     * PS:
-     *   This callback does not support sending processed RGBA video data back to the SDK.*/
-    virtual bool onPreEncodeVideoFrame(VideoFrame &videoFrame) override {
-        getVideoFrame(videoFrame, preEncodeVideoMethodId, _javaDirectPlayBufferCapture, 0);
-        __android_log_print(ANDROID_LOG_DEBUG, "AgoraVideoFrameObserver", "onPreEncodeVideoFrame");
-        writebackVideoFrame(videoFrame, _javaDirectPlayBufferCapture);
         return true;
     }
 
 };
 
-/**Listener to get audio frame*/
+
 class AgoraAudioFrameObserver : public agora::media::IAudioFrameObserver {
 
 public:
@@ -208,35 +160,18 @@ public:
     }
 
 public:
-    /**Retrieves the recorded audio frame.
-     * @param audioFrame
-     * @return
-     *   true: Valid buffer in AudioFrame, and the recorded audio frame is sent out.
-     *   false: Invalid buffer in AudioFrame, and the recorded audio frame is discarded.*/
     virtual bool onRecordAudioFrame(AudioFrame &audioFrame) override {
         getAudioFrame(audioFrame, recordAudioMethodId, _javaDirectPlayBufferRecordAudio, 0);
         writebackAudioFrame(audioFrame, _javaDirectPlayBufferRecordAudio);
         return true;
     }
 
-    /**Retrieves the audio playback frame for getting the audio.
-     * @param audioFrame
-     * @return
-     *   true: Valid buffer in AudioFrame, and the audio playback frame is sent out.
-         false: Invalid buffer in AudioFrame, and the audio playback frame is discarded.*/
     virtual bool onPlaybackAudioFrame(AudioFrame &audioFrame) override {
         getAudioFrame(audioFrame, playbackAudioMethodId, _javaDirectPlayBufferPlayAudio, 0);
         writebackAudioFrame(audioFrame, _javaDirectPlayBufferPlayAudio);
         return true;
     }
 
-    /**Retrieves the audio frame of a specified user before mixing.
-     * The SDK triggers this callback if isMultipleChannelFrameWanted returns false.
-     * @param uid The user ID
-     * @param audioFrame
-     * @return
-     *   true: Valid buffer in AudioFrame, and the mixed recorded and playback audio frame is sent out.
-     *   false: Invalid buffer in AudioFrame, and the mixed recorded and playback audio frame is discarded.*/
     virtual bool
     onPlaybackAudioFrameBeforeMixing(unsigned int uid, AudioFrame &audioFrame) override {
         getAudioFrame(audioFrame, playBeforeMixAudioMethodId, _javaDirectPlayBufferBeforeMixAudio,
@@ -245,11 +180,6 @@ public:
         return true;
     }
 
-    /**Retrieves the mixed recorded and playback audio frame.
-     * @param audioFrame
-     * @return
-     *   true: Valid buffer in AudioFrame and the mixed recorded and playback audio frame is sent out.
-     *   false: Invalid buffer in AudioFrame and the mixed recorded and playback audio frame is discarded.*/
     virtual bool onMixedAudioFrame(AudioFrame &audioFrame) override {
         getAudioFrame(audioFrame, mixAudioMethodId, _javaDirectPlayBufferMixAudio, 0);
         writebackAudioFrame(audioFrame, _javaDirectPlayBufferMixAudio);
@@ -290,38 +220,15 @@ JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setCallback
     agora::util::AutoPtr<agora::media::IMediaEngine> mediaEngine;
     mediaEngine.queryInterface(rtcEngine, agora::INTERFACE_ID_TYPE::AGORA_IID_MEDIA_ENGINE);
     if (mediaEngine) {
-        /**Registers a video frame observer object.
-         * You need to implement the IVideoFrameObserver class in this method, and register callbacks
-         *  according to your scenarios.
-         * After you successfully register the video frame observer, the SDK triggers the registered
-         *  callbacks each time a video frame is received.
-         * @param observer Video frame observer object instance. If NULL is passed in, the registration is canceled.
-         * @return
-         *   0: Success.
-         *   < 0: Failure.
-         * PS:
-         *   When handling the video data returned in the callbacks, pay attention to the changes in
-         *    the width and height parameters, which may be adapted under the following circumstances:
-         *   When the network condition deteriorates, the video resolution decreases incrementally.
-         *   If the user adjusts the video profile, the resolution of the video returned in the callbacks also changes.*/
-        int code = mediaEngine->registerVideoFrameObserver(&s_videoFrameObserver);
-        /**Registers an audio frame observer object.
-         * This method is used to register an audio frame observer object (register a callback).
-         * This method is required to register callbacks when the engine is required to provide an
-         * onRecordAudioFrame or onPlaybackAudioFrame callback.
-         * @param observer Audio frame observer object instance. If NULL is passed in, the registration is canceled.
-         * @return
-         *   0: Success.
-         *   < 0: Failure.*/
-        int ret = mediaEngine->registerAudioFrameObserver(&s_audioFrameObserver);
+        mediaEngine->registerVideoFrameObserver(&s_videoFrameObserver);
+        mediaEngine->registerAudioFrameObserver(&s_audioFrameObserver);
+        __android_log_print(ANDROID_LOG_DEBUG, "agora-raw-data-plugin", "added to media engine");
     }
 
     if (gCallBack == nullptr) {
         gCallBack = env->NewGlobalRef(callback);
         gCallbackClass = env->GetObjectClass(gCallBack);
 
-        /**Get the MethodId of each callback function through the callback object.
-         * Pass the data back to the java layer through these methods*/
         recordAudioMethodId = env->GetMethodID(gCallbackClass, "onRecordAudioFrame", "(IIIIIJI)V");
         playbackAudioMethodId = env->GetMethodID(gCallbackClass, "onPlaybackAudioFrame",
                                                  "(IIIIIJI)V");
@@ -332,12 +239,10 @@ JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_setCallback
 
         captureVideoMethodId = env->GetMethodID(gCallbackClass, "onCaptureVideoFrame",
                                                 "(IIIIIIIIJ)V");
-        preEncodeVideoMethodId = env->GetMethodID(gCallbackClass, "onPreEncodeVideoFrame",
-                                                  "(IIIIIIIIJ)V");
         renderVideoMethodId = env->GetMethodID(gCallbackClass, "onRenderVideoFrame",
                                                "(IIIIIIIIIJ)V");
 
-        __android_log_print(ANDROID_LOG_DEBUG, "setCallback", "setCallback done successfully");
+        __android_log_print(ANDROID_LOG_DEBUG, "agora-raw-data-plugin", "setCallback done successfully");
     }
 }
 
@@ -389,7 +294,6 @@ JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_releasePoint
     mediaEngine.queryInterface(rtcEngine, agora::INTERFACE_ID_TYPE::AGORA_IID_MEDIA_ENGINE);
 
     if (mediaEngine) {
-        /**Release video and audio observers*/
         mediaEngine->registerVideoFrameObserver(NULL);
         mediaEngine->registerAudioFrameObserver(NULL);
     }
@@ -405,7 +309,6 @@ JNIEXPORT void JNICALL Java_live_ablo_agora_data_MediaPreProcessing_releasePoint
     playBeforeMixAudioMethodId = nullptr;
     mixAudioMethodId = nullptr;
     captureVideoMethodId = nullptr;
-    preEncodeVideoMethodId = nullptr;
     renderVideoMethodId = nullptr;
 
     _javaDirectPlayBufferCapture = nullptr;

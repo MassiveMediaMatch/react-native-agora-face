@@ -18,15 +18,7 @@ public class VideoFrameObserver implements MediaDataVideoObserver {
 
 	@Override
 	public void onRenderVideoFrame(int uid, byte[] data, int frameType, int width, int height, int bufferLength, int yStride, int uStride, int vStride, int rotation, long renderTimeMs) {
-		if (blur) {
-			Bitmap bmp = YUVUtils.pixelate(YUVUtils.i420ToBitmap(width, height, rotation, bufferLength, data, yStride, uStride, vStride), 10);
-			System.arraycopy(YUVUtils.bitmapToI420(width, height, bmp), 0, data, 0, bufferLength);
-		}
-	}
-
-	@Override
-	public void onPreEncodeVideoFrame(byte[] buf, int videoFrameType, int width, int height, int bufferLength, int yStride, int uStride, int vStride, int rotation, long renderTimeMs) {
-
+		//Log.i("VideoFrameObserver", String.format("onRenderVideoFrame uid %d width %d height %d bufferLength %d", uid, width, height, bufferLength));
 	}
 
 	public void toggleBlurring(boolean enable) {
