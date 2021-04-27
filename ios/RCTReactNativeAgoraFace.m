@@ -1902,6 +1902,17 @@ RCT_EXPORT_METHOD(getParameters:(NSString *)paramStr
   resolve(res);
 }
 
+RCT_EXPORT_METHOD(setChannelProfile:(NSInteger)channel
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject) {
+    NSInteger res = [self.rtcEngine setChannelProfile:(AgoraChannelProfile)channel];
+    if (res == 0) {
+      resolve(nil);
+    } else {
+      reject(@(-1).stringValue, @(res).stringValue, nil);
+    }
+}
+
 #pragma mark - toggleFaceDetection
 
 RCT_EXPORT_METHOD(toggleFaceDetection:(BOOL)enabled resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)

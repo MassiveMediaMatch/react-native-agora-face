@@ -196,6 +196,14 @@ class RtcEngine {
     }
 
     /**
+     * change channel profile
+     * @param channel
+     */
+    public static setChannelProfile(channel: number) {
+        ReactNativeAgoraFace.setChannelProfile(channel);
+    }
+
+    /**
      * leave channel
      *
      * This method leaves the joined channel, then your video view will not render ever.

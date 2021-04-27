@@ -1320,6 +1320,12 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 		}
 	}
 
+	@ReactMethod
+	public void setChannelProfile(int channel, Promise promise) {
+		int res = AgoraManager.getInstance().getEngine().setChannelProfile(channel);
+		resolvePromiseFromResolve(res, promise, "setChannelProfile Failed");
+	}
+
 	private void resolvePromiseFromResolve(String res, Promise promise) {
 		WritableMap map = Arguments.createMap();
 		map.putBoolean("success", true);

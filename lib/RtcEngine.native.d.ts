@@ -120,6 +120,11 @@ declare class RtcEngine {
      */
     static setClientRole(role: number): void;
     /**
+     * change channel profile
+     * @param channel
+     */
+    static setChannelProfile(channel: number): void;
+    /**
      * leave channel
      *
      * This method leaves the joined channel, then your video view will not render ever.
