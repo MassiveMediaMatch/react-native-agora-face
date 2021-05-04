@@ -18,6 +18,39 @@ export interface VideoEncoderConfig {
   orientationMode: number,
 }
 
+// https://docs.agora.io/en/Video/API%20Reference/react_native/enums/channelprofile.html
+export enum ChannelProfile {
+	COMMUNICATION = 0,
+	LIVE_BROACASTING = 1,
+	GAME = 2,
+}
+
+//
+export enum ClientRole {
+	BROADCASTER = 1,
+	AUDIENCE = 2,
+}
+
+export enum AudioProfile {
+	DEFAULT = 0,
+	SPEECH_STANDARD = 1,
+	MUSIC_STANDARD = 2,
+	MUSIC_STANDARD_STEREO = 3,
+	MUSIC_HIGH_QUALITY = 4,
+	MUSIC_HIGH_QUALITY_STEREO = 5,
+}
+
+export enum AudioScenario {
+	DEFAULT = 0,
+	CHATROOM_ENTERTAINMENT = 1,
+	EDUCATION = 2,
+	GAME_STREAMING = 3,
+	SHOWROOM = 4,
+	CHATROOM_GAMING = 5,
+	IOT = 6,
+	MEETING = 7,
+}
+
 /**
  * Option is work for init method
  * @property: string appid Sets the appid
@@ -29,17 +62,18 @@ export interface VideoEncoderConfig {
  * @property: audioProfile {@link https://docs.agora.io/en/Video/API%20Reference/oc/Constants/AgoraAudioProfile.html}
  * @property: audioScenario {@link https://docs.agora.io/en/Video/API%20Reference/oc/Constants/AgoraAudioScenario.html}
  */
-export interface Option {
+ export interface InitConfig {
   appid: String,
-  channelProfile: number,
-  videoEncoderConfig: VideoEncoderConfig,
+  toggleFaceDetection?: boolean,
+  toggleFaceDetectionBlurring?: boolean,
+  toggleFaceDetectionDataEvents?: boolean,
+  toggleFaceDetectionStatusEvents?: boolean,
+  channelProfile: ChannelProfile,
+  videoEncoderConfig?: VideoEncoderConfig,
   dualStream: boolean,
-  mode: number,
-  clientRole: number,
-  audioProfile: number,
-  audioScenario: number,
-  beauty?: BeautyOption,
-  voice?: VoiceDecorator,
+  clientRole: ClientRole,
+  audioProfile: AudioProfile,
+  audioScenario: AudioScenario,
 }
 
 /**

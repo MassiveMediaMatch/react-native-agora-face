@@ -119,12 +119,6 @@ public class AgoraManager {
 		//create rtcEngine instance and setup rtcEngine eventHandler
 		try {
 			this.mRtcEngine = RtcEngine.create(context, options.getString("appid"), rtcEventHandler);
-			if (options.hasKey("secret") && null != options.getString("secret")) {
-				mRtcEngine.setEncryptionSecret(options.getString("secret"));
-				if (options.hasKey("secretMode") && null != options.getString("secretMode")) {
-					mRtcEngine.setEncryptionMode(options.getString("secretMode"));
-				}
-			}
 			if (options.hasKey("toggleFaceDetection")) {
 				mRtcEngine.enableFaceDetection(options.getBoolean("toggleFaceDetection"));
 				if (!options.getBoolean("toggleFaceDetection")) {
@@ -145,46 +139,6 @@ public class AgoraManager {
 			}
 			if (options.hasKey("dualStream")) {
 				mRtcEngine.enableDualStreamMode(options.getBoolean("dualStream"));
-			}
-			if (options.hasKey("mode")) {
-				int mode = options.getInt("mode");
-				switch (mode) {
-					case 0: {
-						mRtcEngine.enableAudio();
-						mRtcEngine.disableVideo();
-						break;
-					}
-					case 1: {
-						mRtcEngine.enableVideo();
-						mRtcEngine.disableAudio();
-						break;
-					}
-				}
-			} else {
-				mRtcEngine.enableVideo();
-				mRtcEngine.enableAudio();
-			}
-
-			if (options.hasKey("beauty") && null != options.getMap("beauty")) {
-				ReadableMap beauty = options.getMap("beauty");
-				BeautyOptions beautyOption = new BeautyOptions();
-				beautyOption.lighteningContrastLevel = beauty.getInt("lighteningContrastLevel");
-				beautyOption.lighteningLevel = (float) beauty.getDouble("lighteningLevel");
-				beautyOption.smoothnessLevel = (float) beauty.getDouble("smoothnessLevel");
-				beautyOption.rednessLevel = (float) beauty.getDouble("rednessLevel");
-				mRtcEngine.setBeautyEffectOptions(true, beautyOption);
-			}
-
-			if (options.hasKey("voice") && null != options.getMap("voice")) {
-				ReadableMap voice = options.getMap("voice");
-				final String voiceType = voice.getString("type");
-				final int voiceValue = voice.getInt("value");
-				if (voiceType.equals("changer")) {
-					mRtcEngine.setLocalVoiceChanger(voiceValue);
-				}
-				if (voiceType.equals("reverbPreset")) {
-					mRtcEngine.setLocalVoiceReverbPreset(voiceValue);
-				}
 			}
 
 			if (options.hasKey("videoEncoderConfig") && null != options.getMap("videoEncoderConfig")) {

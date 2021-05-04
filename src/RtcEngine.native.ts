@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 
 import {
-    Option, Callback,
+    InitConfig, Callback,
     VideoOption,
     AudioMixingOption,
     DataStreamOption,
@@ -49,7 +49,7 @@ class RtcEngine {
      * @example `RtcEngine.init(option)`
      * @param options Defines the property of the client, see {@link Option} for details.
      */
-    public static init(options: Option): void {
+    public static init(options: InitConfig): void {
         ReactNativeAgoraFace.init(options);
     }
 

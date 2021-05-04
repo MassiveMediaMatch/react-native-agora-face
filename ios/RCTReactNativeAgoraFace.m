@@ -218,52 +218,6 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
   if ([options objectForKey:@"dualStream"]) {
     [self.rtcEngine enableDualStreamMode:[options[@"dualStream"] boolValue]];
   }
-//  dispatch_sync(dispatch_get_main_queue(), ^{
-//    [self.rtcEngine enableVideo];
-//    [self.rtcEngine enableAudio];
-//  });
-//  if ([options objectForKey:@"mode"]) {
-//    switch([options[@"mode"] integerValue]) {
-//      case AgoraAudioMode: {
-//        [self.rtcEngine enableLocalAudio:true];
-//        [self.rtcEngine enableLocalVideo:false];
-//        break;
-//      }
-//      case AgoraVideoMode: {
-//        [self.rtcEngine enableLocalVideo:true];
-//        [self.rtcEngine enableLocalAudio:false];
-//        break;
-//      }
-//    }
-//  } else {
-//    [self.rtcEngine enableLocalVideo:true];
-//    [self.rtcEngine enableLocalAudio:true];
-//  }
-  
-  if ([options objectForKey:@"beauty"]) {
-    AgoraBeautyOptions *beautyOption = [[AgoraBeautyOptions alloc] init];
-    beautyOption.lighteningContrastLevel = [options[@"beauty"][@"lighteningContrastLevel"] integerValue];
-    beautyOption.lighteningLevel = [options[@"beauty"][@"lighteningLevel"] floatValue];
-    beautyOption.smoothnessLevel = [options[@"beauty"][@"smoothnessLevel"] floatValue];
-    beautyOption.rednessLevel = [options[@"beauty"][@"rednessLevel"] floatValue];
-    [self.rtcEngine setBeautyEffectOptions:true options:beautyOption];
-  }
-  if ([options objectForKey:@"voice"]) {
-    NSInteger voiceValue = [options[@"voice"][@"value"] integerValue];
-    NSString *voiceType = options[@"voice"][@"type"];
-    if ([voiceType isEqualToString: @"changer"]) {
-      [self.rtcEngine setLocalVoiceChanger:(AgoraAudioVoiceChanger)voiceValue];
-    }
-    if ([voiceType isEqualToString: @"reverbPreset"]) {
-      [self.rtcEngine setLocalVoiceReverbPreset:(AgoraAudioReverbPreset)voiceValue];
-    }
-  }
-  if (options[@"secret"] != nil) {
-    [self.rtcEngine setEncryptionSecret:options[@"secret"]];
-    if (options[@"secretMode"] != nil) {
-      [self.rtcEngine setEncryptionMode:options[@"secretMode"]];
-    }
-  }
 	
 	if (options[@"toggleFaceDetection"] != nil) {
 	  [self.rtcEngine enableFaceDetection:[options[@"toggleFaceDetection"] boolValue]];
@@ -280,9 +234,9 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
   
   AgoraVideoEncoderConfiguration *video_encoder_config = [[AgoraVideoEncoderConfiguration new] initWithWidth:[options[@"videoEncoderConfig"][@"width"] integerValue] height:[options[@"videoEncoderConfig"][@"height"] integerValue] frameRate:[options[@"videoEncoderConfig"][@"frameRate"] integerValue] bitrate:[options[@"videoEncoderConfig"][@"bitrate"] integerValue] orientationMode: (AgoraVideoOutputOrientationMode)[options[@"videoEncoderConfig"][@"orientationMode"] integerValue]];
   [self.rtcEngine setVideoEncoderConfiguration:video_encoder_config];
+  
   [self.rtcEngine setClientRole:(AgoraClientRole)[options[@"clientRole"] integerValue]];
-  [self.rtcEngine setAudioProfile:(AgoraAudioProfile)[options[@"audioProfile"] integerValue]
-                         scenario:(AgoraAudioScenario)[options[@"audioScenario"] integerValue]];
+  [self.rtcEngine setAudioProfile:(AgoraAudioProfile)[options[@"audioProfile"] integerValue] scenario:(AgoraAudioScenario)[options[@"audioScenario"] integerValue]];
   
   //Enable Agora Native SDK be Interoperable with Agora Web SDK
   [self.rtcEngine enableWebSdkInteroperability:YES];
