@@ -74,6 +74,15 @@ declare class RtcEngine {
      */
     static joinChannel(channelName: string, uid?: number, token?: string, info?: Object): void;
     /**
+     * switch to specified channel
+     *
+     * This method joins and begin rendering the video stream. when join succeeds.
+     * Otherwise, it will invoke error by the event
+     * @param channelName
+     * @param token
+     */
+    static switchChannel(channelName: string, token?: string): void;
+    /**
      * add event listener
      *
      * This method subscribes specified eventType and run listener. You should call this method at first.

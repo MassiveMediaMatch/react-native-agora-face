@@ -197,6 +197,12 @@ public class AgoraManager {
 		return mRtcEngine.joinChannel(token, channelName, optionalInfo, uid);
 	}
 
+	public int switchChannel(ReadableMap options) {
+		String token = options.hasKey("token") ? options.getString("token") : null;
+		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
+		return mRtcEngine.switchChannel(token, channelName);
+	}
+
 	public RtcEngine getEngine() {
 		return mRtcEngine;
 	}
