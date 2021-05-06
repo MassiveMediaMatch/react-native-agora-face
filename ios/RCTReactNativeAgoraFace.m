@@ -1897,6 +1897,21 @@ RCT_EXPORT_METHOD(toggleFaceDetectionBlurring:(BOOL)enabled resolve:(RCTPromiseR
 	}
 }
 
+#pragma mark - toggleBlurring
+
+RCT_EXPORT_METHOD(toggleBlurring:(BOOL)enabled resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
+{
+	if (enabled) {
+    self.shouldBlur = YES;
+  } else {
+    self.shouldBlur = NO;
+  }
+
+	if (resolve) {
+		resolve(nil);
+	}
+}
+
 
 #pragma mark - toggleFaceDetectionDataEvents
 

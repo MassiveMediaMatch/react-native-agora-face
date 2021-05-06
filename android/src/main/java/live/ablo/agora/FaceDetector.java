@@ -104,6 +104,10 @@ public class FaceDetector {
 		}
 	}
 
+	public void setBlurring(boolean enabled) {
+		videoFrameObserver.toggleBlurring(enabled);
+	}
+
 	public boolean sendFaceDetectionDataEvents() {
 		return sendFaceDetectionDataEvent;
 	}

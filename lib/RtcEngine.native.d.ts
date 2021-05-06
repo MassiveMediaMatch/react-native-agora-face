@@ -43,6 +43,15 @@ declare class RtcEngine {
      */
     static toggleFaceDetectionBlurring(enabled: boolean): Promise<any>;
     /**
+     * Toggle blurring on streamed agora video
+     *
+     * This method allows you to always set blurring on a video - regardless if face is detected or not
+     *
+     * @param enabled
+     * @returns Promise<{success, value}>
+     */
+    static toggleBlurring(enabled: boolean): Promise<any>;
+    /**
      * Toggle face detection status events
      *
      * Enables status updates if face is detected or not (every 100ms)
