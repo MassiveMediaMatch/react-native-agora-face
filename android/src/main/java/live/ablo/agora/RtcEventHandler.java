@@ -127,7 +127,7 @@ public class RtcEventHandler extends IRtcEngineEventHandler {
 			public void run() {
 				WritableMap map = Arguments.createMap();
 				map.putString("message", "AgoraWarning");
-				map.putInt("code", code);
+				map.putInt("errorCode", code);
 				sendEvent(reactApplicationContext, AGWarning, map);
 			}
 		});
@@ -140,7 +140,7 @@ public class RtcEventHandler extends IRtcEngineEventHandler {
 			public void run() {
 				WritableMap map = Arguments.createMap();
 				map.putString("message", "AgoraError");
-				map.putInt("code", code);
+				map.putInt("errorCode", code);
 				sendEvent(reactApplicationContext, AGError, map);
 			}
 		});
@@ -152,7 +152,7 @@ public class RtcEventHandler extends IRtcEngineEventHandler {
 			@Override
 			public void run() {
 				WritableMap map = Arguments.createMap();
-				map.putInt("error", code);
+				map.putInt("errorCode", code);
 				map.putString("api", api);
 				map.putString("result", result);
 				if (code != 0) {
