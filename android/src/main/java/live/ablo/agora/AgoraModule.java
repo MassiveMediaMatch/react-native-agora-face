@@ -341,6 +341,14 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
+	public void setVideoEncoderConfiguration(ReadableMap options) {
+		int res = AgoraManager.getInstance().setVideoEncoderConfiguration(options);
+		if (res != 0) {
+			sendError(getReactApplicationContext(), res, "setVideoEncoderConfiguration Failed");
+		}
+	}
+
+	@ReactMethod
 	public void leaveChannel(Promise promise) {
 		int res = AgoraManager.getInstance().getEngine().leaveChannel();
 		if (res != 0) {
