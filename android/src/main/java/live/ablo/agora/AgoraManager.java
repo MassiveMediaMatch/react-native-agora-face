@@ -54,6 +54,26 @@ public class AgoraManager {
 			public boolean onPlaybackFrame(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec) {
 				return observer.onPlaybackFrame(samples, numOfSamples, bytesPerSample, channels, samplesPerSec);
 			}
+
+			@Override
+			public boolean onPlaybackFrameBeforeMixing(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec, int uid) {
+				return false;
+			}
+
+			@Override
+			public boolean onMixedFrame(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec) {
+				return false;
+			}
+
+			@Override
+			public boolean isMultipleChannelFrameWanted() {
+				return false;
+			}
+
+			@Override
+			public boolean onPlaybackFrameBeforeMixingEx(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec, int uid, String channelId) {
+				return false;
+			}
 		});
 		if (res < 0) {
 			throw new ReactNativeAgoraException("registerAudioFrameObserver Failed", res);
@@ -193,6 +213,10 @@ public class AgoraManager {
 		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
 		String optionalInfo = options.hasKey("optionalInfo") ? options.getString("optionalInfo") : null;
 		int uid = options.hasKey("uid") ? options.getInt("uid") : 0;
+
+		// todo - pass options param
+		// https://docs.agora.io/en/Voice/API%20Reference/java/classio_1_1agora_1_1rtc_1_1_rtc_engine.html#a501d43c29b0d2ea6096cca3d71c834fe
+
 		this.mLocalUid = uid;
 		return mRtcEngine.joinChannel(token, channelName, optionalInfo, uid);
 	}
@@ -200,6 +224,10 @@ public class AgoraManager {
 	public int switchChannel(ReadableMap options) {
 		String token = options.hasKey("token") ? options.getString("token") : null;
 		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
+
+		// todo - pass options param
+		// https://docs.agora.io/en/Voice/API%20Reference/java/classio_1_1agora_1_1rtc_1_1_rtc_engine.html#a501d43c29b0d2ea6096cca3d71c834fe
+		
 		return mRtcEngine.switchChannel(token, channelName);
 	}
 

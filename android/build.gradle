@@ -79,5 +79,5 @@ repositories {
 dependencies {
     //noinspection GradleDynamicVersion
     implementation 'com.facebook.react:react-native:+'  // From node_modules
-    implementation "io.agora.rtc:full-sdk:3.2.1"
+    implementation 'com.github.agorabuilder:native-full-sdk:3.4.2'
 }

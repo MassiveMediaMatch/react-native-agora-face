@@ -322,7 +322,8 @@ RCT_EXPORT_METHOD(joinChannel:(NSDictionary *)options
 	if (self.rtcEngine.delegate != self) {
 		self.rtcEngine.delegate = self;
 	}
-	
+	// todo - pass channelMediaOptions in options params
+  // https://docs.agora.io/en/Voice/API%20Reference/oc/Classes/AgoraRtcEngineKit.html#//api/name/joinChannelByToken:channelId:info:uid:options:
   [AgoraConst share].localUid = (NSUInteger)[options[@"uid"] integerValue];
   NSInteger res = [self.rtcEngine joinChannelByToken:options[@"token"] channelId:options[@"channelName"] info:options[@"info"] uid:[AgoraConst share].localUid joinSuccess:nil];
   if (res == 0) {
@@ -336,6 +337,9 @@ RCT_EXPORT_METHOD(joinChannel:(NSDictionary *)options
 RCT_EXPORT_METHOD(switchChannel:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject) {
+  // todo - pass options param
+  // https://docs.agora.io/en/Voice/API%20Reference/oc/Classes/AgoraRtcEngineKit.html#//api/name/joinChannelByToken:channelId:info:uid:options:
+
   NSInteger res = [self.rtcEngine switchChannelByToken:options[@"token"] channelId:options[@"channelName"] joinSuccess:nil];
   if (res == 0) {
     resolve(nil);
