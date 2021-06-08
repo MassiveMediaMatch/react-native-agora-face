@@ -1,4 +1,4 @@
-import { InitConfig, Callback, AudioMixingOption, PlayEffectOption, AudioRecordingOption, AudioFrameOption, MixedAudioFrameOption, ImageOption, VideoStreamOption, DefaultVideoStreamOption, InjectStreamOption, RemoveInjectStreamOption, PublishStreamOption, RemovePublishStreamOption, LiveTranscodingOption, PositionOption, BeautyOption, LastmileProbeConfig, CameraCapturerConfiguration } from "./types";
+import { InitConfig, Callback, AudioMixingOption, PlayEffectOption, AudioRecordingOption, AudioFrameOption, MixedAudioFrameOption, ImageOption, VideoStreamOption, DefaultVideoStreamOption, InjectStreamOption, RemoveInjectStreamOption, PublishStreamOption, RemovePublishStreamOption, LiveTranscodingOption, PositionOption, BeautyOption, LastmileProbeConfig, CameraCapturerConfiguration, ChannelMediaOptions, VideoEncoderConfigOrientationMode } from "./types";
 /**
  * RtcEngine is the javascript object for control agora native sdk through react native bridge.
  *
@@ -80,8 +80,9 @@ declare class RtcEngine {
      * @param uid
      * @param token
      * @param info
+     * @param channelMediaOptions
      */
-    static joinChannel(channelName: string, uid?: number, token?: string, info?: Object): void;
+    static joinChannel(channelName: string, uid?: number, token?: string, info?: Object, channelMediaOptions?: ChannelMediaOptions): void;
     /**
      * switch to specified channel
      *
@@ -90,7 +91,16 @@ declare class RtcEngine {
      * @param channelName
      * @param token
      */
-    static switchChannel(channelName: string, token?: string): void;
+    static switchChannel(channelName: string, token?: string, channelMediaOptions?: ChannelMediaOptions): void;
+    /**
+     * Set the video encoder configuration
+     * @param width
+     * @param height
+     * @param bitrate
+     * @param framerate
+     * @param orientationMode
+     */
+    static setVideoEncoderConfiguration(width: number, height: number, bitrate: number, framerate: number, orientationMode: VideoEncoderConfigOrientationMode): void;
     /**
      * add event listener
      *

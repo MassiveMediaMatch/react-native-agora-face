@@ -24,7 +24,9 @@ import {
     PositionOption,
     BeautyOption,
     LastmileProbeConfig,
-    CameraCapturerConfiguration
+    CameraCapturerConfiguration,
+    ChannelMediaOptions,
+    VideoEncoderConfigOrientationMode
 } from "./types";
 
 
@@ -138,9 +140,10 @@ class RtcEngine {
      * @param uid
      * @param token
      * @param info
+     * @param channelMediaOptions
      */
-    public static joinChannel(channelName: string, uid?: number, token?: string, info?: Object): void {
-        return ReactNativeAgoraFace.joinChannel({channelName, uid, token, info});
+    public static joinChannel(channelName: string, uid?: number, token?: string, info?: Object, channelMediaOptions?: ChannelMediaOptions): void {
+        return ReactNativeAgoraFace.joinChannel({channelName, uid, token, info, channelMediaOptions});
     }
 
     /**
@@ -151,8 +154,20 @@ class RtcEngine {
      * @param channelName
      * @param token
      */
-     public static switchChannel(channelName: string, token?: string): void {
-        return ReactNativeAgoraFace.switchChannel({channelName, token});
+     public static switchChannel(channelName: string, token?: string, channelMediaOptions?: ChannelMediaOptions): void {
+        return ReactNativeAgoraFace.switchChannel({channelName, token, channelMediaOptions});
+    }
+
+    /**
+     * Set the video encoder configuration
+     * @param width
+     * @param height
+     * @param bitrate
+     * @param framerate
+     * @param orientationMode
+     */
+    public static setVideoEncoderConfiguration(width: number, height: number, bitrate: number, framerate: number, orientationMode: VideoEncoderConfigOrientationMode): void {
+        return ReactNativeAgoraFace.setVideoEncoderConfiguration({ width, height, bitrate, framerate, orientationMode });
     }
 
     /**
