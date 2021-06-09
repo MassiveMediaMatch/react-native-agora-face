@@ -231,6 +231,17 @@ public class AgoraManager {
 		return mRtcEngine.switchChannel(token, channelName);
 	}
 
+	public int setVideoEncoderConfiguration(ReadableMap options) {
+		VideoEncoderConfiguration encoderConfig = new VideoEncoderConfiguration(
+			options.getInt("width"),
+			options.getInt("height"),
+			getVideoEncoderEnum(options.getInt("framerate")),
+			options.getInt("bitrate"),
+			getOrientationModeEnum(options.getInt("orientationMode"))
+		);
+		return mRtcEngine.setVideoEncoderConfiguration(encoderConfig);
+	}
+
 	public RtcEngine getEngine() {
 		return mRtcEngine;
 	}

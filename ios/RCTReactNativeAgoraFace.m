@@ -348,6 +348,20 @@ RCT_EXPORT_METHOD(switchChannel:(NSDictionary *)options
   }
 }
 
+// setVideoEncoderConfiguration
+RCT_EXPORT_METHOD(setVideoEncoderConfiguration:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject) {
+  AgoraVideoEncoderConfiguration *video_encoder_config = [[AgoraVideoEncoderConfiguration new] initWithWidth:[options[@"width"] integerValue] height:[options[@"height"] integerValue] frameRate:[options[@"framerate"] integerValue] bitrate:[options[@"bitrate"] integerValue] orientationMode: (AgoraVideoOutputOrientationMode)[options[@"orientationMode"] integerValue]];
+  NSInteger res = [self.rtcEngine setVideoEncoderConfiguration:video_encoder_config];
+
+  if (res == 0) {
+    resolve(nil);
+  } else {
+    reject(@(-1).stringValue, @(res).stringValue, nil);
+  }
+}
+
 // startChannelMediaRelay
 RCT_EXPORT_METHOD(startChannelMediaRelay:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve

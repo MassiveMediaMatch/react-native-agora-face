@@ -13,7 +13,16 @@ export interface VideoEncoderConfig {
     height: number;
     bitrate: number;
     frameRate: number;
-    orientationMode: number;
+    orientationMode: VideoEncoderConfigOrientationMode;
+}
+export declare enum VideoEncoderConfigOrientationMode {
+    ORIENTATION_MODE_ADAPTIVE = 0,
+    ORIENTATION_MODE_FIXED_LANDSCAPE = 1,
+    ORIENTATION_MODE_FIXED_PORTRAIT = 2
+}
+export interface ChannelMediaOptions {
+    autoSubscribeAudio: boolean;
+    autoSubscribeVideo: boolean;
 }
 export declare enum ChannelProfile {
     COMMUNICATION = 0,

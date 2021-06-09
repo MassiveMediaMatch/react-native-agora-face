@@ -93,7 +93,7 @@ public class AgoraVideoView extends LinearLayout {
 			if (null != remoteUid) {
 				AgoraManager.getInstance().getEngine().setRemoteRenderMode(remoteUid, renderMode, io.agora.rtc.Constants.VIDEO_MIRROR_MODE_AUTO);
 			} else {
-				AgoraManager.getInstance().getEngine().setLocalRenderMode(renderMode, io.agora.rtc.Constants.VIDEO_MIRROR_MODE_AUTO);
+				AgoraManager.getInstance().getEngine().setLocalRenderMode(renderMode, io.agora.rtc.Constants.VIDEO_MIRROR_MODE_DISABLED);
 			}
 		}
 	}

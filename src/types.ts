@@ -15,7 +15,18 @@ export interface VideoEncoderConfig {
   height: number,
   bitrate: number,
   frameRate: number,
-  orientationMode: number,
+  orientationMode: VideoEncoderConfigOrientationMode,
+}
+
+export enum VideoEncoderConfigOrientationMode {
+  ORIENTATION_MODE_ADAPTIVE = 0,
+  ORIENTATION_MODE_FIXED_LANDSCAPE = 1,
+  ORIENTATION_MODE_FIXED_PORTRAIT = 2
+}
+
+export interface ChannelMediaOptions {
+  autoSubscribeAudio: boolean,
+  autoSubscribeVideo: boolean,
 }
 
 // https://docs.agora.io/en/Video/API%20Reference/react_native/enums/channelprofile.html
