@@ -322,15 +322,18 @@ RCT_EXPORT_METHOD(joinChannel:(NSDictionary *)options
 	if (self.rtcEngine.delegate != self) {
 		self.rtcEngine.delegate = self;
 	}
-	// todo - pass channelMediaOptions in options params
-  // https://docs.agora.io/en/Voice/API%20Reference/oc/Classes/AgoraRtcEngineKit.html#//api/name/joinChannelByToken:channelId:info:uid:options:
-  [AgoraConst share].localUid = (NSUInteger)[options[@"uid"] integerValue];
-  NSInteger res = [self.rtcEngine joinChannelByToken:options[@"token"] channelId:options[@"channelName"] info:options[@"info"] uid:[AgoraConst share].localUid joinSuccess:nil];
-  if (res == 0) {
-    resolve(nil);
-  } else {
-    reject(@(-1).stringValue, @(res).stringValue, nil);
-  }
+    [AgoraConst share].localUid = (NSUInteger)[options[@"uid"] integerValue];
+    
+    AgoraRtcChannelMediaOptions *mediaOptions = [AgoraRtcChannelMediaOptions new];
+    mediaOptions.autoSubscribeAudio = [options[@"channelMediaOptions"][@"autoSubscribeAudio"] boolValue];
+    mediaOptions.autoSubscribeVideo = [options[@"channelMediaOptions"][@"autoSubscribeVideo"] boolValue];
+    
+    NSInteger res = [self.rtcEngine joinChannelByToken:options[@"token"] channelId:options[@"channelName"] info:options[@"info"] uid:[AgoraConst share].localUid options:mediaOptions];
+    if (res == 0) {
+        resolve(nil);
+    } else {
+        reject(@(-1).stringValue, @(res).stringValue, nil);
+    }
 }
 
 // switch channel
@@ -339,13 +342,17 @@ RCT_EXPORT_METHOD(switchChannel:(NSDictionary *)options
                   reject:(RCTPromiseRejectBlock)reject) {
   // todo - pass options param
   // https://docs.agora.io/en/Voice/API%20Reference/oc/Classes/AgoraRtcEngineKit.html#//api/name/joinChannelByToken:channelId:info:uid:options:
+    
+    AgoraRtcChannelMediaOptions *mediaOptions = [AgoraRtcChannelMediaOptions new];
+    mediaOptions.autoSubscribeAudio = [options[@"channelMediaOptions"][@"autoSubscribeAudio"] boolValue];
+    mediaOptions.autoSubscribeVideo = [options[@"channelMediaOptions"][@"autoSubscribeVideo"] boolValue];
 
-  NSInteger res = [self.rtcEngine switchChannelByToken:options[@"token"] channelId:options[@"channelName"] joinSuccess:nil];
-  if (res == 0) {
-    resolve(nil);
-  } else {
-    reject(@(-1).stringValue, @(res).stringValue, nil);
-  }
+    NSInteger res = [self.rtcEngine switchChannelByToken:options[@"token"] channelId:options[@"channelName"] options:mediaOptions];
+    if (res == 0) {
+        resolve(nil);
+    } else {
+        reject(@(-1).stringValue, @(res).stringValue, nil);
+    }
 }
 
 // setVideoEncoderConfiguration
