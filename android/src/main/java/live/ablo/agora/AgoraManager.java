@@ -7,6 +7,7 @@ import android.view.SurfaceView;
 import com.facebook.react.bridge.ReadableMap;
 
 import io.agora.rtc.RtcEngine;
+import io.agora.rtc.models.ChannelMediaOptions;
 import io.agora.rtc.video.BeautyOptions;
 import io.agora.rtc.video.VideoCanvas;
 import io.agora.rtc.video.VideoEncoderConfiguration;
@@ -214,21 +215,39 @@ public class AgoraManager {
 		String optionalInfo = options.hasKey("optionalInfo") ? options.getString("optionalInfo") : null;
 		int uid = options.hasKey("uid") ? options.getInt("uid") : 0;
 
-		// todo - pass options param
-		// https://docs.agora.io/en/Voice/API%20Reference/java/classio_1_1agora_1_1rtc_1_1_rtc_engine.html#a501d43c29b0d2ea6096cca3d71c834fe
+		ChannelMediaOptions mediaOptions = new ChannelMediaOptions();
+
+		if (options.hasKey("channelMediaOptions")) {
+			ReadableMap channelMediaOptions = options.getMap("channelMediaOptions");
+
+			boolean autoSubscribeAudio = channelMediaOptions.hasKey("autoSubscribeAudio") ? channelMediaOptions.getBoolean("autoSubscribeAudio") : true;
+			boolean autoSubscribeVideo = channelMediaOptions.hasKey("autoSubscribeVideo") ? channelMediaOptions.getBoolean("autoSubscribeVideo") : true;
+
+			mediaOptions.autoSubscribeAudio = autoSubscribeAudio;
+			mediaOptions.autoSubscribeVideo = autoSubscribeVideo;
+		}
 
 		this.mLocalUid = uid;
-		return mRtcEngine.joinChannel(token, channelName, optionalInfo, uid);
+		return mRtcEngine.joinChannel(token, channelName, optionalInfo, uid, mediaOptions);
 	}
 
 	public int switchChannel(ReadableMap options) {
 		String token = options.hasKey("token") ? options.getString("token") : null;
 		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
 
-		// todo - pass options param
-		// https://docs.agora.io/en/Voice/API%20Reference/java/classio_1_1agora_1_1rtc_1_1_rtc_engine.html#a501d43c29b0d2ea6096cca3d71c834fe
+		ChannelMediaOptions mediaOptions = new ChannelMediaOptions();
+
+		if (options.hasKey("channelMediaOptions")) {
+			ReadableMap channelMediaOptions = options.getMap("channelMediaOptions");
+
+			boolean autoSubscribeAudio = channelMediaOptions.hasKey("autoSubscribeAudio") ? channelMediaOptions.getBoolean("autoSubscribeAudio") : true;
+			boolean autoSubscribeVideo = channelMediaOptions.hasKey("autoSubscribeVideo") ? channelMediaOptions.getBoolean("autoSubscribeVideo") : true;
+
+			mediaOptions.autoSubscribeAudio = autoSubscribeAudio;
+			mediaOptions.autoSubscribeVideo = autoSubscribeVideo;
+		}
 		
-		return mRtcEngine.switchChannel(token, channelName);
+		return mRtcEngine.switchChannel(token, channelName, mediaOptions);
 	}
 
 	public int setVideoEncoderConfiguration(ReadableMap options) {
