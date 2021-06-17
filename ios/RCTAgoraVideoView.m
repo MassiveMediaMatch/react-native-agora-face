@@ -53,7 +53,7 @@
   if (_remoteUid > 0) {
     [_rtcEngine setRemoteRenderMode:_remoteUid mode:_renderMode];
   } else {
-    [_rtcEngine setLocalRenderMode:_renderMode mirrorMode:AgoraVideoMirrorModeDisabled];
+    [_rtcEngine setLocalRenderMode:_renderMode];
   }
 }
 
