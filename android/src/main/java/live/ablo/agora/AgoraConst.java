@@ -3,6 +3,7 @@ package live.ablo.agora;
 public class AgoraConst {
 
 	public final static String AG_PREFIX = "ag_rtc";
+	public final static String AGInit = "init";
 	public final static String AGWarning = "warning";
 	public final static String AGError = "error";
 	public final static String AGApiCallExecute = "apiCallExecute";

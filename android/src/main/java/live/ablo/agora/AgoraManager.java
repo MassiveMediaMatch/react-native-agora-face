@@ -3,6 +3,8 @@ package live.ablo.agora;
 import android.content.Context;
 import android.util.Log;
 import android.view.SurfaceView;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.Arguments;
 
 import com.facebook.react.bridge.ReadableMap;
 
@@ -14,6 +16,7 @@ import io.agora.rtc.video.VideoEncoderConfiguration;
 
 import static io.agora.rtc.video.VideoEncoderConfiguration.FRAME_RATE;
 import static io.agora.rtc.video.VideoEncoderConfiguration.ORIENTATION_MODE;
+import static live.ablo.agora.AgoraConst.AGInit;
 
 
 /**
@@ -184,6 +187,9 @@ public class AgoraManager {
 			}
 
 			FaceDetector.getInstance().init(rtcEventHandler);
+
+			WritableMap map = Arguments.createMap();
+			RtcEventHandler.sendEvent(rtcEventHandler.getReactApplicationContext(), AGInit, map);
 
 			return mRtcEngine.enableWebSdkInteroperability(true);
 		} catch (Exception e) {

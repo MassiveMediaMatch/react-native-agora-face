@@ -113,6 +113,7 @@ static NSString * _Nullable AG_PREFIX = @"ag_rtc";
 
 static NSString * _Nullable RCTAgoraErrorDomain = @"RCTAgoraErrorDomain";
 
+static NSString * _Nullable AGInit = @"init";
 static NSString * _Nullable AGWarning = @"warning";
 static NSString * _Nullable AGError = @"error";
 static NSString * _Nullable AGApiCallExecute = @"apiCallExecute";
