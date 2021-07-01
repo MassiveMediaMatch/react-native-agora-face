@@ -240,6 +240,8 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
   
   //Enable Agora Native SDK be Interoperable with Agora Web SDK
   [self.rtcEngine enableWebSdkInteroperability:YES];
+
+  [self sendEvent:AGInit params:nil];
 	
   [self initializeMediaDataPlugin];
 //  self.vision = [FIRVision vision];
