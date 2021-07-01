@@ -58,6 +58,11 @@ public class FaceDetector {
 		mediaDataObserverPlugin.addDecodeBuffer(0);
 	}
 
+	public void takeScreenshot(String filePath) {
+		Log.v(TAG, "Take screenshot and save in " + filePath);
+		mediaDataObserverPlugin.saveCaptureVideoSnapshot(filePath);
+	}
+
 	public void destroy() {
 		Log.v(TAG, "destroy face detector");
 		isTimerRunning = false;

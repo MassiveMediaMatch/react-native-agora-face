@@ -274,6 +274,47 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
+	public void takeScreenshot(final Promise promise) {
+		File outputDir = getReactApplicationContext().getCacheDir();
+		try {
+			final File outputFile = File.createTempFile("screenshot", "jpeg", outputDir);
+			FaceDetector.getInstance().takeScreenshot(outputFile.toString());
+
+			// generating the screenshot happens async
+			// perhaps we got lucky and the async task already finished
+			if (outputFile.exists() && outputFile.length() > 0) {
+				promise.resolve(outputFile.toString());
+				return;
+			}
+
+			// file not ready yet, we need to check with an interval
+			// until the file is written
+			final Handler h = new Handler();
+			h.postDelayed(new Runnable()
+			{
+				private long counter = 0;
+
+				@Override
+				public void run()
+				{
+					counter++;
+					if (outputFile.exists() && outputFile.length() > 0) {
+						promise.resolve(outputFile.toString());
+						return;
+					}
+					if (counter > 10) {
+						// waited too long, this did not work
+						promise.reject(new Error("Waited too long for a screenshot to generate"));
+					}
+					h.postDelayed(this, 500);
+				}
+			}, 500);
+		} catch (IOException e) {
+			promise.reject(e);
+		}
+	}
+
+	@ReactMethod
 	public void toggleFaceDetectionBlurring(boolean enabled, Promise promise) {
 		FaceDetector.getInstance().setBlurOnNoFaceDetected(enabled);
 		resolvePromiseFromResolve(0, promise);
