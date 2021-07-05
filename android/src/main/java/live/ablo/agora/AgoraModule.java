@@ -585,7 +585,7 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
-	public void methodisSpeakerphoneEnabled(Callback callback) {
+	public void isSpeakerphoneEnabled(Callback callback) {
 		WritableMap map = Arguments.createMap();
 		map.putBoolean("status", AgoraManager.getInstance().getEngine().isSpeakerphoneEnabled());
 		callback.invoke(map);
