@@ -278,11 +278,11 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
-	public void takeScreenshot(final Promise promise) {
+	public void takeScreenshot(int uid, final Promise promise) {
 		File outputDir = getReactApplicationContext().getCacheDir();
 		try {
-			final File outputFile = File.createTempFile("screenshot", "jpeg", outputDir);
-			FaceDetector.getInstance().takeScreenshot(outputFile.toString());
+			final File outputFile = File.createTempFile("screenshot", ".jpeg", outputDir);
+			FaceDetector.getInstance().takeScreenshot(outputFile.toString(), uid);
 
 			// generating the screenshot happens async
 			// perhaps we got lucky and the async task already finished
