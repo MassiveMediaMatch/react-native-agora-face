@@ -35,10 +35,10 @@ declare class RtcEngine {
 
     /**
     * Take a screenshot
-    *
+    * @param int uid
     * @returns Promise<{success, filePAth}>
     */
-    static takeScreenshot(): Promise<any>;
+    static takeScreenshot(uid: number): Promise<any>;
     /**
      * Toggle face detection blurring
      *
