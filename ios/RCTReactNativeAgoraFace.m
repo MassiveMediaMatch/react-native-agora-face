@@ -269,6 +269,28 @@ RCT_EXPORT_METHOD(enableEncryption:
   }
 }
 
+// take screenshot
+RCT_EXPORT_METHOD(takeScreenshot:
+                  (int)uid
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject) {
+    if (!self.agoraMediaDataPlugin) {
+        reject(@(-1).stringValue, @"Media plugin not initialised", nil);
+        return;
+    }
+    
+    [self.agoraMediaDataPlugin remoteSnapshotWithUid:uid image:^(AGImage * _Nonnull image) {
+        NSString *directory = [NSTemporaryDirectory() stringByAppendingPathComponent:@"Screenshot"];
+        NSString *filename = [NSUUID new].UUIDString;
+        filename = [filename stringByAppendingPathExtension:@"jpeg"];
+        NSString *filePath = [directory stringByAppendingPathComponent:filename];
+
+        // Save image.
+        [UIImageJPEGRepresentation(image, 1) writeToFile:filePath atomically:YES];
+        resolve(filePath);
+    }];
+}
+
 // renew token
 RCT_EXPORT_METHOD(renewToken
                   :(NSString *)token
