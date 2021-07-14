@@ -203,7 +203,7 @@ RCT_EXPORT_MODULE();
 
 // init
 RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
-//  [self startObserving];
+  [self startObserving];
   [AgoraConst share].appid = options[@"appid"];
   
   self.rtcEngine = [AgoraRtcEngineKit sharedEngineWithAppId:options[@"appid"] delegate:self];
@@ -240,6 +240,8 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
   
   //Enable Agora Native SDK be Interoperable with Agora Web SDK
   [self.rtcEngine enableWebSdkInteroperability:YES];
+
+  [self sendEvent:AGInit params:nil];
 	
   [self initializeMediaDataPlugin];
 //  self.vision = [FIRVision vision];

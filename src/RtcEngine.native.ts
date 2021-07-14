@@ -500,8 +500,8 @@ class RtcEngine {
      * This method checks the phone speaker is enabled
      * @param callback
      */
-    public static methodisSpeakerphoneEnabled(callback: Callback<any>) {
-        ReactNativeAgoraFace.methodisSpeakerphoneEnabled(callback);
+    public static isSpeakerphoneEnabled(callback: Callback<any>) {
+        ReactNativeAgoraFace.isSpeakerphoneEnabled(callback);
     }
 
     /**

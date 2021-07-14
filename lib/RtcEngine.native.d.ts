@@ -340,7 +340,7 @@ declare class RtcEngine {
      * This method checks the phone speaker is enabled
      * @param callback
      */
-    static methodisSpeakerphoneEnabled(callback: Callback<any>): void;
+    static isSpeakerphoneEnabled(callback: Callback<any>): void;
     /**
      * enable in-ear monitor
      *
