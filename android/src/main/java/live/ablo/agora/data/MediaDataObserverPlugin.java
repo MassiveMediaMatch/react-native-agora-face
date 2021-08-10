@@ -128,19 +128,19 @@ public class MediaDataObserverPlugin implements MediaPreProcessing.ProgressCallb
 			while (it.hasNext()) {
 				DecodeDataBuffer tmp = it.next();
 				if (tmp.getUid() == uid) {
-					byte[] buf = new byte[bufferLength];
-					tmp.getByteBuffer().limit(bufferLength);
-					tmp.getByteBuffer().get(buf);
-					tmp.getByteBuffer().flip();
-
-					observer.onRenderVideoFrame(uid, buf, videoFrameType, width, height, bufferLength, yStride, uStride, vStride, rotation, renderTimeMs);
-
-					tmp.getByteBuffer().put(buf);
-					tmp.getByteBuffer().flip();
-
 					if (beRenderVideoShot) {
 						if (uid == renderVideoShotUid) {
 							beRenderVideoShot = false;
+
+							byte[] buf = new byte[bufferLength];
+							tmp.getByteBuffer().limit(bufferLength);
+							tmp.getByteBuffer().get(buf);
+							tmp.getByteBuffer().flip();
+
+							observer.onRenderVideoFrame(uid, buf, videoFrameType, width, height, bufferLength, yStride, uStride, vStride, rotation, renderTimeMs);
+
+							tmp.getByteBuffer().put(buf);
+							tmp.getByteBuffer().flip();
 
 							getVideoSnapshot(width, height, rotation, bufferLength, buf, renderFilePath, yStride, uStride, vStride);
 						}
