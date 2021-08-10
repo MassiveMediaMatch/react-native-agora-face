@@ -54,8 +54,14 @@ public class FaceDetector {
 		MediaPreProcessing.setCallback(mediaDataObserverPlugin);
 		MediaPreProcessing.setVideoCaptureByteBuffer(mediaDataObserverPlugin.byteBufferCapture);
 		mediaDataObserverPlugin.addVideoObserver(videoFrameObserver);
+		eventHandler.setMediaDataPlugin(mediaDataObserverPlugin);
 		// add decode buffer for local user
 		mediaDataObserverPlugin.addDecodeBuffer(0);
+	}
+
+	public void takeScreenshot(String filePath, int uid) {
+		Log.v(TAG, "Take screenshot and save in " + filePath + " for " + uid);
+		mediaDataObserverPlugin.saveRenderVideoSnapshot(filePath, uid);
 	}
 
 	public void destroy() {

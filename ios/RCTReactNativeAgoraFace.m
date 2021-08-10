@@ -271,6 +271,35 @@ RCT_EXPORT_METHOD(enableEncryption:
   }
 }
 
+// take screenshot
+RCT_EXPORT_METHOD(takeScreenshot:
+                  (int)uid
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject) {
+    if (!self.agoraMediaDataPlugin) {
+        reject(@(-1).stringValue, @"Media plugin not initialised", nil);
+        return;
+    }
+
+    [self.agoraMediaDataPlugin remoteSnapshotWithUid:uid image:^(AGImage * _Nonnull image) {
+        NSString *directory = [NSTemporaryDirectory() stringByAppendingPathComponent:@"Screenshot"];
+        if (![[NSFileManager defaultManager] fileExistsAtPath:directory]) {
+          [[NSFileManager defaultManager] createDirectoryAtPath:directory withIntermediateDirectories:YES attributes:NULL error:NULL];
+        }
+
+        NSString *filename = [NSUUID new].UUIDString;
+        filename = [filename stringByAppendingPathExtension:@"jpeg"];
+        NSString *filePath = [directory stringByAppendingPathComponent:filename];
+
+        // Save image.
+        if ([UIImageJPEGRepresentation(image, 1) writeToFile:filePath atomically:YES ]) {
+            resolve(filePath);
+        } else {
+            reject(@(-1).stringValue, @"Writing screenshot failed", nil);
+        }
+    }];
+}
+
 // renew token
 RCT_EXPORT_METHOD(renewToken
                   :(NSString *)token
