@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 
 import {
-    Option, Callback,
+    InitConfig, Callback,
     VideoOption,
     AudioMixingOption,
     DataStreamOption,
@@ -24,7 +24,9 @@ import {
     PositionOption,
     BeautyOption,
     LastmileProbeConfig,
-    CameraCapturerConfiguration
+    CameraCapturerConfiguration,
+    ChannelMediaOptions,
+    VideoEncoderConfigOrientationMode
 } from "./types";
 
 
@@ -49,7 +51,7 @@ class RtcEngine {
      * @example `RtcEngine.init(option)`
      * @param options Defines the property of the client, see {@link Option} for details.
      */
-    public static init(options: Option): void {
+    public static init(options: InitConfig): void {
         ReactNativeAgoraFace.init(options);
     }
 
@@ -58,6 +60,10 @@ class RtcEngine {
      */
     static initVideoCall() {
         ReactNativeAgoraFace.initVideoCall();
+    }
+
+    public static enableEncryption(enabled: boolean, key:string): Promise<any> {
+        return ReactNativeAgoraFace.enableEncryption(enabled, key);
     }
 
      /**
@@ -85,6 +91,18 @@ class RtcEngine {
      */
     public static toggleFaceDetectionBlurring(enabled: boolean): Promise<any> {
         return ReactNativeAgoraFace.toggleFaceDetectionBlurring(enabled);
+    }
+
+    /**
+     * Toggle blurring on streamed agora video
+     *
+     * This method allows you to always set blurring on a video - regardless if face is detected or not
+     *
+     * @param enabled
+     * @returns Promise<{success, value}>
+     */
+     public static toggleBlurring(enabled: boolean): Promise<any> {
+        return ReactNativeAgoraFace.toggleBlurring(enabled);
     }
 
     /**
@@ -122,9 +140,34 @@ class RtcEngine {
      * @param uid
      * @param token
      * @param info
+     * @param channelMediaOptions
      */
-    public static joinChannel(channelName: string, uid?: number, token?: string, info?: Object): void {
-        return ReactNativeAgoraFace.joinChannel({channelName, uid, token, info});
+    public static joinChannel(channelName: string, uid?: number, token?: string, info?: Object, channelMediaOptions?: ChannelMediaOptions): void {
+        return ReactNativeAgoraFace.joinChannel({channelName, uid, token, info, channelMediaOptions});
+    }
+
+    /**
+     * switch to specified channel
+     *
+     * This method joins and begin rendering the video stream. when join succeeds.
+     * Otherwise, it will invoke error by the event
+     * @param channelName
+     * @param token
+     */
+     public static switchChannel(channelName: string, token?: string, channelMediaOptions?: ChannelMediaOptions): void {
+        return ReactNativeAgoraFace.switchChannel({channelName, token, channelMediaOptions});
+    }
+
+    /**
+     * Set the video encoder configuration
+     * @param width
+     * @param height
+     * @param bitrate
+     * @param framerate
+     * @param orientationMode
+     */
+    public static setVideoEncoderConfiguration(width: number, height: number, bitrate: number, framerate: number, orientationMode: VideoEncoderConfigOrientationMode): void {
+        return ReactNativeAgoraFace.setVideoEncoderConfiguration({ width, height, bitrate, framerate, orientationMode });
     }
 
     /**
@@ -189,6 +232,14 @@ class RtcEngine {
      */
     public static setClientRole(role: number) {
         ReactNativeAgoraFace.setClientRole(role);
+    }
+
+    /**
+     * change channel profile
+     * @param channel
+     */
+    public static setChannelProfile(channel: number) {
+        ReactNativeAgoraFace.setChannelProfile(channel);
     }
 
     /**
@@ -449,8 +500,8 @@ class RtcEngine {
      * This method checks the phone speaker is enabled
      * @param callback
      */
-    public static methodisSpeakerphoneEnabled(callback: Callback<any>) {
-        ReactNativeAgoraFace.methodisSpeakerphoneEnabled(callback);
+    public static isSpeakerphoneEnabled(callback: Callback<any>) {
+        ReactNativeAgoraFace.isSpeakerphoneEnabled(callback);
     }
 
     /**

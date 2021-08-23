@@ -1,4 +1,4 @@
-import { Option, Callback, AudioMixingOption, PlayEffectOption, AudioRecordingOption, AudioFrameOption, MixedAudioFrameOption, ImageOption, VideoStreamOption, DefaultVideoStreamOption, InjectStreamOption, RemoveInjectStreamOption, PublishStreamOption, RemovePublishStreamOption, LiveTranscodingOption, PositionOption, BeautyOption, LastmileProbeConfig, CameraCapturerConfiguration } from "./types";
+import { InitConfig, Callback, AudioMixingOption, PlayEffectOption, AudioRecordingOption, AudioFrameOption, MixedAudioFrameOption, ImageOption, VideoStreamOption, DefaultVideoStreamOption, InjectStreamOption, RemoveInjectStreamOption, PublishStreamOption, RemovePublishStreamOption, LiveTranscodingOption, PositionOption, BeautyOption, LastmileProbeConfig, CameraCapturerConfiguration, ChannelMediaOptions, VideoEncoderConfigOrientationMode } from "./types";
 /**
  * RtcEngine is the javascript object for control agora native sdk through react native bridge.
  *
@@ -15,11 +15,12 @@ declare class RtcEngine {
      * @example `RtcEngine.init(option)`
      * @param options Defines the property of the client, see {@link Option} for details.
      */
-    static init(options: Option): void;
+    static init(options: InitConfig): void;
     /**
      * Initialize video call
      */
     static initVideoCall(): void;
+    static enableEncryption(enabled: boolean, key: string): Promise<any>;
     /**
     * Toggle face detection
     *
@@ -31,6 +32,13 @@ declare class RtcEngine {
     * @returns Promise<{success, value}>
     */
     static toggleFaceDetection(enabled: boolean): Promise<any>;
+
+    /**
+    * Take a screenshot
+    * @param int uid
+    * @returns Promise<{success, filePAth}>
+    */
+    static takeScreenshot(uid: number): Promise<any>;
     /**
      * Toggle face detection blurring
      *
@@ -41,6 +49,15 @@ declare class RtcEngine {
      * @returns Promise<{success, value}>
      */
     static toggleFaceDetectionBlurring(enabled: boolean): Promise<any>;
+    /**
+     * Toggle blurring on streamed agora video
+     *
+     * This method allows you to always set blurring on a video - regardless if face is detected or not
+     *
+     * @param enabled
+     * @returns Promise<{success, value}>
+     */
+    static toggleBlurring(enabled: boolean): Promise<any>;
     /**
      * Toggle face detection status events
      *
@@ -70,8 +87,27 @@ declare class RtcEngine {
      * @param uid
      * @param token
      * @param info
+     * @param channelMediaOptions
      */
-    static joinChannel(channelName: string, uid?: number, token?: string, info?: Object): void;
+    static joinChannel(channelName: string, uid?: number, token?: string, info?: Object, channelMediaOptions?: ChannelMediaOptions): void;
+    /**
+     * switch to specified channel
+     *
+     * This method joins and begin rendering the video stream. when join succeeds.
+     * Otherwise, it will invoke error by the event
+     * @param channelName
+     * @param token
+     */
+    static switchChannel(channelName: string, token?: string, channelMediaOptions?: ChannelMediaOptions): void;
+    /**
+     * Set the video encoder configuration
+     * @param width
+     * @param height
+     * @param bitrate
+     * @param framerate
+     * @param orientationMode
+     */
+    static setVideoEncoderConfiguration(width: number, height: number, bitrate: number, framerate: number, orientationMode: VideoEncoderConfigOrientationMode): void;
     /**
      * add event listener
      *
@@ -118,6 +154,11 @@ declare class RtcEngine {
      * @param role (audience: 0, host: 1)
      */
     static setClientRole(role: number): void;
+    /**
+     * change channel profile
+     * @param channel
+     */
+    static setChannelProfile(channel: number): void;
     /**
      * leave channel
      *
@@ -299,7 +340,7 @@ declare class RtcEngine {
      * This method checks the phone speaker is enabled
      * @param callback
      */
-    static methodisSpeakerphoneEnabled(callback: Callback<any>): void;
+    static isSpeakerphoneEnabled(callback: Callback<any>): void;
     /**
      * enable in-ear monitor
      *

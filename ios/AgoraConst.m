@@ -28,7 +28,8 @@ static AgoraConst *_person;
 }
 
 + (NSArray<NSString*>*) supportEvents {
-    NSArray<NSString*>* array = @[AGWarning,
+    NSArray<NSString*>* array = @[AGInit,
+                                  AGWarning,
                                   AGError,
                                   AGApiCallExecute,
                                   AGJoinChannelSuccess,

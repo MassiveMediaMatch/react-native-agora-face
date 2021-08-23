@@ -1,5 +1,7 @@
 package live.ablo.agora;
 
+import android.os.Handler;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
@@ -10,6 +12,8 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -20,6 +24,7 @@ import io.agora.rtc.Constants;
 import io.agora.rtc.IAudioEffectManager;
 import io.agora.rtc.IMetadataObserver;
 import io.agora.rtc.IRtcEngineEventHandler;
+import io.agora.rtc.internal.EncryptionConfig;
 import io.agora.rtc.internal.LastmileProbeConfig;
 import io.agora.rtc.live.LiveInjectStreamConfig;
 import io.agora.rtc.live.LiveTranscoding;
@@ -154,7 +159,7 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 		constants.put(FixedPortrait, VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_FIXED_PORTRAIT.getValue());
 		constants.put(Host, IRtcEngineEventHandler.ClientRole.CLIENT_ROLE_BROADCASTER);
 		constants.put(Audience, IRtcEngineEventHandler.ClientRole.CLIENT_ROLE_AUDIENCE);
-		constants.put(ChannelProfileCommunication, Constants.CHANNEL_PROFILE_LIVE_BROADCASTING);
+		constants.put(ChannelProfileCommunication, Constants.CHANNEL_PROFILE_COMMUNICATION);
 		constants.put(ChannelProfileLiveBroadcasting, Constants.CHANNEL_PROFILE_LIVE_BROADCASTING);
 		constants.put(ChannelProfileGame, Constants.CHANNEL_PROFILE_GAME);
 		constants.put(UserOfflineReasonQuit, Constants.USER_OFFLINE_QUIT);
@@ -258,14 +263,70 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
+	public void enableEncryption(boolean enable, String key, Promise promise) {
+		EncryptionConfig config = new EncryptionConfig();
+		config.encryptionKey = key;
+		config.encryptionMode = EncryptionConfig.EncryptionMode.AES_128_XTS;
+		int res = AgoraManager.getInstance().getEngine().enableEncryption(enable, config);
+		resolvePromiseFromResolve(res, promise);
+	}
+
+	@ReactMethod
 	public void toggleFaceDetection(boolean enabled, Promise promise) {
 		FaceDetector.getInstance().enableFaceDetection(enabled);
 		resolvePromiseFromResolve(0, promise, "enable facedetection");
 	}
 
 	@ReactMethod
+	public void takeScreenshot(int uid, final Promise promise) {
+		File outputDir = getReactApplicationContext().getCacheDir();
+		try {
+			final File outputFile = File.createTempFile("screenshot", ".jpeg", outputDir);
+			FaceDetector.getInstance().takeScreenshot(outputFile.toString(), uid);
+
+			// generating the screenshot happens async
+			// perhaps we got lucky and the async task already finished
+			if (outputFile.exists() && outputFile.length() > 0) {
+				promise.resolve(outputFile.toString());
+				return;
+			}
+
+			// file not ready yet, we need to check with an interval
+			// until the file is written
+			final Handler h = new Handler();
+			h.postDelayed(new Runnable()
+			{
+				private long counter = 0;
+
+				@Override
+				public void run()
+				{
+					counter++;
+					if (outputFile.exists() && outputFile.length() > 0) {
+						promise.resolve(outputFile.toString());
+						return;
+					}
+					if (counter > 10) {
+						// waited too long, this did not work
+						promise.reject(new Error("Waited too long for a screenshot to generate"));
+					}
+					h.postDelayed(this, 500);
+				}
+			}, 500);
+		} catch (IOException e) {
+			promise.reject(e);
+		}
+	}
+
+	@ReactMethod
 	public void toggleFaceDetectionBlurring(boolean enabled, Promise promise) {
 		FaceDetector.getInstance().setBlurOnNoFaceDetected(enabled);
+		resolvePromiseFromResolve(0, promise);
+	}
+
+	@ReactMethod
+	public void toggleBlurring(boolean enabled, Promise promise) {
+		FaceDetector.getInstance().setBlurring(enabled);
 		resolvePromiseFromResolve(0, promise);
 	}
 
@@ -317,9 +378,27 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
+	public void switchChannel(ReadableMap options) {
+		int res = AgoraManager.getInstance().switchChannel(options);
+		if (res != 0) {
+			sendError(getReactApplicationContext(), res, "switchChannel Failed");
+		}
+	}
+
+	@ReactMethod
+	public void setVideoEncoderConfiguration(ReadableMap options) {
+		int res = AgoraManager.getInstance().setVideoEncoderConfiguration(options);
+		if (res != 0) {
+			sendError(getReactApplicationContext(), res, "setVideoEncoderConfiguration Failed");
+		}
+	}
+
+	@ReactMethod
 	public void leaveChannel(Promise promise) {
 		int res = AgoraManager.getInstance().getEngine().leaveChannel();
-		resolvePromiseFromResolve(res, promise);
+		if (res != 0) {
+			sendError(getReactApplicationContext(), res, "leaveChannel Failed");
+		}
 	}
 
 	@ReactMethod
@@ -551,7 +630,7 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
-	public void methodisSpeakerphoneEnabled(Callback callback) {
+	public void isSpeakerphoneEnabled(Callback callback) {
 		WritableMap map = Arguments.createMap();
 		map.putBoolean("status", AgoraManager.getInstance().getEngine().isSpeakerphoneEnabled());
 		callback.invoke(map);
@@ -1308,6 +1387,12 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 		} catch (Exception e) {
 			promise.reject(e);
 		}
+	}
+
+	@ReactMethod
+	public void setChannelProfile(int channel, Promise promise) {
+		int res = AgoraManager.getInstance().getEngine().setChannelProfile(channel);
+		resolvePromiseFromResolve(res, promise, "setChannelProfile Failed");
 	}
 
 	private void resolvePromiseFromResolve(String res, Promise promise) {

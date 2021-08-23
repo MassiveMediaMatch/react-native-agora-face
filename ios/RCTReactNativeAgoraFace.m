@@ -203,7 +203,7 @@ RCT_EXPORT_MODULE();
 
 // init
 RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
-//  [self startObserving];
+  [self startObserving];
   [AgoraConst share].appid = options[@"appid"];
   
   self.rtcEngine = [AgoraRtcEngineKit sharedEngineWithAppId:options[@"appid"] delegate:self];
@@ -217,52 +217,6 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
   //enable dual stream
   if ([options objectForKey:@"dualStream"]) {
     [self.rtcEngine enableDualStreamMode:[options[@"dualStream"] boolValue]];
-  }
-//  dispatch_sync(dispatch_get_main_queue(), ^{
-//    [self.rtcEngine enableVideo];
-//    [self.rtcEngine enableAudio];
-//  });
-//  if ([options objectForKey:@"mode"]) {
-//    switch([options[@"mode"] integerValue]) {
-//      case AgoraAudioMode: {
-//        [self.rtcEngine enableLocalAudio:true];
-//        [self.rtcEngine enableLocalVideo:false];
-//        break;
-//      }
-//      case AgoraVideoMode: {
-//        [self.rtcEngine enableLocalVideo:true];
-//        [self.rtcEngine enableLocalAudio:false];
-//        break;
-//      }
-//    }
-//  } else {
-//    [self.rtcEngine enableLocalVideo:true];
-//    [self.rtcEngine enableLocalAudio:true];
-//  }
-  
-  if ([options objectForKey:@"beauty"]) {
-    AgoraBeautyOptions *beautyOption = [[AgoraBeautyOptions alloc] init];
-    beautyOption.lighteningContrastLevel = [options[@"beauty"][@"lighteningContrastLevel"] integerValue];
-    beautyOption.lighteningLevel = [options[@"beauty"][@"lighteningLevel"] floatValue];
-    beautyOption.smoothnessLevel = [options[@"beauty"][@"smoothnessLevel"] floatValue];
-    beautyOption.rednessLevel = [options[@"beauty"][@"rednessLevel"] floatValue];
-    [self.rtcEngine setBeautyEffectOptions:true options:beautyOption];
-  }
-  if ([options objectForKey:@"voice"]) {
-    NSInteger voiceValue = [options[@"voice"][@"value"] integerValue];
-    NSString *voiceType = options[@"voice"][@"type"];
-    if ([voiceType isEqualToString: @"changer"]) {
-      [self.rtcEngine setLocalVoiceChanger:(AgoraAudioVoiceChanger)voiceValue];
-    }
-    if ([voiceType isEqualToString: @"reverbPreset"]) {
-      [self.rtcEngine setLocalVoiceReverbPreset:(AgoraAudioReverbPreset)voiceValue];
-    }
-  }
-  if (options[@"secret"] != nil) {
-    [self.rtcEngine setEncryptionSecret:options[@"secret"]];
-    if (options[@"secretMode"] != nil) {
-      [self.rtcEngine setEncryptionMode:options[@"secretMode"]];
-    }
   }
 	
 	if (options[@"toggleFaceDetection"] != nil) {
@@ -280,12 +234,14 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
   
   AgoraVideoEncoderConfiguration *video_encoder_config = [[AgoraVideoEncoderConfiguration new] initWithWidth:[options[@"videoEncoderConfig"][@"width"] integerValue] height:[options[@"videoEncoderConfig"][@"height"] integerValue] frameRate:[options[@"videoEncoderConfig"][@"frameRate"] integerValue] bitrate:[options[@"videoEncoderConfig"][@"bitrate"] integerValue] orientationMode: (AgoraVideoOutputOrientationMode)[options[@"videoEncoderConfig"][@"orientationMode"] integerValue]];
   [self.rtcEngine setVideoEncoderConfiguration:video_encoder_config];
+  
   [self.rtcEngine setClientRole:(AgoraClientRole)[options[@"clientRole"] integerValue]];
-  [self.rtcEngine setAudioProfile:(AgoraAudioProfile)[options[@"audioProfile"] integerValue]
-                         scenario:(AgoraAudioScenario)[options[@"audioScenario"] integerValue]];
+  [self.rtcEngine setAudioProfile:(AgoraAudioProfile)[options[@"audioProfile"] integerValue] scenario:(AgoraAudioScenario)[options[@"audioScenario"] integerValue]];
   
   //Enable Agora Native SDK be Interoperable with Agora Web SDK
   [self.rtcEngine enableWebSdkInteroperability:YES];
+
+  [self sendEvent:AGInit params:nil];
 	
   [self initializeMediaDataPlugin];
 //  self.vision = [FIRVision vision];
@@ -295,6 +251,53 @@ RCT_EXPORT_METHOD(initVideoCall:(RCTPromiseResolveBlock)resolve reject:(RCTPromi
 {
 	self.rtcEngine.delegate = self;
 	resolve(nil);
+}
+
+// enabl encryption
+RCT_EXPORT_METHOD(enableEncryption:
+                  (BOOL)enabled
+                  key:(NSString *)key
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject) {
+
+  AgoraEncryptionConfig *config = [[AgoraEncryptionConfig alloc] init];
+  config.encryptionKey = key;
+    
+  NSInteger res = [self.rtcEngine enableEncryption:enabled encryptionConfig:config];
+  if (res == 0) {
+    resolve(nil);
+  } else {
+    reject(@(-1).stringValue, @(res).stringValue, nil);
+  }
+}
+
+// take screenshot
+RCT_EXPORT_METHOD(takeScreenshot:
+                  (int)uid
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject) {
+    if (!self.agoraMediaDataPlugin) {
+        reject(@(-1).stringValue, @"Media plugin not initialised", nil);
+        return;
+    }
+
+    [self.agoraMediaDataPlugin remoteSnapshotWithUid:uid image:^(AGImage * _Nonnull image) {
+        NSString *directory = [NSTemporaryDirectory() stringByAppendingPathComponent:@"Screenshot"];
+        if (![[NSFileManager defaultManager] fileExistsAtPath:directory]) {
+          [[NSFileManager defaultManager] createDirectoryAtPath:directory withIntermediateDirectories:YES attributes:NULL error:NULL];
+        }
+
+        NSString *filename = [NSUUID new].UUIDString;
+        filename = [filename stringByAppendingPathExtension:@"jpeg"];
+        NSString *filePath = [directory stringByAppendingPathComponent:filename];
+
+        // Save image.
+        if ([UIImageJPEGRepresentation(image, 1) writeToFile:filePath atomically:YES ]) {
+            resolve(filePath);
+        } else {
+            reject(@(-1).stringValue, @"Writing screenshot failed", nil);
+        }
+    }];
 }
 
 // renew token
@@ -350,21 +353,46 @@ RCT_EXPORT_METHOD(joinChannel:(NSDictionary *)options
 	if (self.rtcEngine.delegate != self) {
 		self.rtcEngine.delegate = self;
 	}
-	
-  [AgoraConst share].localUid = (NSUInteger)[options[@"uid"] integerValue];
-  NSInteger res = [self.rtcEngine joinChannelByToken:options[@"token"] channelId:options[@"channelName"] info:options[@"info"] uid:[AgoraConst share].localUid joinSuccess:nil];
-  if (res == 0) {
-    resolve(nil);
-  } else {
-    reject(@(-1).stringValue, @(res).stringValue, nil);
-  }
+    [AgoraConst share].localUid = (NSUInteger)[options[@"uid"] integerValue];
+    
+    AgoraRtcChannelMediaOptions *mediaOptions = [AgoraRtcChannelMediaOptions new];
+    mediaOptions.autoSubscribeAudio = [options[@"channelMediaOptions"][@"autoSubscribeAudio"] boolValue];
+    mediaOptions.autoSubscribeVideo = [options[@"channelMediaOptions"][@"autoSubscribeVideo"] boolValue];
+    
+    NSInteger res = [self.rtcEngine joinChannelByToken:options[@"token"] channelId:options[@"channelName"] info:options[@"info"] uid:[AgoraConst share].localUid options:mediaOptions];
+    if (res == 0) {
+        resolve(nil);
+    } else {
+        reject(@(-1).stringValue, @(res).stringValue, nil);
+    }
 }
 
 // switch channel
 RCT_EXPORT_METHOD(switchChannel:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject) {
-  NSInteger res = [self.rtcEngine switchChannelByToken:options[@"token"] channelId:options[@"channelName"] joinSuccess:nil];
+  // todo - pass options param
+  // https://docs.agora.io/en/Voice/API%20Reference/oc/Classes/AgoraRtcEngineKit.html#//api/name/joinChannelByToken:channelId:info:uid:options:
+    
+    AgoraRtcChannelMediaOptions *mediaOptions = [AgoraRtcChannelMediaOptions new];
+    mediaOptions.autoSubscribeAudio = [options[@"channelMediaOptions"][@"autoSubscribeAudio"] boolValue];
+    mediaOptions.autoSubscribeVideo = [options[@"channelMediaOptions"][@"autoSubscribeVideo"] boolValue];
+
+    NSInteger res = [self.rtcEngine switchChannelByToken:options[@"token"] channelId:options[@"channelName"] options:mediaOptions];
+    if (res == 0) {
+        resolve(nil);
+    } else {
+        reject(@(-1).stringValue, @(res).stringValue, nil);
+    }
+}
+
+// setVideoEncoderConfiguration
+RCT_EXPORT_METHOD(setVideoEncoderConfiguration:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject) {
+  AgoraVideoEncoderConfiguration *video_encoder_config = [[AgoraVideoEncoderConfiguration new] initWithWidth:[options[@"width"] integerValue] height:[options[@"height"] integerValue] frameRate:[options[@"framerate"] integerValue] bitrate:[options[@"bitrate"] integerValue] orientationMode: (AgoraVideoOutputOrientationMode)[options[@"orientationMode"] integerValue]];
+  NSInteger res = [self.rtcEngine setVideoEncoderConfiguration:video_encoder_config];
+
   if (res == 0) {
     resolve(nil);
   } else {
@@ -1884,6 +1912,17 @@ RCT_EXPORT_METHOD(getParameters:(NSString *)paramStr
   resolve(res);
 }
 
+RCT_EXPORT_METHOD(setChannelProfile:(NSInteger)channel
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject) {
+    NSInteger res = [self.rtcEngine setChannelProfile:(AgoraChannelProfile)channel];
+    if (res == 0) {
+      resolve(nil);
+    } else {
+      reject(@(-1).stringValue, @(res).stringValue, nil);
+    }
+}
+
 #pragma mark - toggleFaceDetection
 
 RCT_EXPORT_METHOD(toggleFaceDetection:(BOOL)enabled resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
@@ -1908,6 +1947,21 @@ RCT_EXPORT_METHOD(toggleFaceDetectionBlurring:(BOOL)enabled resolve:(RCTPromiseR
 			[self stopFaceDetectionTimer];
 		}
 	}
+
+	if (resolve) {
+		resolve(nil);
+	}
+}
+
+#pragma mark - toggleBlurring
+
+RCT_EXPORT_METHOD(toggleBlurring:(BOOL)enabled resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
+{
+	if (enabled) {
+    self.shouldBlur = YES;
+  } else {
+    self.shouldBlur = NO;
+  }
 
 	if (resolve) {
 		resolve(nil);

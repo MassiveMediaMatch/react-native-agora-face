@@ -3,16 +3,20 @@ package live.ablo.agora;
 import android.content.Context;
 import android.util.Log;
 import android.view.SurfaceView;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.Arguments;
 
 import com.facebook.react.bridge.ReadableMap;
 
 import io.agora.rtc.RtcEngine;
+import io.agora.rtc.models.ChannelMediaOptions;
 import io.agora.rtc.video.BeautyOptions;
 import io.agora.rtc.video.VideoCanvas;
 import io.agora.rtc.video.VideoEncoderConfiguration;
 
 import static io.agora.rtc.video.VideoEncoderConfiguration.FRAME_RATE;
 import static io.agora.rtc.video.VideoEncoderConfiguration.ORIENTATION_MODE;
+import static live.ablo.agora.AgoraConst.AGInit;
 
 
 /**
@@ -53,6 +57,26 @@ public class AgoraManager {
 			@Override
 			public boolean onPlaybackFrame(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec) {
 				return observer.onPlaybackFrame(samples, numOfSamples, bytesPerSample, channels, samplesPerSec);
+			}
+
+			@Override
+			public boolean onPlaybackFrameBeforeMixing(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec, int uid) {
+				return false;
+			}
+
+			@Override
+			public boolean onMixedFrame(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec) {
+				return false;
+			}
+
+			@Override
+			public boolean isMultipleChannelFrameWanted() {
+				return false;
+			}
+
+			@Override
+			public boolean onPlaybackFrameBeforeMixingEx(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec, int uid, String channelId) {
+				return false;
 			}
 		});
 		if (res < 0) {
@@ -120,12 +144,6 @@ public class AgoraManager {
 		Log.v("Agora", "init :" + options.toString());
 		try {
 			this.mRtcEngine = RtcEngine.create(context, options.getString("appid"), rtcEventHandler);
-			if (options.hasKey("secret") && null != options.getString("secret")) {
-				mRtcEngine.setEncryptionSecret(options.getString("secret"));
-				if (options.hasKey("secretMode") && null != options.getString("secretMode")) {
-					mRtcEngine.setEncryptionMode(options.getString("secretMode"));
-				}
-			}
 			if (options.hasKey("toggleFaceDetection")) {
 				FaceDetector.getInstance().enableFaceDetection(options.getBoolean("toggleFaceDetection"));
 				if (!options.getBoolean("toggleFaceDetection")) {
@@ -146,46 +164,6 @@ public class AgoraManager {
 			}
 			if (options.hasKey("dualStream")) {
 				mRtcEngine.enableDualStreamMode(options.getBoolean("dualStream"));
-			}
-			if (options.hasKey("mode")) {
-				int mode = options.getInt("mode");
-				switch (mode) {
-					case 0: {
-						mRtcEngine.enableAudio();
-						mRtcEngine.disableVideo();
-						break;
-					}
-					case 1: {
-						mRtcEngine.enableVideo();
-						mRtcEngine.disableAudio();
-						break;
-					}
-				}
-			} else {
-				mRtcEngine.enableVideo();
-				mRtcEngine.enableAudio();
-			}
-
-			if (options.hasKey("beauty") && null != options.getMap("beauty")) {
-				ReadableMap beauty = options.getMap("beauty");
-				BeautyOptions beautyOption = new BeautyOptions();
-				beautyOption.lighteningContrastLevel = beauty.getInt("lighteningContrastLevel");
-				beautyOption.lighteningLevel = (float) beauty.getDouble("lighteningLevel");
-				beautyOption.smoothnessLevel = (float) beauty.getDouble("smoothnessLevel");
-				beautyOption.rednessLevel = (float) beauty.getDouble("rednessLevel");
-				mRtcEngine.setBeautyEffectOptions(true, beautyOption);
-			}
-
-			if (options.hasKey("voice") && null != options.getMap("voice")) {
-				ReadableMap voice = options.getMap("voice");
-				final String voiceType = voice.getString("type");
-				final int voiceValue = voice.getInt("value");
-				if (voiceType.equals("changer")) {
-					mRtcEngine.setLocalVoiceChanger(voiceValue);
-				}
-				if (voiceType.equals("reverbPreset")) {
-					mRtcEngine.setLocalVoiceReverbPreset(voiceValue);
-				}
 			}
 
 			if (options.hasKey("videoEncoderConfig") && null != options.getMap("videoEncoderConfig")) {
@@ -210,6 +188,9 @@ public class AgoraManager {
 			}
 
 			FaceDetector.getInstance().init(rtcEventHandler);
+
+			WritableMap map = Arguments.createMap();
+			RtcEventHandler.sendEvent(rtcEventHandler.getReactApplicationContext(), AGInit, map);
 
 			return mRtcEngine.enableWebSdkInteroperability(true);
 		} catch (Exception e) {
@@ -240,8 +221,51 @@ public class AgoraManager {
 		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
 		String optionalInfo = options.hasKey("optionalInfo") ? options.getString("optionalInfo") : null;
 		int uid = options.hasKey("uid") ? options.getInt("uid") : 0;
+
+		ChannelMediaOptions mediaOptions = new ChannelMediaOptions();
+
+		if (options.hasKey("channelMediaOptions")) {
+			ReadableMap channelMediaOptions = options.getMap("channelMediaOptions");
+
+			boolean autoSubscribeAudio = channelMediaOptions.hasKey("autoSubscribeAudio") ? channelMediaOptions.getBoolean("autoSubscribeAudio") : true;
+			boolean autoSubscribeVideo = channelMediaOptions.hasKey("autoSubscribeVideo") ? channelMediaOptions.getBoolean("autoSubscribeVideo") : true;
+
+			mediaOptions.autoSubscribeAudio = autoSubscribeAudio;
+			mediaOptions.autoSubscribeVideo = autoSubscribeVideo;
+		}
+
 		this.mLocalUid = uid;
-		return mRtcEngine.joinChannel(token, channelName, optionalInfo, uid);
+		return mRtcEngine.joinChannel(token, channelName, optionalInfo, uid, mediaOptions);
+	}
+
+	public int switchChannel(ReadableMap options) {
+		String token = options.hasKey("token") ? options.getString("token") : null;
+		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
+
+		ChannelMediaOptions mediaOptions = new ChannelMediaOptions();
+
+		if (options.hasKey("channelMediaOptions")) {
+			ReadableMap channelMediaOptions = options.getMap("channelMediaOptions");
+
+			boolean autoSubscribeAudio = channelMediaOptions.hasKey("autoSubscribeAudio") ? channelMediaOptions.getBoolean("autoSubscribeAudio") : true;
+			boolean autoSubscribeVideo = channelMediaOptions.hasKey("autoSubscribeVideo") ? channelMediaOptions.getBoolean("autoSubscribeVideo") : true;
+
+			mediaOptions.autoSubscribeAudio = autoSubscribeAudio;
+			mediaOptions.autoSubscribeVideo = autoSubscribeVideo;
+		}
+		
+		return mRtcEngine.switchChannel(token, channelName, mediaOptions);
+	}
+
+	public int setVideoEncoderConfiguration(ReadableMap options) {
+		VideoEncoderConfiguration encoderConfig = new VideoEncoderConfiguration(
+			options.getInt("width"),
+			options.getInt("height"),
+			getVideoEncoderEnum(options.getInt("framerate")),
+			options.getInt("bitrate"),
+			getOrientationModeEnum(options.getInt("orientationMode"))
+		);
+		return mRtcEngine.setVideoEncoderConfiguration(encoderConfig);
 	}
 
 	public RtcEngine getEngine() {
