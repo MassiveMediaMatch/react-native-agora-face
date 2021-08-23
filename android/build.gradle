@@ -248,5 +248,6 @@ dependencies {
     //noinspection GradleDynamicVersion
     implementation 'com.facebook.react:react-native:+'  // From node_modules
     implementation 'com.github.agorabuilder:native-full-sdk:3.4.3'
-    implementation 'com.google.android.gms:play-services-mlkit-face-detection:16.1.0'
+    // implementation 'com.google.android.gms:play-services-mlkit-face-detection:16.1.0'
+    implementation 'com.google.mlkit:face-detection:16.1.2' // this is the github one
 }
