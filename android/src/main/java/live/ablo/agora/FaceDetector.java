@@ -35,7 +35,7 @@ public class FaceDetector implements MediaDataVideoObserver, OnSuccessListener<L
 	private boolean sendFaceDetectionDataEvent;
 	private boolean sendFaceDetectionStatusEvent;
 	private boolean isTimerRunning;
-	private long lastTimeFaceSeen, lastTimeFaceSent;
+	private long lastTimeFaceSeen, lastTimeFaceSent, lastTimeDoneDetection;
 	private Boolean lastFaceStatus = null;
 	private RtcEventHandler eventHandler;
 	private Timer timer;
@@ -51,7 +51,7 @@ public class FaceDetector implements MediaDataVideoObserver, OnSuccessListener<L
 				.setContourMode(FaceDetectorOptions.CONTOUR_MODE_NONE)
 				.setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
 				.setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
-				.enableTracking()
+				// .enableTracking()
 				.build());
 	}
 
@@ -150,7 +150,7 @@ public class FaceDetector implements MediaDataVideoObserver, OnSuccessListener<L
 		return new TimerTask() {
 			@Override
 			public void run() {
-				boolean noFaceDetected = lastTimeFaceSeen < System.currentTimeMillis() - 500;
+				boolean noFaceDetected = lastTimeFaceSeen < System.currentTimeMillis() - 1000;
 
 				if (blurOnNoFaceDetected) {
 					toggleBlurring(noFaceDetected);
@@ -171,9 +171,14 @@ public class FaceDetector implements MediaDataVideoObserver, OnSuccessListener<L
 	public void onCaptureVideoFrame(byte[] data, int frameType, int width, int height, int bufferLength, int yStride, int uStride, int vStride, int rotation, long renderTimeMs) {
 		Bitmap frame = YUVUtils.i420ToBitmap(width, height, rotation, bufferLength, data, yStride, uStride, vStride);
 		if (!processingFace && enabledFaceDetection) {
-			processingFace = true;
-			InputImage image = InputImage.fromBitmap(Bitmap.createScaledBitmap(frame, frame.getWidth() / 2, frame.getHeight() / 2, true), 0);
-			mlDetector.process(image).addOnSuccessListener(this).addOnFailureListener(this);
+			// Only detect 1nce per second
+			if (lastTimeDoneDetection < System.currentTimeMillis() - 500) {
+				lastTimeDoneDetection = System.currentTimeMillis();
+				processingFace = true;
+				// InputImage image = InputImage.fromBitmap(frame, rotation);
+				InputImage image = InputImage.fromBitmap(Bitmap.createScaledBitmap(frame, frame.getWidth() / 2, frame.getHeight() / 2, true), rotation);
+				mlDetector.process(image).addOnSuccessListener(this).addOnFailureListener(this);	
+			}
 		}
 		if (blur) {
 			Bitmap bmp = YUVUtils.pixelate(frame, 10);
