@@ -118,23 +118,6 @@ public class YUVUtils {
 		return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 	}
 
-	public static Bitmap blur(Context context, Bitmap image, float radius) {
-		RenderScript rs = RenderScript.create(context);
-		Bitmap outputBitmap = Bitmap.createBitmap(image.getWidth(), image.getHeight(), Bitmap.Config.ARGB_8888);
-		Allocation in = Allocation.createFromBitmap(rs, image);
-		Allocation out = Allocation.createFromBitmap(rs, outputBitmap);
-		ScriptIntrinsicBlur intrinsicBlur = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
-		intrinsicBlur.setRadius(radius);
-		intrinsicBlur.setInput(in);
-		intrinsicBlur.forEach(out);
-
-		out.copyTo(outputBitmap);
-		image.recycle();
-		rs.destroy();
-
-		return outputBitmap;
-	}
-
 	public static Bitmap pixelate(Bitmap image, int radius) {
 		// scale down first, then scale up again! :D
 		return Bitmap.createScaledBitmap(Bitmap.createScaledBitmap(image, radius, radius, false), image.getWidth(), image.getHeight(), false);
