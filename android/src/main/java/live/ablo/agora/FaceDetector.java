@@ -13,8 +13,6 @@ import com.google.mlkit.vision.face.Face;
 import com.google.mlkit.vision.face.FaceDetection;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -164,18 +162,18 @@ public class FaceDetector implements MediaDataVideoObserver, OnSuccessListener<L
 
 	@Override
 	public void onCaptureVideoFrame(byte[] data, int frameType, int width, int height, int bufferLength, int yStride, int uStride, int vStride, int rotation, long renderTimeMs) {
+		Bitmap frame = YUVUtils.i420ToBitmap(width, height, rotation, bufferLength, data, yStride, uStride, vStride);
 		if (!processingFace && enabledFaceDetection) {
-			// Only detect in intervals
-			if (lastTimeDoneDetection < System.currentTimeMillis() - 500 && data.length > 0) {
+			// Only detect 1nce per second
+			if (lastTimeDoneDetection < System.currentTimeMillis() - 500) {
 				lastTimeDoneDetection = System.currentTimeMillis();
 				processingFace = true;
-				InputImage image = InputImage.fromByteArray(data, width, height, rotation, InputImage.IMAGE_FORMAT_NV21);
-				// InputImage image = InputImage.fromBitmap(Bitmap.createScaledBitmap(frame, frame.getWidth() / 2, frame.getHeight() / 2, true), rotation);
-				mlDetector.process(image).addOnSuccessListener(this).addOnFailureListener(this);
+				// InputImage image = InputImage.fromBitmap(frame, rotation);
+				InputImage image = InputImage.fromBitmap(Bitmap.createScaledBitmap(frame, frame.getWidth() / 2, frame.getHeight() / 2, true), rotation);
+				mlDetector.process(image).addOnSuccessListener(this).addOnFailureListener(this);	
 			}
 		}
 		if (blur) {
-			Bitmap frame = YUVUtils.i420ToBitmap(width, height, rotation, bufferLength, data, yStride, uStride, vStride);
 			Bitmap bmp = YUVUtils.pixelate(frame, 10);
 			System.arraycopy(YUVUtils.bitmapToI420(width, height, bmp), 0, data, 0, bufferLength);
 		}
