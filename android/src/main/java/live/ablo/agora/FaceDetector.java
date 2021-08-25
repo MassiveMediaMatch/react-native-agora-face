@@ -75,6 +75,7 @@ public class FaceDetector implements MediaDataVideoObserver, OnSuccessListener<L
 		mediaDataObserverPlugin = MediaDataObserverPlugin.the();
 		MediaPreProcessing.setCallback(mediaDataObserverPlugin);
 		MediaPreProcessing.setVideoCaptureByteBuffer(mediaDataObserverPlugin.byteBufferCapture);
+		mediaDataObserverPlugin.addVideoObserver(this);
 		// add decode buffer for local user
 		mediaDataObserverPlugin.addDecodeBuffer(0);
 	}
