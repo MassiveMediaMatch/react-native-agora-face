@@ -198,6 +198,9 @@ public class RtcEventHandler extends IRtcEngineEventHandler {
 
 	@Override
 	public void onLeaveChannel(final RtcStats stats) {
+		if (this.plugin != null) {
+			this.plugin.removeAllBuffer();
+		}
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -256,9 +259,6 @@ public class RtcEventHandler extends IRtcEngineEventHandler {
 
 	@Override
 	public void onUserOffline(final int uid, final int reason) {
-		if (this.plugin != null) {
-			this.plugin.removeDecodeBuffer(uid);
-		}
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
