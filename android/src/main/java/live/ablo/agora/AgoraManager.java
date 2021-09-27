@@ -9,6 +9,7 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableMap;
 
 import io.agora.rtc.RtcEngine;
+import io.agora.rtc.RtcEngineConfig;
 import io.agora.rtc.models.ChannelMediaOptions;
 import io.agora.rtc.video.BeautyOptions;
 import io.agora.rtc.video.VideoCanvas;
@@ -143,7 +144,11 @@ public class AgoraManager {
 		//create rtcEngine instance and setup rtcEngine eventHandler
 		Log.v("Agora", "init :" + options.toString());
 		try {
-			this.mRtcEngine = RtcEngine.create(context, options.getString("appid"), rtcEventHandler);
+			RtcEngineConfig rtcEngineConfig = new RtcEngineConfig();
+			rtcEngineConfig.mAppId = options.getString("appid");
+			rtcEngineConfig.mContext = context;
+			rtcEngineConfig.mEventHandler = rtcEventHandler;
+			this.mRtcEngine = RtcEngine.create(rtcEngineConfig);
 			if (options.hasKey("toggleFaceDetection")) {
 				FaceDetector.getInstance().enableFaceDetection(options.getBoolean("toggleFaceDetection"));
 				if (!options.getBoolean("toggleFaceDetection")) {
