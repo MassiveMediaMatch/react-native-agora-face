@@ -320,6 +320,18 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
+	public void removeScreenshots(ReadableArray screenshotFilePaths, final Promise promise) {
+		for (int i = 0; i < screenshotFilePaths.size(); i++) {
+			File screenshotFilePath = new File(screenshotFilePaths.getString(i));
+			if (screenshotFilePath.exists()) {
+				screenshotFilePath.delete();
+			}
+		}
+
+		promise.resolve(true);
+	}
+
+	@ReactMethod
 	public void toggleFaceDetectionBlurring(boolean enabled, Promise promise) {
 		FaceDetector.getInstance().setBlurOnNoFaceDetected(enabled);
 		resolvePromiseFromResolve(0, promise);

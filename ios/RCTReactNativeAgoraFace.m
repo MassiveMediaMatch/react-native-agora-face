@@ -300,6 +300,18 @@ RCT_EXPORT_METHOD(takeScreenshot:
     }];
 }
 
+RCT_EXPORT_METHOD(removeScreenshots:
+                  (NSArray<NSString *> *)screenShotFilePaths
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject) {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError *error;
+    for (NSString *filePath in screenShotFilePaths) {
+            [fileManager removeItemAtPath:filePath error:&error];
+    }
+    resolve(nil);
+}
+
 // renew token
 RCT_EXPORT_METHOD(renewToken
                   :(NSString *)token
