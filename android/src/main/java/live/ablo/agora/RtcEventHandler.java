@@ -14,6 +14,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import io.agora.rtc.IRtcEngineEventHandler;
+import live.ablo.agora.data.MediaDataObserverPlugin;
 
 import static com.facebook.react.bridge.UiThreadUtil.runOnUiThread;
 import static live.ablo.agora.AgoraConst.AGActiveSpeaker;
@@ -74,11 +75,15 @@ import static live.ablo.agora.AgoraConst.AG_PREFIX;
 import static live.ablo.agora.AgoraConst.AGonFacePositionChanged;
 
 public class RtcEventHandler extends IRtcEngineEventHandler {
-
+	private MediaDataObserverPlugin plugin;
 	private final ReactApplicationContext reactApplicationContext;
 
 	RtcEventHandler(ReactApplicationContext reactApplicationContext) {
 		this.reactApplicationContext = reactApplicationContext;
+	}
+
+	public void setMediaDataPlugin(MediaDataObserverPlugin plugin) {
+		this.plugin = plugin;
 	}
 
 	public static void sendEvent(ReactContext reactContext,
@@ -193,6 +198,9 @@ public class RtcEventHandler extends IRtcEngineEventHandler {
 
 	@Override
 	public void onLeaveChannel(final RtcStats stats) {
+		if (this.plugin != null) {
+			this.plugin.removeAllBuffer();
+		}
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -235,6 +243,9 @@ public class RtcEventHandler extends IRtcEngineEventHandler {
 
 	@Override
 	public void onUserJoined(final int uid, final int elapsed) {
+		if (this.plugin != null) {
+			this.plugin.addDecodeBuffer(uid);
+		}
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {

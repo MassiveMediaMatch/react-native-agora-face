@@ -1,5 +1,7 @@
 package live.ablo.agora;
 
+import android.os.Handler;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
@@ -10,6 +12,8 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -271,6 +275,60 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	public void toggleFaceDetection(boolean enabled, Promise promise) {
 		FaceDetector.getInstance().enableFaceDetection(enabled);
 		resolvePromiseFromResolve(0, promise, "enable facedetection");
+	}
+
+	@ReactMethod
+	public void takeScreenshot(int uid, final Promise promise) {
+		File outputDir = getReactApplicationContext().getCacheDir();
+		try {
+			final File outputFile = File.createTempFile("screenshot", ".jpeg", outputDir);
+			FaceDetector.getInstance().takeScreenshot(outputFile.toString(), uid);
+
+			// generating the screenshot happens async
+			// perhaps we got lucky and the async task already finished
+			if (outputFile.exists() && outputFile.length() > 0) {
+				promise.resolve(outputFile.toString());
+				return;
+			}
+
+			// file not ready yet, we need to check with an interval
+			// until the file is written
+			final Handler h = new Handler();
+			h.postDelayed(new Runnable()
+			{
+				private long counter = 0;
+
+				@Override
+				public void run()
+				{
+					counter++;
+					if (outputFile.exists() && outputFile.length() > 0) {
+						promise.resolve(outputFile.toString());
+						return;
+					}
+					if (counter > 10) {
+						// waited too long, this did not work
+						promise.reject(new Error("Waited too long for a screenshot to generate"));
+						return;
+					}
+					h.postDelayed(this, 500);
+				}
+			}, 500);
+		} catch (IOException e) {
+			promise.reject(e);
+		}
+	}
+
+	@ReactMethod
+	public void removeScreenshots(ReadableArray screenshotFilePaths, final Promise promise) {
+		for (int i = 0; i < screenshotFilePaths.size(); i++) {
+			File screenshotFilePath = new File(screenshotFilePaths.getString(i));
+			if (screenshotFilePath.exists()) {
+				screenshotFilePath.delete();
+			}
+		}
+
+		promise.resolve(true);
 	}
 
 	@ReactMethod
