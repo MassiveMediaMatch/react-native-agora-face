@@ -262,6 +262,7 @@ RCT_EXPORT_METHOD(enableEncryption:
 
   AgoraEncryptionConfig *config = [[AgoraEncryptionConfig alloc] init];
   config.encryptionKey = key;
+  config.encryptionMode = AgoraEncryptionModeAES128XTS;
     
   NSInteger res = [self.rtcEngine enableEncryption:enabled encryptionConfig:config];
   if (res == 0) {
