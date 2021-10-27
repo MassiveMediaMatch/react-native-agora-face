@@ -8,8 +8,10 @@ import com.facebook.react.bridge.Arguments;
 
 import com.facebook.react.bridge.ReadableMap;
 
+import io.agora.rtc.AudioFrame;
 import io.agora.rtc.RtcEngine;
 import io.agora.rtc.RtcEngineConfig;
+import io.agora.rtc.audio.AudioParams;
 import io.agora.rtc.models.ChannelMediaOptions;
 import io.agora.rtc.video.BeautyOptions;
 import io.agora.rtc.video.VideoCanvas;
@@ -50,7 +52,7 @@ public class AgoraManager {
 
 	public void registerAudioFrameObserver(final IAudioFrameObserver observer) throws ReactNativeAgoraException {
 		int res = mRtcEngine.registerAudioFrameObserver(new io.agora.rtc.IAudioFrameObserver() {
-			@Override
+			/*@Override
 			public boolean onRecordFrame(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec) {
 				return observer.onRecordFrame(samples, numOfSamples, bytesPerSample, channels, samplesPerSec);
 			}
@@ -71,13 +73,60 @@ public class AgoraManager {
 			}
 
 			@Override
+			public boolean onPlaybackFrameBeforeMixingEx(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec, int uid, String channelId) {
+				return false;
+			}
+			*/
+
+			@Override
+			public boolean onRecordFrame(AudioFrame audioFrame) {
+				// return false;
+				return observer.onRecordFrame(audioFrame.samples.array(), audioFrame.numOfSamples, audioFrame.bytesPerSample, audioFrame.channels, audioFrame.samplesPerSec);
+			}
+
+			@Override
+			public boolean onPlaybackFrame(AudioFrame audioFrame) {
+				return observer.onPlaybackFrame(audioFrame.samples.array(), audioFrame.numOfSamples, audioFrame.bytesPerSample, audioFrame.channels, audioFrame.samplesPerSec);
+			}
+
+			@Override
+			public boolean onPlaybackFrameBeforeMixing(AudioFrame audioFrame, int uid) {
+				return false;
+			}
+
+			@Override
+			public boolean onMixedFrame(AudioFrame audioFrame) {
+				return false;
+			}
+
+			@Override
 			public boolean isMultipleChannelFrameWanted() {
 				return false;
 			}
 
 			@Override
-			public boolean onPlaybackFrameBeforeMixingEx(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec, int uid, String channelId) {
+			public boolean onPlaybackFrameBeforeMixingEx(AudioFrame audioFrame, int uid, String channelId) {
 				return false;
+			}
+
+			@Override
+			public int getObservedAudioFramePosition() {
+				return 0;
+			}
+
+			@Override
+			public AudioParams getRecordAudioParams() {
+				return null;
+			}
+
+			@Override
+			public AudioParams getPlaybackAudioParams() {
+				return null;
+			}
+
+			@Override
+			public AudioParams getMixedAudioParams() {
+				return null;
 			}
 		});
 		if (res < 0) {
