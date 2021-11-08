@@ -8,6 +8,10 @@
 
 `$ react-native link react-native-react-native-agora-face`
 
+### Make changes to JS
+
+`npm run build`
+
 ## Usage
 ```javascript
 import ReactNativeAgoraFace from 'react-native-react-native-agora-face';

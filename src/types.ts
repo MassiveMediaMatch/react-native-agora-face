@@ -185,8 +185,8 @@ export type Number = Nullable<number> | 0;
 
 export interface AgoraViewProps extends ViewProps {
   mode: number,
-  showLocalVideo: boolean,
-  remoteUid: number,
+  showLocalVideo?: boolean,
+  remoteUid?: number,
   zOrderMediaOverlay: boolean,
   [key:string]: any;
 }
