@@ -1,7 +1,9 @@
 package live.ablo.agora;
 
-public interface IAudioFrameObserver {
-	boolean onRecordFrame(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec);
+import java.nio.ByteBuffer;
 
-	boolean onPlaybackFrame(byte[] samples, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec);
+public interface IAudioFrameObserver {
+	boolean onRecordFrame(ByteBuffer byteBuffer, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec);
+
+	boolean onPlaybackFrame(ByteBuffer byteBuffer, int numOfSamples, int bytesPerSample, int channels, int samplesPerSec);
 }
