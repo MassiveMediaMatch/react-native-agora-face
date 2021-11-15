@@ -80,13 +80,12 @@ public class AgoraManager {
 
 			@Override
 			public boolean onRecordFrame(AudioFrame audioFrame) {
-				// return false;
-				return observer.onRecordFrame(audioFrame.samples.array(), audioFrame.numOfSamples, audioFrame.bytesPerSample, audioFrame.channels, audioFrame.samplesPerSec);
+				return observer.onRecordFrame(audioFrame.samples, audioFrame.numOfSamples, audioFrame.bytesPerSample, audioFrame.channels, audioFrame.samplesPerSec);
 			}
 
 			@Override
 			public boolean onPlaybackFrame(AudioFrame audioFrame) {
-				return observer.onPlaybackFrame(audioFrame.samples.array(), audioFrame.numOfSamples, audioFrame.bytesPerSample, audioFrame.channels, audioFrame.samplesPerSec);
+				return observer.onPlaybackFrame(audioFrame.samples, audioFrame.numOfSamples, audioFrame.bytesPerSample, audioFrame.channels, audioFrame.samplesPerSec);
 			}
 
 			@Override
@@ -111,7 +110,7 @@ public class AgoraManager {
 
 			@Override
 			public int getObservedAudioFramePosition() {
-				return 0;
+				return io.agora.rtc.IAudioFrameObserver.POSITION_RECORD;
 			}
 
 			@Override
