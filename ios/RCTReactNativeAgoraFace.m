@@ -335,14 +335,6 @@ RCT_EXPORT_METHOD(setClientRole:(NSInteger)role
 	}
 }
 
-// getOrCreateChannel
-RCT_EXPORT_METHOD(getOrCreateChannel:(NSString *)channelName
-				  resolve:(RCTPromiseResolveBlock)resolve
-				  reject:(RCTPromiseRejectBlock)reject)
-{
-	[self getOrCreateChannel:channelName];
-	resolve(nil);
-}
 
 // join channel
 RCT_EXPORT_METHOD(joinChannel:(NSDictionary *)options
