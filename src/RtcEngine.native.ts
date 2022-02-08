@@ -26,7 +26,8 @@ import {
     LastmileProbeConfig,
     CameraCapturerConfiguration,
     ChannelMediaOptions,
-    VideoEncoderConfigOrientationMode
+    VideoEncoderConfigOrientationMode,
+    JoinChannelOptions
 } from "./types";
 
 
@@ -142,8 +143,8 @@ class RtcEngine {
      * @param info
      * @param channelMediaOptions
      */
-    public static joinChannel(channelName: string, uid?: number, token?: string, info?: Object, channelMediaOptions?: ChannelMediaOptions): void {
-        return ReactNativeAgoraFace.joinChannel({channelName, uid, token, info, channelMediaOptions});
+    public static joinChannel(options: JoinChannelOptions): void {
+        return ReactNativeAgoraFace.joinChannel(options);
     }
 
     /**

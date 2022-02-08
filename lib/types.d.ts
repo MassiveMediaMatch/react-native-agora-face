@@ -203,6 +203,14 @@ export interface ImageOption {
     x: number;
     y: number;
 }
+export interface JoinChannelOptions {
+    channelName: string;
+    clientRole?: number;
+    uid?: number;
+    token?: string;
+    info?: Object;
+    channelMediaOptions?: ChannelMediaOptions;
+}
 export interface VideoStreamOption {
     uid: number;
     streamType: number;
