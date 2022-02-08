@@ -14,6 +14,7 @@
 @property (strong, nonatomic) AgoraRtcEngineKit *rtcEngine;
 @property (nonatomic) BOOL showLocalVideo;
 @property (nonatomic) NSUInteger remoteUid;
+@property (nonatomic, strong) NSString *channelId;
 @property (nonatomic) NSInteger renderMode;
 
 @end

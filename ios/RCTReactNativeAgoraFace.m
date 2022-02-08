@@ -25,6 +25,7 @@
 @property (strong, nonatomic) NSData *metadata;
 @property (nonatomic, assign) NSUInteger remoteUserId;
 @property (nonatomic, strong) CIContext *blurImageContext;
+@property (nonatomic, strong) NSMutableDictionary *channels;
 
 @property (nonatomic, assign) BOOL hasFaces;
 @property (nonatomic, assign) BOOL shouldBlur;
@@ -316,6 +317,26 @@ RCT_EXPORT_METHOD(setClientRole:(NSInteger)role
   }
 }
 
+// getOrCreateChannel
+RCT_EXPORT_METHOD(getOrCreateChannel:(NSString *)channelName
+				  resolve:(RCTPromiseResolveBlock)resolve
+				  reject:(RCTPromiseRejectBlock)reject)
+{
+	if (!self.channels) {
+		self.channels = [NSMutableDictionary new];
+	}
+	
+	AgoraRtcChannel *channel;
+	if ([self.channels objectForKey:channelName]) {
+		channel = [self.channels objectForKey:channelName];
+	} else {
+		channel = [self.rtcEngine createRtcChannel:@"channelName"];
+		[self.channels setObject:channel forKey:channelName];
+	}
+	
+	resolve(nil);
+}
+
 // join channel
 RCT_EXPORT_METHOD(joinChannel:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
@@ -331,13 +352,80 @@ RCT_EXPORT_METHOD(joinChannel:(NSDictionary *)options
     mediaOptions.autoSubscribeAudio = [options[@"channelMediaOptions"][@"autoSubscribeAudio"] boolValue];
     mediaOptions.autoSubscribeVideo = [options[@"channelMediaOptions"][@"autoSubscribeVideo"] boolValue];
     
-    NSInteger res = [self.rtcEngine joinChannelByToken:options[@"token"] channelId:options[@"channelName"] info:options[@"info"] uid:[AgoraConst share].localUid options:mediaOptions];
+	AgoraRtcChannel *channel = [self getOrCreateChannel:options[@"channelName"] resolve:nil reject:nil];
+	NSInteger res = [channel joinChannelByToken:options[@"token"] info:options[@"info"] uid:[AgoraConst share].localUid options:mediaOptions];
+	[channel setClientRole:[options[@"clientRole"] integerValue]];
+	
+    // NSInteger res = [self.rtcEngine joinChannelByToken:options[@"token"] channelId:options[@"channelName"] info:options[@"info"] uid:[AgoraConst share].localUid options:mediaOptions];
     if (res == 0) {
         resolve(nil);
     } else {
         reject(@(-1).stringValue, @(res).stringValue, nil);
     }
 }
+
+// leave channel
+RCT_EXPORT_METHOD(leaveChannel:(NSDictionary *)options
+				  resolve:(RCTPromiseResolveBlock) resolve
+				  reject:(RCTPromiseRejectBlock) reject)
+{
+	AgoraRtcChannel *channel = [self.channels objectForKey:options[@"channelName"]];
+	NSInteger res;
+	if (channel) {
+		res = [channel leaveChannel];
+		[self sendEvent:AGLeaveChannel params:@{
+												@"message": @"leaveChannel",
+												@"duration": @(stats.duration),
+												@"txBytes": @(stats.txBytes),
+												@"rxBytes": @(stats.rxBytes),
+												@"txAudioBytes": @(stats.txAudioBytes),
+												@"txVideoBytes": @(stats.txVideoBytes),
+												@"rxAudioBytes": @(stats.rxAudioBytes),
+												@"rxVideoBytes": @(stats.rxVideoBytes),
+												@"txPacketLossRate": @(stats.txPacketLossRate),
+												@"rxPacketLossRate": @(stats.rxPacketLossRate),
+												@"txAudioKBitrate": @(stats.txAudioKBitrate),
+												@"rxAudioKBitrate": @(stats.rxAudioKBitrate),
+												@"txVideoKBitrate": @(stats.txVideoKBitrate),
+												@"rxVideoKBitrate": @(stats.rxVideoKBitrate),
+												@"lastmileDelay": @(stats.lastmileDelay),
+												@"userCount": @(stats.userCount),
+												@"cpuAppUsage": @(stats.cpuAppUsage),
+												@"cpuTotalUsage": @(stats.cpuTotalUsage)
+												}];
+	  }];
+	} else {
+		res = [self.rtcEngine leaveChannel:^(AgoraChannelStats * _Nonnull stats) {
+		[self sendEvent:AGLeaveChannel params:@{
+												@"message": @"leaveChannel",
+												@"duration": @(stats.duration),
+												@"txBytes": @(stats.txBytes),
+												@"rxBytes": @(stats.rxBytes),
+												@"txAudioBytes": @(stats.txAudioBytes),
+												@"txVideoBytes": @(stats.txVideoBytes),
+												@"rxAudioBytes": @(stats.rxAudioBytes),
+												@"rxVideoBytes": @(stats.rxVideoBytes),
+												@"txPacketLossRate": @(stats.txPacketLossRate),
+												@"rxPacketLossRate": @(stats.rxPacketLossRate),
+												@"txAudioKBitrate": @(stats.txAudioKBitrate),
+												@"rxAudioKBitrate": @(stats.rxAudioKBitrate),
+												@"txVideoKBitrate": @(stats.txVideoKBitrate),
+												@"rxVideoKBitrate": @(stats.rxVideoKBitrate),
+												@"lastmileDelay": @(stats.lastmileDelay),
+												@"userCount": @(stats.userCount),
+												@"cpuAppUsage": @(stats.cpuAppUsage),
+												@"cpuTotalUsage": @(stats.cpuTotalUsage)
+												}];
+	  }];
+	}
+
+  if (res == 0) {
+	resolve(nil);
+  } else {
+	reject(@(-1).stringValue, @(res).stringValue, nil);
+  }
+}
+
 
 // switch channel
 RCT_EXPORT_METHOD(switchChannel:(NSDictionary *)options
@@ -519,39 +607,6 @@ RCT_EXPORT_METHOD(getUserInfoByUserAccount:(NSString *)userAccount
               });
   } else {
     reject(@(-1).stringValue, @((int)code).stringValue, nil);
-  }
-}
-
-// leave channel
-RCT_EXPORT_METHOD(leaveChannel
-                  :(RCTPromiseResolveBlock) resolve
-                  reject:(RCTPromiseRejectBlock) reject) {
-  NSInteger res = [self.rtcEngine leaveChannel:^(AgoraChannelStats * _Nonnull stats) {
-    [self sendEvent:AGLeaveChannel params:@{
-                                            @"message": @"leaveChannel",
-                                            @"duration": @(stats.duration),
-                                            @"txBytes": @(stats.txBytes),
-                                            @"rxBytes": @(stats.rxBytes),
-                                            @"txAudioBytes": @(stats.txAudioBytes),
-                                            @"txVideoBytes": @(stats.txVideoBytes),
-                                            @"rxAudioBytes": @(stats.rxAudioBytes),
-                                            @"rxVideoBytes": @(stats.rxVideoBytes),
-                                            @"txPacketLossRate": @(stats.txPacketLossRate),
-                                            @"rxPacketLossRate": @(stats.rxPacketLossRate),
-                                            @"txAudioKBitrate": @(stats.txAudioKBitrate),
-                                            @"rxAudioKBitrate": @(stats.rxAudioKBitrate),
-                                            @"txVideoKBitrate": @(stats.txVideoKBitrate),
-                                            @"rxVideoKBitrate": @(stats.rxVideoKBitrate),
-                                            @"lastmileDelay": @(stats.lastmileDelay),
-                                            @"userCount": @(stats.userCount),
-                                            @"cpuAppUsage": @(stats.cpuAppUsage),
-                                            @"cpuTotalUsage": @(stats.cpuTotalUsage)
-                                            }];
-  }];
-  if (res == 0) {
-    resolve(nil);
-  } else {
-    reject(@(-1).stringValue, @(res).stringValue, nil);
   }
 }
 

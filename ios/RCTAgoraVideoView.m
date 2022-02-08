@@ -41,6 +41,7 @@
   AgoraRtcVideoCanvas *canvas = [[AgoraRtcVideoCanvas alloc] init];
   if (_remoteUid != 0) {
     canvas.uid = _remoteUid;
+	canvas.channelId = _channelId;
     canvas.view = self;
     canvas.renderMode = _renderMode;
     [_rtcEngine setupRemoteVideo:canvas];

@@ -25,6 +25,10 @@ RCT_CUSTOM_VIEW_PROPERTY(remoteUid, NSInteger, RCTAgoraVideoView) {
   view.remoteUid = [RCTConvert NSInteger:json];
 }
 
+RCT_CUSTOM_VIEW_PROPERTY(channelId, NSString *, RCTAgoraVideoView) {
+  view.channelId = [RCTConvert NSString:json];
+}
+
 - (UIView *)view {
   return [RCTAgoraVideoView new];
 }

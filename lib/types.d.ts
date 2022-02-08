@@ -162,6 +162,7 @@ export interface AgoraViewProps extends ViewProps {
     mode?: number;
     showLocalVideo?: boolean;
     remoteUid?: number;
+    channelId?: string;
     zOrderMediaOverlay: boolean;
     [key: string]: any;
 }

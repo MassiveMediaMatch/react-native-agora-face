@@ -12,6 +12,7 @@ import { AgoraViewProps } from "./types";
  * @property boolean: showLocalVideo, this property will render local video, NOTICE: IF YOU SET showLocalVideo YOU CANNOT SET remoteUid
  * @property number: remoteUid, this property will render video with remote uid, NOTICE: IF YOU SET remoteUid YOU CANNOT SET showLocalVideo
  * @property boolean: zOrderMediaOverlay, this property will working for android side and it likes zIndex behaviour on web side.
+ * @property string: channelId
  */
 export default class AgoraView extends React.Component<AgoraViewProps> {
     /**
