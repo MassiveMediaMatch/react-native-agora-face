@@ -160,7 +160,9 @@ declare class RtcEngine {
      *
      * @returns Promise<{success, value}>
      */
-    static leaveChannel(): Promise<any>;
+    static leaveChannel(options: {
+        channelName: string;
+    }): Promise<any>;
     /**
      * destroy
      *

@@ -212,7 +212,7 @@ export interface JoinChannelOptions {
     channelMediaOptions?: ChannelMediaOptions;
 }
 export interface MuteRemoteStreamOptions {
-    channelName?: string;
+    channelName: string;
     uid: number;
     mute: boolean;
 }

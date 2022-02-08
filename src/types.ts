@@ -245,7 +245,7 @@ export interface JoinChannelOptions {
 }
 
 export interface MuteRemoteStreamOptions {
-  channelName?: string
+  channelName: string
   uid: number
   mute: boolean
 }

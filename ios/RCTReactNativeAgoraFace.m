@@ -750,7 +750,8 @@ RCT_EXPORT_METHOD(muteRemoteVideoStream:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject) {
   AgoraRtcChannel *channel = [self getOrCreateChannel:options[@"channelName"]];
-  NSInteger res = [channel muteRemoteVideoStream:(NSUInteger)options[@"uid"] mute:(BOOL)options[@"mute"]];
+  NSInteger uid = (NSUInteger)[options[@"uid"] integerValue];
+  NSInteger res = [channel muteRemoteVideoStream:uid mute:[options[@"mute"] boolValue]];
   if (res == 0) {
     resolve(nil);
   } else {
@@ -832,7 +833,8 @@ RCT_EXPORT_METHOD(muteRemoteAudioStream:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject) {
   AgoraRtcChannel *channel = [self getOrCreateChannel:options[@"channelName"]];
-  NSInteger res = [channel muteRemoteAudioStream:(NSUInteger)options[@"uid"] mute:(BOOL)options[@"mute"]];
+  NSInteger uid = (NSUInteger)[options[@"uid"] integerValue];
+  NSInteger res = [channel muteRemoteAudioStream:uid mute:[options[@"mute"] boolValue]];
   if (res == 0) {
     resolve(nil);
   } else {

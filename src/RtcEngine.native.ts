@@ -252,8 +252,8 @@ class RtcEngine {
      *
      * @returns Promise<{success, value}>
      */
-    public static leaveChannel(): Promise<any> {
-        return ReactNativeAgoraFace.leaveChannel();
+    public static leaveChannel(options: { channelName: string }): Promise<any> {
+        return ReactNativeAgoraFace.leaveChannel(options);
     }
 
     /**
