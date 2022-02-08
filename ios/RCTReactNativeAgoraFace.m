@@ -317,10 +317,8 @@ RCT_EXPORT_METHOD(setClientRole:(NSInteger)role
   }
 }
 
-// getOrCreateChannel
-RCT_EXPORT_METHOD(getOrCreateChannel:(NSString *)channelName
-				  resolve:(RCTPromiseResolveBlock)resolve
-				  reject:(RCTPromiseRejectBlock)reject)
+// getOrCreateChannel (private)
+- (AgoraRtcChannel*)getOrCreateChannel:(NSString*)channelName
 {
 	if (!self.channels) {
 		self.channels = [NSMutableDictionary new];
@@ -329,11 +327,20 @@ RCT_EXPORT_METHOD(getOrCreateChannel:(NSString *)channelName
 	AgoraRtcChannel *channel;
 	if ([self.channels objectForKey:channelName]) {
 		channel = [self.channels objectForKey:channelName];
+		return channel;
 	} else {
 		channel = [self.rtcEngine createRtcChannel:@"channelName"];
 		[self.channels setObject:channel forKey:channelName];
+		return channel;
 	}
-	
+}
+
+// getOrCreateChannel
+RCT_EXPORT_METHOD(getOrCreateChannel:(NSString *)channelName
+				  resolve:(RCTPromiseResolveBlock)resolve
+				  reject:(RCTPromiseRejectBlock)reject)
+{
+	[self getOrCreateChannel:channelName];
 	resolve(nil);
 }
 
@@ -352,7 +359,7 @@ RCT_EXPORT_METHOD(joinChannel:(NSDictionary *)options
     mediaOptions.autoSubscribeAudio = [options[@"channelMediaOptions"][@"autoSubscribeAudio"] boolValue];
     mediaOptions.autoSubscribeVideo = [options[@"channelMediaOptions"][@"autoSubscribeVideo"] boolValue];
     
-	AgoraRtcChannel *channel = [self getOrCreateChannel:options[@"channelName"] resolve:nil reject:nil];
+	AgoraRtcChannel *channel = [self getOrCreateChannel:options[@"channelName"]];
 	NSInteger res = [channel joinChannelByToken:options[@"token"] info:options[@"info"] uid:[AgoraConst share].localUid options:mediaOptions];
 	[channel setClientRole:[options[@"clientRole"] integerValue]];
 	
@@ -373,27 +380,7 @@ RCT_EXPORT_METHOD(leaveChannel:(NSDictionary *)options
 	NSInteger res;
 	if (channel) {
 		res = [channel leaveChannel];
-		[self sendEvent:AGLeaveChannel params:@{
-												@"message": @"leaveChannel",
-												@"duration": @(stats.duration),
-												@"txBytes": @(stats.txBytes),
-												@"rxBytes": @(stats.rxBytes),
-												@"txAudioBytes": @(stats.txAudioBytes),
-												@"txVideoBytes": @(stats.txVideoBytes),
-												@"rxAudioBytes": @(stats.rxAudioBytes),
-												@"rxVideoBytes": @(stats.rxVideoBytes),
-												@"txPacketLossRate": @(stats.txPacketLossRate),
-												@"rxPacketLossRate": @(stats.rxPacketLossRate),
-												@"txAudioKBitrate": @(stats.txAudioKBitrate),
-												@"rxAudioKBitrate": @(stats.rxAudioKBitrate),
-												@"txVideoKBitrate": @(stats.txVideoKBitrate),
-												@"rxVideoKBitrate": @(stats.rxVideoKBitrate),
-												@"lastmileDelay": @(stats.lastmileDelay),
-												@"userCount": @(stats.userCount),
-												@"cpuAppUsage": @(stats.cpuAppUsage),
-												@"cpuTotalUsage": @(stats.cpuTotalUsage)
-												}];
-	  }];
+		// TODO: don't have stats to send event with
 	} else {
 		res = [self.rtcEngine leaveChannel:^(AgoraChannelStats * _Nonnull stats) {
 		[self sendEvent:AGLeaveChannel params:@{

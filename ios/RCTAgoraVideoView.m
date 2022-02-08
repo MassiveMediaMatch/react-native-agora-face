@@ -39,7 +39,7 @@
 -(void)setRemoteUid:(NSUInteger)remoteUid {
   _remoteUid = remoteUid;
   AgoraRtcVideoCanvas *canvas = [[AgoraRtcVideoCanvas alloc] init];
-  if (_remoteUid != 0) {
+  if (_remoteUid != 0 && _channelId) {
     canvas.uid = _remoteUid;
 	canvas.channelId = _channelId;
     canvas.view = self;
@@ -47,6 +47,19 @@
     [_rtcEngine setupRemoteVideo:canvas];
     return;
   }
+}
+
+- (void)setChannelId:(NSString *)channelId {
+	_channelId = channelId;
+	AgoraRtcVideoCanvas *canvas = [[AgoraRtcVideoCanvas alloc] init];
+	if (_channelId && _remoteUid != 0) {
+	  canvas.uid = _remoteUid;
+	  canvas.channelId = _channelId;
+	  canvas.view = self;
+	  canvas.renderMode = _renderMode;
+	  [_rtcEngine setupRemoteVideo:canvas];
+	  return;
+	}
 }
 
 -(void) willMoveToSuperview:(UIView *)newSuperview {
