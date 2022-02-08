@@ -1,4 +1,4 @@
-import { InitConfig, Callback, AudioMixingOption, PlayEffectOption, AudioRecordingOption, AudioFrameOption, MixedAudioFrameOption, ImageOption, VideoStreamOption, DefaultVideoStreamOption, InjectStreamOption, RemoveInjectStreamOption, PublishStreamOption, RemovePublishStreamOption, LiveTranscodingOption, PositionOption, BeautyOption, LastmileProbeConfig, CameraCapturerConfiguration, ChannelMediaOptions, VideoEncoderConfigOrientationMode, JoinChannelOptions } from "./types";
+import { InitConfig, Callback, AudioMixingOption, PlayEffectOption, AudioRecordingOption, AudioFrameOption, MixedAudioFrameOption, ImageOption, VideoStreamOption, DefaultVideoStreamOption, InjectStreamOption, RemoveInjectStreamOption, PublishStreamOption, RemovePublishStreamOption, LiveTranscodingOption, PositionOption, BeautyOption, LastmileProbeConfig, CameraCapturerConfiguration, ChannelMediaOptions, VideoEncoderConfigOrientationMode, JoinChannelOptions, MuteRemoteStreamOptions } from "./types";
 /**
  * RtcEngine is the javascript object for control agora native sdk through react native bridge.
  *
@@ -257,7 +257,7 @@ declare class RtcEngine {
      * @param uid
      * @param muted
      */
-    static muteRemoteVideoStream(uid: number, muted: boolean): void;
+    static muteRemoteVideoStream(options: MuteRemoteStreamOptions): void;
     /**
      * set default mute all remote video stream
      *
@@ -304,7 +304,7 @@ declare class RtcEngine {
      * @param uid
      * @param muted
      */
-    static muteRemoteAudioStream(uid: number, muted: boolean): void;
+    static muteRemoteAudioStream(options: MuteRemoteStreamOptions): void;
     /**
      * adjust recording signal volume
      *

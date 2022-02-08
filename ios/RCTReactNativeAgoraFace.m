@@ -746,10 +746,11 @@ RCT_EXPORT_METHOD(muteAllRemoteVideoStreams:(BOOL)muted
 }
 
 // mute video stream by uid
-RCT_EXPORT_METHOD(muteRemoteVideoStream:(NSUInteger)uid mute:(BOOL)mute
+RCT_EXPORT_METHOD(muteRemoteVideoStream:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject) {
-  NSInteger res = [self.rtcEngine muteRemoteVideoStream:uid mute:mute];
+  AgoraRtcChannel *channel = [self getOrCreateChannel:options[@"channelName"]];
+  NSInteger res = [channel muteRemoteVideoStream:(NSUInteger)options[@"uid"] mute:(BOOL)options[@"mute"]];
   if (res == 0) {
     resolve(nil);
   } else {
@@ -827,10 +828,11 @@ RCT_EXPORT_METHOD(muteAllRemoteAudioStreams:(BOOL)mute
 }
 
 // mute one remote audio stream by uid
-RCT_EXPORT_METHOD(muteRemoteAudioStream:(NSUInteger)uid muted:(BOOL)mute
+RCT_EXPORT_METHOD(muteRemoteAudioStream:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject) {
-  NSInteger res = [self.rtcEngine muteRemoteAudioStream:uid mute:mute];
+  AgoraRtcChannel *channel = [self getOrCreateChannel:options[@"channelName"]];
+  NSInteger res = [channel muteRemoteAudioStream:(NSUInteger)options[@"uid"] mute:(BOOL)options[@"mute"]];
   if (res == 0) {
     resolve(nil);
   } else {

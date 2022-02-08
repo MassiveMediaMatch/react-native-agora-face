@@ -244,6 +244,12 @@ export interface JoinChannelOptions {
   channelMediaOptions?: ChannelMediaOptions
 }
 
+export interface MuteRemoteStreamOptions {
+  channelName?: string
+  uid: number
+  mute: boolean
+}
+
 export interface VideoStreamOption {
   uid: number,
   streamType: number

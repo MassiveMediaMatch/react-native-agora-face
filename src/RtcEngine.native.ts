@@ -27,7 +27,8 @@ import {
     CameraCapturerConfiguration,
     ChannelMediaOptions,
     VideoEncoderConfigOrientationMode,
-    JoinChannelOptions
+    JoinChannelOptions,
+    MuteRemoteStreamOptions
 } from "./types";
 
 
@@ -392,8 +393,8 @@ class RtcEngine {
      * @param uid
      * @param muted
      */
-    public static muteRemoteVideoStream(uid: number, muted: boolean) {
-        ReactNativeAgoraFace.muteRemoteVideoStream(uid, muted);
+    public static muteRemoteVideoStream(options: MuteRemoteStreamOptions) {
+        ReactNativeAgoraFace.muteRemoteVideoStream(options);
     }
 
     /**
@@ -460,8 +461,8 @@ class RtcEngine {
      * @param uid
      * @param muted
      */
-    public static muteRemoteAudioStream(uid: number, muted: boolean) {
-        ReactNativeAgoraFace.muteRemoteAudioStream(uid, muted);
+    public static muteRemoteAudioStream(options: MuteRemoteStreamOptions) {
+        ReactNativeAgoraFace.muteRemoteAudioStream(options);
     }
 
     /**
