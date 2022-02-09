@@ -350,6 +350,8 @@ RCT_EXPORT_METHOD(joinChannel:(NSDictionary *)options
     AgoraRtcChannelMediaOptions *mediaOptions = [AgoraRtcChannelMediaOptions new];
     mediaOptions.autoSubscribeAudio = [options[@"channelMediaOptions"][@"autoSubscribeAudio"] boolValue];
     mediaOptions.autoSubscribeVideo = [options[@"channelMediaOptions"][@"autoSubscribeVideo"] boolValue];
+    mediaOptions.publishLocalAudio = [options[@"channelMediaOptions"][@"publishLocalAudio"] boolValue];
+    mediaOptions.publishLocalVideo = [options[@"channelMediaOptions"][@"publishLocalVideo"] boolValue];
     
 	AgoraRtcChannel *channel = [self getOrCreateChannel:options[@"channelName"]];
 	NSInteger res = [channel joinChannelByToken:options[@"token"] info:options[@"info"] uid:[AgoraConst share].localUid options:mediaOptions];
