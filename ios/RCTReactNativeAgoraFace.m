@@ -375,10 +375,12 @@ RCT_EXPORT_METHOD(leaveChannel:(NSDictionary *)options
 	NSInteger res;
 	if (channel) {
 		res = [channel leaveChannel];
-		// TODO: don't have stats to send event with
+		
 		[self sendEvent:AGLeaveChannel params:@{
 			@"message": @"leaveChannel"
 		}];
+		
+		[self.channels removeObjectForKey:options[@"channelName"]];
 	} else {
 		res = [self.rtcEngine leaveChannel:^(AgoraChannelStats * _Nonnull stats) {
 		[self sendEvent:AGLeaveChannel params:@{
