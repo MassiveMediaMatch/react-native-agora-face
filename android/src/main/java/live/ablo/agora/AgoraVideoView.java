@@ -15,6 +15,7 @@ public class AgoraVideoView extends LinearLayout {
 	private boolean showLocalVideo;
 	private Integer renderMode = 1;
 	private Integer remoteUid;
+	private String channelId;
 	private boolean zOrderMediaOverlay;
 	private int localViewId = -1;
 	private int remoteViewId = -1;
@@ -32,10 +33,12 @@ public class AgoraVideoView extends LinearLayout {
 	}
 
 	public void setupRemoteView() {
-		SurfaceView surfaceView = AgoraManager.getInstance().setupRemoteVideo(remoteUid, getRenderMode(), getContext());
-		surfaceView.setZOrderMediaOverlay(getZOrderMediaOverlay());
-		surfaceView.setId(getRemoteViewId());
-		addView(surfaceView);
+		if (remoteUid != null && remoteUid != 0 && channelId != null) {
+			SurfaceView surfaceView = AgoraManager.getInstance().setupRemoteVideo(remoteUid, channelId, getRenderMode(), getContext());
+			surfaceView.setZOrderMediaOverlay(getZOrderMediaOverlay());
+			surfaceView.setId(getRemoteViewId());
+			addView(surfaceView);
+		}
 	}
 
 	public void setupLocalView() {
@@ -68,6 +71,14 @@ public class AgoraVideoView extends LinearLayout {
 
 	public void setRemoteUid(Integer remoteUid) {
 		this.remoteUid = remoteUid;
+	}
+
+	public Integer getChannelId() {
+		return channelId;
+	}
+
+	public void setChannelId(String channelId) {
+		this.channelId = channelId;
 	}
 
 	public boolean getZOrderMediaOverlay() {

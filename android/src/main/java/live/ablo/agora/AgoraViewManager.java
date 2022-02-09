@@ -48,4 +48,10 @@ public class AgoraViewManager extends SimpleViewManager<AgoraVideoView> {
 		}
 	}
 
+	@ReactProp(name = "channelId")
+	public void setChannelId(final AgoraVideoView agoraVideoView, final String channelId) {
+		agoraVideoView.setChannelId(channelId);
+		agoraVideoView.setupRemoteView();
+	}
+
 }

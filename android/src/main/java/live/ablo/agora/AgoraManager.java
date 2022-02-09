@@ -263,9 +263,9 @@ public class AgoraManager {
 	/**
 	 * setupRemoteVideo will render video from remote side capture into ui layout
 	 */
-	public SurfaceView setupRemoteVideo(final int uid, final Integer mode, Context context) {
+	public SurfaceView setupRemoteVideo(final int uid, final String channelId, final Integer mode, Context context) {
 		SurfaceView surfaceView = RtcEngine.CreateRendererView(context);
-		mRtcEngine.setupRemoteVideo(new VideoCanvas(surfaceView, mode, uid));
+		mRtcEngine.setupRemoteVideo(new VideoCanvas(surfaceView, mode, channelId, uid));
 		return surfaceView;
 	}
 
