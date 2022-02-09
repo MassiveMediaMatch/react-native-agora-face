@@ -28,7 +28,8 @@ import {
     ChannelMediaOptions,
     VideoEncoderConfigOrientationMode,
     JoinChannelOptions,
-    MuteRemoteStreamOptions
+    MuteRemoteStreamOptions,
+    MuteLocalStreamOptions
 } from "./types";
 
 
@@ -372,8 +373,8 @@ class RtcEngine {
      * This method mutes video stream by the boolean parameter.
      * @param muted
      */
-    public static muteLocalVideoStream(muted: boolean) {
-        ReactNativeAgoraFace.muteLocalVideoStream(muted);
+    public static muteLocalVideoStream(options: MuteLocalStreamOptions) {
+        ReactNativeAgoraFace.muteLocalVideoStream(options);
     }
 
     /**
@@ -1261,8 +1262,8 @@ class RtcEngine {
      * @param enabled
      */
 
-     public static muteLocalAudioStream(enabled: boolean) {
-        ReactNativeAgoraFace.muteLocalAudioStream(enabled);
+     public static muteLocalAudioStream(options: MuteLocalStreamOptions) {
+        ReactNativeAgoraFace.muteLocalAudioStream(options);
      }
 
     /**

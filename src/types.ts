@@ -27,6 +27,8 @@ export enum VideoEncoderConfigOrientationMode {
 export interface ChannelMediaOptions {
   autoSubscribeAudio: boolean,
   autoSubscribeVideo: boolean,
+  publishLocalAudio: boolean,
+  publishLocalVideo: boolean,
 }
 
 // https://docs.agora.io/en/Video/API%20Reference/react_native/enums/channelprofile.html
@@ -247,6 +249,11 @@ export interface JoinChannelOptions {
 export interface MuteRemoteStreamOptions {
   channelName: string
   uid: number
+  mute: boolean
+}
+
+export interface MuteLocalStreamOptions {
+  channelName?: string
   mute: boolean
 }
 

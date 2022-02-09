@@ -23,6 +23,8 @@ export declare enum VideoEncoderConfigOrientationMode {
 export interface ChannelMediaOptions {
     autoSubscribeAudio: boolean;
     autoSubscribeVideo: boolean;
+    publishLocalAudio: boolean;
+    publishLocalVideo: boolean;
 }
 export declare enum ChannelProfile {
     COMMUNICATION = 0,
@@ -214,6 +216,10 @@ export interface JoinChannelOptions {
 export interface MuteRemoteStreamOptions {
     channelName: string;
     uid: number;
+    mute: boolean;
+}
+export interface MuteLocalStreamOptions {
+    channelName?: string;
     mute: boolean;
 }
 export interface VideoStreamOption {
