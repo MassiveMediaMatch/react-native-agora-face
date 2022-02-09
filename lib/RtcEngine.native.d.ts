@@ -1,4 +1,4 @@
-import { InitConfig, Callback, AudioMixingOption, PlayEffectOption, AudioRecordingOption, AudioFrameOption, MixedAudioFrameOption, ImageOption, VideoStreamOption, DefaultVideoStreamOption, InjectStreamOption, RemoveInjectStreamOption, PublishStreamOption, RemovePublishStreamOption, LiveTranscodingOption, PositionOption, BeautyOption, LastmileProbeConfig, CameraCapturerConfiguration, ChannelMediaOptions, VideoEncoderConfigOrientationMode, JoinChannelOptions, MuteRemoteStreamOptions } from "./types";
+import { InitConfig, Callback, AudioMixingOption, PlayEffectOption, AudioRecordingOption, AudioFrameOption, MixedAudioFrameOption, ImageOption, VideoStreamOption, DefaultVideoStreamOption, InjectStreamOption, RemoveInjectStreamOption, PublishStreamOption, RemovePublishStreamOption, LiveTranscodingOption, PositionOption, BeautyOption, LastmileProbeConfig, CameraCapturerConfiguration, ChannelMediaOptions, VideoEncoderConfigOrientationMode, JoinChannelOptions, MuteRemoteStreamOptions, MuteLocalStreamOptions } from "./types";
 /**
  * RtcEngine is the javascript object for control agora native sdk through react native bridge.
  *
@@ -244,7 +244,7 @@ declare class RtcEngine {
      * This method mutes video stream by the boolean parameter.
      * @param muted
      */
-    static muteLocalVideoStream(muted: boolean): void;
+    static muteLocalVideoStream(options: MuteLocalStreamOptions): void;
     /**
      * mute all remote video streams
      *
@@ -889,7 +889,7 @@ declare class RtcEngine {
      *
      * @param enabled
      */
-    static muteLocalAudioStream(enabled: boolean): void;
+    static muteLocalAudioStream(options: MuteLocalStreamOptions): void;
     /**
      * video pre-process/post-process
      *

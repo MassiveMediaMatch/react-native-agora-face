@@ -216,6 +216,10 @@ export interface MuteRemoteStreamOptions {
     uid: number;
     mute: boolean;
 }
+export interface MuteLocalStreamOptions {
+    channelName?: string;
+    mute: boolean;
+}
 export interface VideoStreamOption {
     uid: number;
     streamType: number;

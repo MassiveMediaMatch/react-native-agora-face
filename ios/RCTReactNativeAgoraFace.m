@@ -725,15 +725,22 @@ RCT_EXPORT_METHOD(enableLocalVideo:(BOOL)enabled
 }
 
 // mute local video stream
-RCT_EXPORT_METHOD(muteLocalVideoStream:(BOOL)muted
+RCT_EXPORT_METHOD(muteLocalVideoStream:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject) {
-  NSInteger res = [self.rtcEngine muteLocalVideoStream:muted];
-  if (res == 0) {
-    resolve(nil);
-  } else {
-    reject(@(-1).stringValue, @(res).stringValue, nil);
-  }
+
+    AgoraRtcChannel *channel = [self.channels objectForKey:options[@"channelName"]];
+    NSInteger res;
+    if (channel) {
+        res = [channel muteLocalVideoStream:[options[@"mute"] boolValue]];
+    } else {
+        res = [self.rtcEngine muteLocalVideoStream:[options[@"mute"] boolValue]];
+    }
+    if (res == 0) {
+        resolve(nil);
+    } else {
+        reject(@(-1).stringValue, @(res).stringValue, nil);
+    }
 }
 
 // mute all remote video streams
@@ -808,15 +815,22 @@ RCT_EXPORT_METHOD(enableLocalAudio:(BOOL)enabled
 }
 
 // mute local audio stream
-RCT_EXPORT_METHOD(muteLocalAudioStream:(BOOL)mute
+RCT_EXPORT_METHOD(muteLocalAudioStream:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject) {
-  NSInteger res = [self.rtcEngine muteLocalAudioStream:mute];
-  if (res == 0) {
-    resolve(nil);
-  } else {
-    reject(@(-1).stringValue, @(res).stringValue, nil);
-  }
+
+    AgoraRtcChannel *channel = [self.channels objectForKey:options[@"channelName"]];
+    NSInteger res;
+    if (channel) {
+        res = [channel muteLocalAudioStream:[options[@"mute"] boolValue]];
+    } else {
+        res = [self.rtcEngine muteLocalAudioStream:[options[@"mute"] boolValue]];
+    }
+    if (res == 0) {
+        resolve(nil);
+    } else {
+        reject(@(-1).stringValue, @(res).stringValue, nil);
+    }
 }
 
 // mute all remote audio stream
