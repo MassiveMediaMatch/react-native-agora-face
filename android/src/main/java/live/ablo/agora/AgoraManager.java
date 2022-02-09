@@ -6,10 +6,14 @@ import android.view.SurfaceView;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.Arguments;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.facebook.react.bridge.ReadableMap;
 
 import io.agora.rtc.AudioFrame;
 import io.agora.rtc.RtcEngine;
+import io.agora.rtc.RtcChannel;
 import io.agora.rtc.RtcEngineConfig;
 import io.agora.rtc.audio.AudioParams;
 import io.agora.rtc.models.ChannelMediaOptions;
@@ -33,6 +37,8 @@ public class AgoraManager {
 	private RtcEngine mRtcEngine;
 
 	private int mLocalUid = 0;
+
+	private Map<String, RtcChannel> agoraChannels = new HashMap<String, RtcChannel>();
 
 
 	private AgoraManager() {
@@ -269,11 +275,30 @@ public class AgoraManager {
 		return surfaceView;
 	}
 
+	/**
+	 * Create a new agora channel object
+	 */
+	private RtcChannel getOrCreateChannel(String channelName) {
+		if (agoraChannels.containsKey(channelName)) {
+			// return channel
+			return agoraChannels.get(channelName);
+		}
+
+		RtcChannel channel = mRtcEngine.createRtcChannel(channelName);
+
+		// Store channel reference
+		agoraChannels.put(channelName, channel);
+
+		// return
+		return channel;
+	}
+
 	public int joinChannel(ReadableMap options) {
 		String token = options.hasKey("token") ? options.getString("token") : null;
 		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
 		String optionalInfo = options.hasKey("optionalInfo") ? options.getString("optionalInfo") : null;
 		int uid = options.hasKey("uid") ? options.getInt("uid") : 0;
+		int clientRole = options.hasKey("clientRole") ? options.getInt("clientRole") : 2;
 
 		ChannelMediaOptions mediaOptions = new ChannelMediaOptions();
 
@@ -282,13 +307,29 @@ public class AgoraManager {
 
 			boolean autoSubscribeAudio = channelMediaOptions.hasKey("autoSubscribeAudio") ? channelMediaOptions.getBoolean("autoSubscribeAudio") : true;
 			boolean autoSubscribeVideo = channelMediaOptions.hasKey("autoSubscribeVideo") ? channelMediaOptions.getBoolean("autoSubscribeVideo") : true;
+			boolean publishLocalAudio = channelMediaOptions.hasKey("publishLocalAudio") ? channelMediaOptions.getBoolean("publishLocalAudio") : true;
+			boolean publishLocalVideo = channelMediaOptions.hasKey("publishLocalVideo") ? channelMediaOptions.getBoolean("publishLocalVideo") : true;
 
 			mediaOptions.autoSubscribeAudio = autoSubscribeAudio;
 			mediaOptions.autoSubscribeVideo = autoSubscribeVideo;
+			mediaOptions.publishLocalAudio = publishLocalAudio;
+			mediaOptions.publishLocalVideo = publishLocalVideo;
 		}
 
+		RtcChannel channel = getOrCreateChannel(channelName);
+		channel.setClientRole(clientRole);
+
 		this.mLocalUid = uid;
-		return mRtcEngine.joinChannel(token, channelName, optionalInfo, uid, mediaOptions);
+		return channel.joinChannel(token, optionalInfo, uid, mediaOptions);
+	}
+
+	public int leaveChannel(ReadableMap options) {
+		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
+
+		if (agoraChannels.containsKey(channelName)) {
+			return agoraChannels.get(channelName).leaveChannel();
+		}
+		return mRtcEngine.leaveChannel();
 	}
 
 	public int switchChannel(ReadableMap options) {
@@ -308,6 +349,52 @@ public class AgoraManager {
 		}
 		
 		return mRtcEngine.switchChannel(token, channelName, mediaOptions);
+	}
+
+	public void muteRemoteVideoStream(ReadableMap options) {
+		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
+		int uid = options.hasKey("uid") ? options.getInt("uid") : 0;
+		boolean mute = options.hasKey("mute") ? options.getBoolean("mute") : true;
+
+		if (agoraChannels.containsKey(channelName)) {
+			agoraChannels.get(channelName).muteRemoteVideoStream(uid, mute);
+		}
+
+		mRtcEngine.muteRemoteVideoStream(uid, mute);
+	}
+
+	public void muteRemoteAudioStream(ReadableMap options) {
+		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
+		int uid = options.hasKey("uid") ? options.getInt("uid") : 0;
+		boolean mute = options.hasKey("mute") ? options.getBoolean("mute") : true;
+
+		if (agoraChannels.containsKey(channelName)) {
+			agoraChannels.get(channelName).muteRemoteAudioStream(uid, mute);
+		}
+
+		mRtcEngine.muteRemoteAudioStream(uid, mute);
+	}
+
+	public void muteLocalVideoStream(ReadableMap options) {
+		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
+		boolean mute = options.hasKey("mute") ? options.getBoolean("mute") : true;
+
+		if (agoraChannels.containsKey(channelName)) {
+			agoraChannels.get(channelName).muteLocalVideoStream(mute);
+		}
+
+		mRtcEngine.muteLocalVideoStream(mute);
+	}
+
+	public void muteLocalAudioStream(ReadableMap options) {
+		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
+		boolean mute = options.hasKey("mute") ? options.getBoolean("mute") : true;
+
+		if (agoraChannels.containsKey(channelName)) {
+			agoraChannels.get(channelName).muteLocalAudioStream(mute);
+		}
+
+		mRtcEngine.muteLocalAudioStream(mute);
 	}
 
 	public int setVideoEncoderConfiguration(ReadableMap options) {

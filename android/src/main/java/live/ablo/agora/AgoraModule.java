@@ -349,8 +349,8 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
-	public void leaveChannel(Promise promise) {
-		int res = AgoraManager.getInstance().getEngine().leaveChannel();
+	public void leaveChannel(ReadableMap options) {
+		int res = AgoraManager.getInstance().leaveChannel(options);
 		if (res != 0) {
 			sendError(getReactApplicationContext(), res, "leaveChannel Failed");
 		}
@@ -404,8 +404,8 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
-	public void muteLocalVideoStream(boolean muted) {
-		AgoraManager.getInstance().getEngine().muteLocalVideoStream(muted);
+	public void muteLocalVideoStream(ReadableMap options) {
+		AgoraManager.getInstance().muteLocalVideoStream(options);
 	}
 
 	@ReactMethod
@@ -414,8 +414,8 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
-	public void muteRemoteVideoStream(int uid, boolean muted) {
-		AgoraManager.getInstance().getEngine().muteRemoteVideoStream(uid, muted);
+	public void muteRemoteVideoStream(ReadableMap options) {
+		AgoraManager.getInstance().muteRemoteVideoStream(options);
 	}
 
 	@ReactMethod
@@ -544,8 +544,8 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
-	public void muteRemoteAudioStream(int uid, boolean muted) {
-		AgoraManager.getInstance().getEngine().muteRemoteAudioStream(uid, muted);
+	public void muteRemoteAudioStream(ReadableMap options) {
+		AgoraManager.getInstance().muteRemoteAudioStream(options);
 	}
 
 	@ReactMethod
@@ -580,8 +580,8 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
-	public void muteLocalAudioStream(boolean enabled) {
-		AgoraManager.getInstance().getEngine().muteLocalAudioStream(enabled);
+	public void muteLocalAudioStream(ReadableMap options) {
+		AgoraManager.getInstance().muteLocalAudioStream(options);
 	}
 
 	@ReactMethod
