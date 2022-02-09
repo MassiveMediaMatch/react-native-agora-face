@@ -73,7 +73,7 @@ public class AgoraVideoView extends LinearLayout {
 		this.remoteUid = remoteUid;
 	}
 
-	public Integer getChannelId() {
+	public String getChannelId() {
 		return channelId;
 	}
 
