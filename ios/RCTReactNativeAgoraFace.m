@@ -18,7 +18,7 @@
 
 #define MAX_DATA_LENGTH 1024
 
-@interface RCTReactNativeAgoraFace ()	<AgoraRtcEngineDelegate, AgoraVideoDataPluginDelegate, AgoraAudioDataPluginDelegate, AgoraPacketDataPluginDelegate>
+@interface RCTReactNativeAgoraFace ()	<AgoraRtcEngineDelegate, AgoraRtcChannelDelegate, AgoraVideoDataPluginDelegate, AgoraAudioDataPluginDelegate, AgoraPacketDataPluginDelegate>
 @property (strong, nonatomic) AgoraRtcEngineKit *rtcEngine;
 @property (nonatomic, strong) AgoraMediaDataPlugin *agoraMediaDataPlugin;
 @property (strong, nonatomic) NSString *appId;
@@ -330,6 +330,7 @@ RCT_EXPORT_METHOD(setClientRole:(NSInteger)role
 		return channel;
 	} else {
 		channel = [self.rtcEngine createRtcChannel:channelName];
+		[channel setRtcChannelDelegate:self];
 		[self.channels setObject:channel forKey:channelName];
 		return channel;
 	}
@@ -350,6 +351,8 @@ RCT_EXPORT_METHOD(joinChannel:(NSDictionary *)options
     AgoraRtcChannelMediaOptions *mediaOptions = [AgoraRtcChannelMediaOptions new];
     mediaOptions.autoSubscribeAudio = [options[@"channelMediaOptions"][@"autoSubscribeAudio"] boolValue];
     mediaOptions.autoSubscribeVideo = [options[@"channelMediaOptions"][@"autoSubscribeVideo"] boolValue];
+    mediaOptions.publishLocalAudio = [options[@"channelMediaOptions"][@"publishLocalAudio"] boolValue];
+    mediaOptions.publishLocalVideo = [options[@"channelMediaOptions"][@"publishLocalVideo"] boolValue];
     
 	AgoraRtcChannel *channel = [self getOrCreateChannel:options[@"channelName"]];
 	NSInteger res = [channel joinChannelByToken:options[@"token"] info:options[@"info"] uid:[AgoraConst share].localUid options:mediaOptions];
@@ -373,9 +376,9 @@ RCT_EXPORT_METHOD(leaveChannel:(NSDictionary *)options
 	if (channel) {
 		res = [channel leaveChannel];
 		// TODO: don't have stats to send event with
-    [self sendEvent:AGLeaveChannel params:@{
-        @"message": @"leaveChannel"
-    }];
+		[self sendEvent:AGLeaveChannel params:@{
+			@"message": @"leaveChannel"
+		}];
 	} else {
 		res = [self.rtcEngine leaveChannel:^(AgoraChannelStats * _Nonnull stats) {
 		[self sendEvent:AGLeaveChannel params:@{
@@ -725,15 +728,22 @@ RCT_EXPORT_METHOD(enableLocalVideo:(BOOL)enabled
 }
 
 // mute local video stream
-RCT_EXPORT_METHOD(muteLocalVideoStream:(BOOL)muted
+RCT_EXPORT_METHOD(muteLocalVideoStream:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject) {
-  NSInteger res = [self.rtcEngine muteLocalVideoStream:muted];
-  if (res == 0) {
-    resolve(nil);
-  } else {
-    reject(@(-1).stringValue, @(res).stringValue, nil);
-  }
+
+    AgoraRtcChannel *channel = [self.channels objectForKey:options[@"channelName"]];
+    NSInteger res;
+    if (channel) {
+        res = [channel muteLocalVideoStream:[options[@"mute"] boolValue]];
+    } else {
+        res = [self.rtcEngine muteLocalVideoStream:[options[@"mute"] boolValue]];
+    }
+    if (res == 0) {
+        resolve(nil);
+    } else {
+        reject(@(-1).stringValue, @(res).stringValue, nil);
+    }
 }
 
 // mute all remote video streams
@@ -808,15 +818,22 @@ RCT_EXPORT_METHOD(enableLocalAudio:(BOOL)enabled
 }
 
 // mute local audio stream
-RCT_EXPORT_METHOD(muteLocalAudioStream:(BOOL)mute
+RCT_EXPORT_METHOD(muteLocalAudioStream:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject) {
-  NSInteger res = [self.rtcEngine muteLocalAudioStream:mute];
-  if (res == 0) {
-    resolve(nil);
-  } else {
-    reject(@(-1).stringValue, @(res).stringValue, nil);
-  }
+
+    AgoraRtcChannel *channel = [self.channels objectForKey:options[@"channelName"]];
+    NSInteger res;
+    if (channel) {
+        res = [channel muteLocalAudioStream:[options[@"mute"] boolValue]];
+    } else {
+        res = [self.rtcEngine muteLocalAudioStream:[options[@"mute"] boolValue]];
+    }
+    if (res == 0) {
+        resolve(nil);
+    } else {
+        reject(@(-1).stringValue, @(res).stringValue, nil);
+    }
 }
 
 // mute all remote audio stream
@@ -2752,6 +2769,192 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
     ObserverVideoType videoType = ObserverVideoTypeCaptureVideo | ObserverVideoTypeRenderVideo;
     [self.agoraMediaDataPlugin registerVideoRawDataObserver:videoType];
     self.agoraMediaDataPlugin.videoDelegate = self;
+}
+
+#pragma mark - <AgoraRtcChannelDelegate>
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didOccurWarning:(AgoraWarningCode)warningCode {
+	[self sendEvent:AGWarning params:@{@"message": @"AgoraWarning", @"errorCode": @(warningCode)}];
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didOccurError:(AgoraErrorCode)errorCode {
+	[self sendEvent:AGError params:@{@"message": @"AgoraError", @"errorCode": @(errorCode)}];
+}
+
+- (void)rtcChannelDidJoinChannel:(AgoraRtcChannel* _Nonnull)rtcChannel withUid:(NSUInteger)uid elapsed:(NSInteger)elapsed {
+	[self sendEvent:AGUserJoined params:@{
+		@"uid": @(uid),
+		@"elapsed": @(elapsed)
+	}];
+}
+
+- (void)rtcChannelDidRejoinChannel:(AgoraRtcChannel* _Nonnull)rtcChannel withUid:(NSUInteger)uid elapsed:(NSInteger)elapsed {
+	[self sendEvent:AGRejoinChannelSuccess params:@{
+		@"channel": rtcChannel,
+		@"uid": @(uid),
+		@"elapsed": @(elapsed)
+	}];
+}
+
+- (void)rtcChannelDidLeaveChannel:(AgoraRtcChannel* _Nonnull)rtcChannel withStats:(AgoraChannelStats* _Nonnull)stats {
+	[self sendEvent:AGLeaveChannel params:@{
+		@"message": @"leaveChannel"
+	}];
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didClientRoleChanged:(AgoraClientRole)oldRole newRole:(AgoraClientRole)newRole {
+	[self sendEvent:AGClientRoleChanged params:@{
+		@"oldRole": @(oldRole),
+		@"newRole": @(newRole)
+	}];
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didJoinedOfUid:(NSUInteger)uid elapsed:(NSInteger)elapsed {
+	[self sendEvent:AGUserJoined params:@{
+	  @"uid": @(uid),
+	  @"elapsed": @(elapsed)
+	}];
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didOfflineOfUid:(NSUInteger)uid reason:(AgoraUserOfflineReason)reason {
+	[self sendEvent:AGUserOffline params:@{
+		@"uid": @(uid),
+		@"reason": @(reason)
+	}];
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel connectionChangedToState:(AgoraConnectionStateType)state reason:(AgoraConnectionChangedReason)reason {
+	[self sendEvent:AGConnectionStateChanged params:@{
+	  @"state": @(state),
+	  @"reason": @(reason)
+	}];
+}
+
+- (void)rtcChannelDidLost:(AgoraRtcChannel* _Nonnull)rtcChannel {
+	[self sendEvent:AGConnectionLost params:@{
+	  @"message": @"connectionLost"
+	}];
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel tokenPrivilegeWillExpire:(NSString* _Nonnull)token {
+	[self sendEvent:AGTokenPrivilegeWillExpire params:@{
+		@"token": token
+	}];
+}
+
+- (void)rtcChannelRequestToken:(AgoraRtcChannel* _Nonnull)rtcChannel {
+	[self sendEvent:AGRequestToken params:@{
+		@"message": @"RequestToken"
+	}];
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel activeSpeaker:(NSUInteger)speakerUid {
+	[self sendEvent:AGActiveSpeaker params:@{
+		@"uid": @(speakerUid)
+	}];
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel videoSizeChangedOfUid:(NSUInteger)uid size:(CGSize)size rotation:(NSInteger)rotation {
+	[self sendEvent:AGVideoSizeChanged params:@{
+		@"uid": @(uid),
+		@"width": @(size.width),
+		@"height": @(size.height),
+		@"rotation": @(rotation)
+	}];
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel remoteVideoStateChangedOfUid:(NSUInteger)uid state:(AgoraVideoRemoteState)state reason:(AgoraVideoRemoteStateReason)reason elapsed:(NSInteger)elapsed {
+	[self sendEvent:AGRemoteVideoStateChanged params:@{
+	   @"uid": @(uid),
+	   @"state": @(state),
+	   @"reason": @(reason),
+	   @"elapsed": @(elapsed)
+	}];
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel superResolutionEnabledOfUid:(NSUInteger)uid enabled:(BOOL)enabled reason:(AgoraSuperResolutionStateReason)reason {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel remoteAudioStateChangedOfUid:(NSUInteger)uid state:(AgoraAudioRemoteState)state reason:(AgoraAudioRemoteStateReason)reason elapsed:(NSInteger)elapsed {
+	[self sendEvent:AGRemoteAudioStateChanged params:@{
+	   @"uid": @(uid),
+	   @"state": @(state),
+	   @"reason": @(reason),
+	   @"elapsed": @(elapsed)
+	}];
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didLocalPublishFallbackToAudioOnly:(BOOL)isFallbackOrRecover {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didRemoteSubscribeFallbackToAudioOnly:(BOOL)isFallbackOrRecover byUid:(NSUInteger)uid {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel reportRtcStats:(AgoraChannelStats* _Nonnull)stats {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel networkQuality:(NSUInteger)uid txQuality:(AgoraNetworkQuality)txQuality rxQuality:(AgoraNetworkQuality)rxQuality {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel remoteVideoStats:(AgoraRtcRemoteVideoStats* _Nonnull)stats {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel remoteAudioStats:(AgoraRtcRemoteAudioStats* _Nonnull)stats {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel rtmpStreamingChangedToState:(NSString* _Nonnull)url state:(AgoraRtmpStreamingState)state errorCode:(AgoraRtmpStreamingErrorCode)errorCode {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel rtmpStreamingEventWithUrl:(NSString* _Nonnull)url eventCode:(AgoraRtmpStreamingEvent)eventCode {
+	
+}
+
+- (void)rtcChannelTranscodingUpdated:(AgoraRtcChannel* _Nonnull)rtcChannel {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel streamInjectedStatusOfUrl:(NSString* _Nonnull)url uid:(NSUInteger)uid status:(AgoraInjectStreamStatus)status {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel receiveStreamMessageFromUid:(NSUInteger)uid streamId:(NSInteger)streamId data:(NSData* _Nonnull)data {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didOccurStreamMessageErrorFromUid:(NSUInteger)uid streamId:(NSInteger)streamId error:(NSInteger)error missed:(NSInteger)missed cached:(NSInteger)cached {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel channelMediaRelayStateDidChange:(AgoraChannelMediaRelayState)state error:(AgoraChannelMediaRelayError)error {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didReceiveChannelMediaRelayEvent:(AgoraChannelMediaRelayEvent)event {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didAudioPublishStateChange:(AgoraStreamPublishState)oldState newState:(AgoraStreamPublishState)newState elapseSinceLastState:(NSInteger)elapseSinceLastState {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didVideoPublishStateChange:(AgoraStreamPublishState)oldState newState:(AgoraStreamPublishState)newState elapseSinceLastState:(NSInteger)elapseSinceLastState {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didAudioSubscribeStateChange:(NSUInteger)uid oldState:(AgoraStreamSubscribeState)oldState newState:(AgoraStreamSubscribeState)newState elapseSinceLastState:(NSInteger)elapseSinceLastState {
+	
+}
+
+- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didVideoSubscribeStateChange:(NSUInteger)uid oldState:(AgoraStreamSubscribeState)oldState newState:(AgoraStreamSubscribeState)newState elapseSinceLastState:(NSInteger)elapseSinceLastState {
+	
 }
 
 @end
