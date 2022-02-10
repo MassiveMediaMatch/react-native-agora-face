@@ -17,6 +17,7 @@ import io.agora.rtc.RtcChannel;
 import io.agora.rtc.RtcEngineConfig;
 import io.agora.rtc.audio.AudioParams;
 import io.agora.rtc.models.ChannelMediaOptions;
+import io.agora.rtc.internal.EncryptionConfig;
 import io.agora.rtc.video.BeautyOptions;
 import io.agora.rtc.video.VideoCanvas;
 import io.agora.rtc.video.VideoEncoderConfiguration;
