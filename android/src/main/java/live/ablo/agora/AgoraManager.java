@@ -242,9 +242,9 @@ public class AgoraManager {
 				mRtcEngine.setAudioProfile(options.getInt("audioProfile"), options.getInt("audioScenario"));
 			}
 
-			if (options.hasKey("clientRole")) {
-				mRtcEngine.setClientRole(options.getInt("clientRole"));
-			}
+			// if (options.hasKey("clientRole")) {
+			// 	mRtcEngine.setClientRole(options.getInt("clientRole"));
+			// }
 
 			FaceDetector.getInstance().init(rtcEventHandler);
 

@@ -84,7 +84,6 @@ export enum AudioScenario {
   channelProfile: ChannelProfile,
   videoEncoderConfig?: VideoEncoderConfig,
   dualStream: boolean,
-  clientRole: ClientRole,
   audioProfile: AudioProfile,
   audioScenario: AudioScenario,
 }

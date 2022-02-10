@@ -236,7 +236,6 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
   AgoraVideoEncoderConfiguration *video_encoder_config = [[AgoraVideoEncoderConfiguration new] initWithWidth:[options[@"videoEncoderConfig"][@"width"] integerValue] height:[options[@"videoEncoderConfig"][@"height"] integerValue] frameRate:[options[@"videoEncoderConfig"][@"frameRate"] integerValue] bitrate:[options[@"videoEncoderConfig"][@"bitrate"] integerValue] orientationMode: (AgoraVideoOutputOrientationMode)[options[@"videoEncoderConfig"][@"orientationMode"] integerValue]];
   [self.rtcEngine setVideoEncoderConfiguration:video_encoder_config];
   
-  [self.rtcEngine setClientRole:(AgoraClientRole)[options[@"clientRole"] integerValue]];
   [self.rtcEngine setAudioProfile:(AgoraAudioProfile)[options[@"audioProfile"] integerValue] scenario:(AgoraAudioScenario)[options[@"audioScenario"] integerValue]];
   
   //Enable Agora Native SDK be Interoperable with Agora Web SDK

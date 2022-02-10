@@ -73,7 +73,6 @@ export interface InitConfig {
     channelProfile: ChannelProfile;
     videoEncoderConfig?: VideoEncoderConfig;
     dualStream: boolean;
-    clientRole: ClientRole;
     audioProfile: AudioProfile;
     audioScenario: AudioScenario;
 }
