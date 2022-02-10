@@ -300,6 +300,8 @@ public class AgoraManager {
 		int uid = options.hasKey("uid") ? options.getInt("uid") : 0;
 		int clientRole = options.hasKey("clientRole") ? options.getInt("clientRole") : 2;
 
+		RtcChannel channel = getOrCreateChannel(channelName);
+
 		ChannelMediaOptions mediaOptions = new ChannelMediaOptions();
 
 		if (options.hasKey("channelMediaOptions")) {
@@ -316,7 +318,15 @@ public class AgoraManager {
 			mediaOptions.publishLocalVideo = publishLocalVideo;
 		}
 
-		RtcChannel channel = getOrCreateChannel(channelName);
+		if (options.hasKey("encryption")) {
+			ReadableMap encryptionOptions = options.getMap("encryption");
+			EncryptionConfig config = new EncryptionConfig();
+			config.encryptionKey = encryptionOptions.hasKey("key") ? encryptionOptions.getString("key") : "";
+			config.encryptionMode = EncryptionConfig.EncryptionMode.AES_128_XTS;
+
+			channel.enableEncryption(true, config);
+		}
+
 		channel.setClientRole(clientRole);
 
 		this.mLocalUid = uid;

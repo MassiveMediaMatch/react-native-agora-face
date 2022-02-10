@@ -347,17 +347,24 @@ RCT_EXPORT_METHOD(joinChannel:(NSDictionary *)options
 	}
     [AgoraConst share].localUid = (NSUInteger)[options[@"uid"] integerValue];
     
+    AgoraRtcChannel *channel = [self getOrCreateChannel:options[@"channelName"]];
+    
     AgoraRtcChannelMediaOptions *mediaOptions = [AgoraRtcChannelMediaOptions new];
     mediaOptions.autoSubscribeAudio = [options[@"channelMediaOptions"][@"autoSubscribeAudio"] boolValue];
     mediaOptions.autoSubscribeVideo = [options[@"channelMediaOptions"][@"autoSubscribeVideo"] boolValue];
     mediaOptions.publishLocalAudio = [options[@"channelMediaOptions"][@"publishLocalAudio"] boolValue];
     mediaOptions.publishLocalVideo = [options[@"channelMediaOptions"][@"publishLocalVideo"] boolValue];
     
-	AgoraRtcChannel *channel = [self getOrCreateChannel:options[@"channelName"]];
-	NSInteger res = [channel joinChannelByToken:options[@"token"] info:options[@"info"] uid:[AgoraConst share].localUid options:mediaOptions];
-	[channel setClientRole:[options[@"clientRole"] integerValue]];
-	
-    // NSInteger res = [self.rtcEngine joinChannelByToken:options[@"token"] channelId:options[@"channelName"] info:options[@"info"] uid:[AgoraConst share].localUid options:mediaOptions];
+    if (options[@"encryption"] != nil) {
+        AgoraEncryptionConfig *config = [[AgoraEncryptionConfig alloc] init];
+        config.encryptionKey = options[@"encryption"][@"key"];
+        config.encryptionMode = AgoraEncryptionModeAES128XTS;
+        
+        [channel enableEncryption:YES encryptionConfig:config];
+    }
+    
+    [channel setClientRole:[options[@"clientRole"] integerValue]];
+    NSInteger res = [channel joinChannelByToken:options[@"token"] info:options[@"info"] uid:[AgoraConst share].localUid options:mediaOptions];
     if (res == 0) {
         resolve(nil);
     } else {

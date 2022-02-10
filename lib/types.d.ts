@@ -26,6 +26,10 @@ export interface ChannelMediaOptions {
     publishLocalAudio: boolean;
     publishLocalVideo: boolean;
 }
+export interface EncryptionConfig {
+    enabled: boolean;
+    key: string;
+}
 export declare enum ChannelProfile {
     COMMUNICATION = 0,
     LIVE_BROACASTING = 1,
@@ -211,6 +215,7 @@ export interface JoinChannelOptions {
     token?: string;
     info?: Object;
     channelMediaOptions?: ChannelMediaOptions;
+    encryption?: EncryptionConfig;
 }
 export interface MuteRemoteStreamOptions {
     channelName: string;

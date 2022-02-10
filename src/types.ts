@@ -31,6 +31,10 @@ export interface ChannelMediaOptions {
   publishLocalVideo: boolean,
 }
 
+export interface EncryptionConfig {
+  key: string,
+}
+
 // https://docs.agora.io/en/Video/API%20Reference/react_native/enums/channelprofile.html
 export enum ChannelProfile {
 	COMMUNICATION = 0,
@@ -243,6 +247,7 @@ export interface JoinChannelOptions {
   token?: string,
   info?: Object,
   channelMediaOptions?: ChannelMediaOptions
+  encryption?: EncryptionConfig
 }
 
 export interface MuteRemoteStreamOptions {
