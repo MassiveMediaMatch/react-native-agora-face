@@ -380,6 +380,7 @@ RCT_EXPORT_METHOD(leaveChannel:(NSDictionary *)options
 			@"message": @"leaveChannel"
 		}];
 		
+		[channel destroy];
 		[self.channels removeObjectForKey:options[@"channelName"]];
 	} else {
 		res = [self.rtcEngine leaveChannel:^(AgoraChannelStats * _Nonnull stats) {
