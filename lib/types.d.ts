@@ -27,7 +27,6 @@ export interface ChannelMediaOptions {
     publishLocalVideo: boolean;
 }
 export interface EncryptionConfig {
-    enabled: boolean;
     key: string;
 }
 export declare enum ChannelProfile {
