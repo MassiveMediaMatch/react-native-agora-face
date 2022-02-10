@@ -349,7 +349,7 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
-	public void leaveChannel(ReadableMap options) {
+	public void leaveChannel(ReadableMap options, Promise promise) {
 		int res = AgoraManager.getInstance().leaveChannel(options);
 		if (res != 0) {
 			sendError(getReactApplicationContext(), res, "leaveChannel Failed");
