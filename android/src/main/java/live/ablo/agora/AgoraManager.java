@@ -327,7 +327,14 @@ public class AgoraManager {
 		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
 
 		if (agoraChannels.containsKey(channelName)) {
-			return agoraChannels.get(channelName).leaveChannel();
+			RtcChannel channel = agoraChannels.get(channelName);
+			int result = channel.leaveChannel();
+			channel.destroy();
+
+			// remove from channel
+			agoraChannels.remove(channelName);
+
+			return result;
 		}
 		return mRtcEngine.leaveChannel();
 	}
