@@ -103,6 +103,10 @@ export interface PublisherConfig {
     extraInfo: String;
     owner: boolean;
 }
+export interface ClientRoleOptions {
+    clientRole: ClientRole;
+    channelName: string;
+}
 export interface BackgroundImage {
     url: string;
     x: number;

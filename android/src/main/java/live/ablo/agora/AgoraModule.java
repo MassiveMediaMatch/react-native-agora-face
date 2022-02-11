@@ -319,8 +319,8 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	}
 
 	@ReactMethod
-	public void setClientRole(int role) {
-		int res = AgoraManager.getInstance().getEngine().setClientRole(role);
+	public void setClientRole(ReadableMap options) {
+		int res = AgoraManager.getInstance().setClientRole(options);
 		if (res != 0) {
 			sendError(getReactApplicationContext(), res, "setClientRole Failed");
 		}

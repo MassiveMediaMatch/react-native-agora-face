@@ -1,4 +1,4 @@
-import { InitConfig, Callback, AudioMixingOption, PlayEffectOption, AudioRecordingOption, AudioFrameOption, MixedAudioFrameOption, ImageOption, VideoStreamOption, DefaultVideoStreamOption, InjectStreamOption, RemoveInjectStreamOption, PublishStreamOption, RemovePublishStreamOption, LiveTranscodingOption, PositionOption, BeautyOption, LastmileProbeConfig, CameraCapturerConfiguration, ChannelMediaOptions, VideoEncoderConfigOrientationMode, JoinChannelOptions, MuteRemoteStreamOptions, MuteLocalStreamOptions } from "./types";
+import { InitConfig, Callback, AudioMixingOption, PlayEffectOption, AudioRecordingOption, AudioFrameOption, MixedAudioFrameOption, ImageOption, VideoStreamOption, DefaultVideoStreamOption, InjectStreamOption, RemoveInjectStreamOption, PublishStreamOption, RemovePublishStreamOption, LiveTranscodingOption, PositionOption, BeautyOption, LastmileProbeConfig, CameraCapturerConfiguration, ChannelMediaOptions, VideoEncoderConfigOrientationMode, JoinChannelOptions, MuteRemoteStreamOptions, MuteLocalStreamOptions, ClientRoleOptions } from "./types";
 /**
  * RtcEngine is the javascript object for control agora native sdk through react native bridge.
  *
@@ -146,7 +146,7 @@ declare class RtcEngine {
      * This method changes the client of role.
      * @param role (audience: 0, host: 1)
      */
-    static setClientRole(role: number): void;
+    static setClientRole(options: ClientRoleOptions): void;
     /**
      * change channel profile
      * @param channel

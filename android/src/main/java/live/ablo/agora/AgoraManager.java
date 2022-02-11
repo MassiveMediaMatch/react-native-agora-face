@@ -338,13 +338,26 @@ public class AgoraManager {
 		return channel.joinChannel(token, optionalInfo, uid, mediaOptions);
 	}
 
+	public int setClientRole(ReadableMap options) {
+		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
+		int clientRole = options.hasKey("clientRole") ? options.getInt("clientRole") : 2;
+
+		if (agoraChannels.containsKey(channelName)) {
+			RtcChannel channel = agoraChannels.get(channelName);
+			int result = channel.setClientRole(clientRole);
+
+			return result;
+		}
+		return mRtcEngine.setClientRole(clientRole);
+	}
+
 	public int leaveChannel(ReadableMap options) {
 		String channelName = options.hasKey("channelName") ? options.getString("channelName") : null;
 
 		if (agoraChannels.containsKey(channelName)) {
 			RtcChannel channel = agoraChannels.get(channelName);
 			int result = channel.leaveChannel();
-			channel.destroy();
+			// channel.destroy(); --> calling destroy here causes the leavechannel event not be called. We need to check why
 
 			// remove from channel
 			agoraChannels.remove(channelName);

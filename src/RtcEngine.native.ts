@@ -29,7 +29,8 @@ import {
     VideoEncoderConfigOrientationMode,
     JoinChannelOptions,
     MuteRemoteStreamOptions,
-    MuteLocalStreamOptions
+    MuteLocalStreamOptions,
+    ClientRoleOptions
 } from "./types";
 
 
@@ -233,8 +234,8 @@ class RtcEngine {
      * This method changes the client of role.
      * @param role (audience: 0, host: 1)
      */
-    public static setClientRole(role: number) {
-        ReactNativeAgoraFace.setClientRole(role);
+    public static setClientRole(options: ClientRoleOptions) {
+        ReactNativeAgoraFace.setClientRole(options);
     }
 
     /**

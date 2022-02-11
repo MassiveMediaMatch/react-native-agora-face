@@ -305,15 +305,23 @@ RCT_EXPORT_METHOD(getConnectionState
 }
 
 // set client role
-RCT_EXPORT_METHOD(setClientRole:(NSInteger)role
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject) {
-  NSInteger res = [self.rtcEngine setClientRole:(AgoraClientRole)role];
-  if (res == 0) {
-    resolve(nil);
-  } else {
-    reject(@(-1).stringValue, @(res).stringValue, nil);
-  }
+RCT_EXPORT_METHOD(setClientRole:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock) resolve
+                  reject:(RCTPromiseRejectBlock) reject)
+{
+    AgoraRtcChannel *channel = [self.channels objectForKey:options[@"channelName"]];
+    NSInteger res;
+    if (channel) {
+        res = [channel setClientRole:[options[@"clientRole"] integerValue]];
+    } else {
+        res = [self.rtcEngine setClientRole:[options[@"clientRole"] integerValue]];
+    }
+    
+    if (res == 0) {
+      resolve(nil);
+    } else {
+      reject(@(-1).stringValue, @(res).stringValue, nil);
+    }
 }
 
 // getOrCreateChannel (private)
