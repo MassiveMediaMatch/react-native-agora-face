@@ -390,11 +390,7 @@ RCT_EXPORT_METHOD(leaveChannel:(NSDictionary *)options
 	if (channel) {
 		res = [channel leaveChannel];
 		
-		[self sendEvent:AGLeaveChannel params:@{
-			@"message": @"leaveChannel"
-		}];
-		
-		[channel destroy];
+//		[channel destroy]; --> todo check as destroy might cause leave event nog to be triggered
 		[self.channels removeObjectForKey:options[@"channelName"]];
 	} else {
 		res = [self.rtcEngine leaveChannel:^(AgoraChannelStats * _Nonnull stats) {
@@ -2791,43 +2787,89 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 #pragma mark - <AgoraRtcChannelDelegate>
 
 - (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didOccurWarning:(AgoraWarningCode)warningCode {
-	[self sendEvent:AGWarning params:@{@"message": @"AgoraWarning", @"errorCode": @(warningCode)}];
+	[self sendEvent:AGWarning params:@{
+        @"channel": rtcChannel.getChannelId,
+        @"message": @"AgoraWarning",
+        @"errorCode": @(warningCode)
+    }];
 }
 
 - (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didOccurError:(AgoraErrorCode)errorCode {
-	[self sendEvent:AGError params:@{@"message": @"AgoraError", @"errorCode": @(errorCode)}];
+	[self sendEvent:AGError params:@{
+        @"channel": rtcChannel.getChannelId,
+        @"message": @"AgoraError",
+        @"errorCode": @(errorCode)
+    }];
 }
 
 - (void)rtcChannelDidJoinChannel:(AgoraRtcChannel* _Nonnull)rtcChannel withUid:(NSUInteger)uid elapsed:(NSInteger)elapsed {
-	[self sendEvent:AGUserJoined params:@{
-		@"uid": @(uid),
-		@"elapsed": @(elapsed)
+    [self sendEvent:AGJoinChannelSuccess params:@{
+      @"channel": rtcChannel.getChannelId,
+		  @"uid": @(uid),
+		  @"elapsed": @(elapsed),
 	}];
 }
 
 - (void)rtcChannelDidRejoinChannel:(AgoraRtcChannel* _Nonnull)rtcChannel withUid:(NSUInteger)uid elapsed:(NSInteger)elapsed {
 	[self sendEvent:AGRejoinChannelSuccess params:@{
-		@"channel": rtcChannel,
+		@"channel": rtcChannel.getChannelId,
 		@"uid": @(uid),
-		@"elapsed": @(elapsed)
+		@"elapsed": @(elapsed),
 	}];
+}
+
+- (void)rtcChannel:(AgoraRtcChannel *)rtcChannel remoteVideoStats:(AgoraRtcRemoteVideoStats *)stats {
+    [self sendEvent:AGRemoteVideoStats params:@{
+        @"channel": rtcChannel.getChannelId,
+        @"stats": @{
+            @"uid": @(stats.uid),
+            @"width": @(stats.width),
+            @"height": @(stats.height),
+            @"receivedBitrate": @(stats.receivedBitrate),
+            @"rendererOutputFrameRate": @(stats.rendererOutputFrameRate),
+            @"rxStreamType": @(stats.rxStreamType),
+            @"decoderOutputFrameRate": @(stats.decoderOutputFrameRate),
+            @"totalFrozenTime": @(stats.totalFrozenTime),
+            @"frozenRate": @(stats.frozenRate)
+        }
+    }];
 }
 
 - (void)rtcChannelDidLeaveChannel:(AgoraRtcChannel* _Nonnull)rtcChannel withStats:(AgoraChannelStats* _Nonnull)stats {
-	[self sendEvent:AGLeaveChannel params:@{
-		@"message": @"leaveChannel"
-	}];
+    [self sendEvent:AGLeaveChannel params:@{
+        @"channel": rtcChannel.getChannelId,
+        @"stats": @{
+            @"duration": @(stats.duration),
+            @"txBytes": @(stats.txBytes),
+            @"rxBytes": @(stats.rxBytes),
+            @"txAudioBytes": @(stats.txAudioBytes),
+            @"txVideoBytes": @(stats.txVideoBytes),
+            @"rxAudioBytes": @(stats.rxAudioBytes),
+            @"rxVideoBytes": @(stats.rxVideoBytes),
+            @"txPacketLossRate": @(stats.txPacketLossRate),
+            @"rxPacketLossRate": @(stats.rxPacketLossRate),
+            @"txAudioKBitrate": @(stats.txAudioKBitrate),
+            @"rxAudioKBitrate": @(stats.rxVideoKBitrate),
+            @"txVideoKBitrate": @(stats.txVideoKBitrate),
+            @"rxVideoKBitrate": @(stats.rxVideoKBitrate),
+            @"lastmileDelay": @(stats.lastmileDelay),
+            @"userCount": @(stats.userCount),
+            @"cpuAppUsage": @(stats.cpuAppUsage),
+            @"cpuTotalUsage": @(stats.cpuTotalUsage)
+        }
+    }];
 }
 
 - (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didClientRoleChanged:(AgoraClientRole)oldRole newRole:(AgoraClientRole)newRole {
-	[self sendEvent:AGClientRoleChanged params:@{
-		@"oldRole": @(oldRole),
-		@"newRole": @(newRole)
-	}];
+//	[self sendEvent:AGClientRoleChanged params:@{
+//		@"oldRole": @(oldRole),
+//		@"newRole": @(newRole)
+//	}];
 }
 
 - (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didJoinedOfUid:(NSUInteger)uid elapsed:(NSInteger)elapsed {
 	[self sendEvent:AGUserJoined params:@{
+      @"channel": rtcChannel.getChannelId,
 	  @"uid": @(uid),
 	  @"elapsed": @(elapsed)
 	}];
@@ -2835,58 +2877,60 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 
 - (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didOfflineOfUid:(NSUInteger)uid reason:(AgoraUserOfflineReason)reason {
 	[self sendEvent:AGUserOffline params:@{
+        @"channel": rtcChannel.getChannelId,
 		@"uid": @(uid),
 		@"reason": @(reason)
 	}];
 }
 
 - (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel connectionChangedToState:(AgoraConnectionStateType)state reason:(AgoraConnectionChangedReason)reason {
-	[self sendEvent:AGConnectionStateChanged params:@{
-	  @"state": @(state),
-	  @"reason": @(reason)
-	}];
+//	[self sendEvent:AGConnectionStateChanged params:@{
+//	  @"state": @(state),
+//	  @"reason": @(reason)
+//	}];
 }
 
 - (void)rtcChannelDidLost:(AgoraRtcChannel* _Nonnull)rtcChannel {
-	[self sendEvent:AGConnectionLost params:@{
-	  @"message": @"connectionLost"
-	}];
+//	[self sendEvent:AGConnectionLost params:@{
+//	  @"message": @"connectionLost"
+//	}];
 }
 
 - (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel tokenPrivilegeWillExpire:(NSString* _Nonnull)token {
-	[self sendEvent:AGTokenPrivilegeWillExpire params:@{
-		@"token": token
-	}];
+//	[self sendEvent:AGTokenPrivilegeWillExpire params:@{
+//		@"token": token
+//	}];
 }
 
 - (void)rtcChannelRequestToken:(AgoraRtcChannel* _Nonnull)rtcChannel {
-	[self sendEvent:AGRequestToken params:@{
-		@"message": @"RequestToken"
-	}];
+//	[self sendEvent:AGRequestToken params:@{
+//		@"message": @"RequestToken"
+//	}];
 }
 
 - (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel activeSpeaker:(NSUInteger)speakerUid {
-	[self sendEvent:AGActiveSpeaker params:@{
-		@"uid": @(speakerUid)
-	}];
+//	[self sendEvent:AGActiveSpeaker params:@{
+//		@"uid": @(speakerUid)
+//	}];
 }
 
 - (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel videoSizeChangedOfUid:(NSUInteger)uid size:(CGSize)size rotation:(NSInteger)rotation {
-	[self sendEvent:AGVideoSizeChanged params:@{
-		@"uid": @(uid),
-		@"width": @(size.width),
-		@"height": @(size.height),
-		@"rotation": @(rotation)
-	}];
+//	[self sendEvent:AGVideoSizeChanged params:@{
+//        @"channel": rtcChannel.getChannelId,
+//		@"uid": @(uid),
+//		@"width": @(size.width),
+//		@"height": @(size.height),
+//		@"rotation": @(rotation)
+//	}];
 }
 
 - (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel remoteVideoStateChangedOfUid:(NSUInteger)uid state:(AgoraVideoRemoteState)state reason:(AgoraVideoRemoteStateReason)reason elapsed:(NSInteger)elapsed {
-	[self sendEvent:AGRemoteVideoStateChanged params:@{
-	   @"uid": @(uid),
-	   @"state": @(state),
-	   @"reason": @(reason),
-	   @"elapsed": @(elapsed)
-	}];
+//	[self sendEvent:AGRemoteVideoStateChanged params:@{
+//	   @"uid": @(uid),
+//	   @"state": @(state),
+//	   @"reason": @(reason),
+//	   @"elapsed": @(elapsed)
+//	}];
 }
 
 - (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel superResolutionEnabledOfUid:(NSUInteger)uid enabled:(BOOL)enabled reason:(AgoraSuperResolutionStateReason)reason {
@@ -2894,12 +2938,12 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 }
 
 - (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel remoteAudioStateChangedOfUid:(NSUInteger)uid state:(AgoraAudioRemoteState)state reason:(AgoraAudioRemoteStateReason)reason elapsed:(NSInteger)elapsed {
-	[self sendEvent:AGRemoteAudioStateChanged params:@{
-	   @"uid": @(uid),
-	   @"state": @(state),
-	   @"reason": @(reason),
-	   @"elapsed": @(elapsed)
-	}];
+//	[self sendEvent:AGRemoteAudioStateChanged params:@{
+//	   @"uid": @(uid),
+//	   @"state": @(state),
+//	   @"reason": @(reason),
+//	   @"elapsed": @(elapsed)
+//	}];
 }
 
 - (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel didLocalPublishFallbackToAudioOnly:(BOOL)isFallbackOrRecover {
@@ -2915,10 +2959,6 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 }
 
 - (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel networkQuality:(NSUInteger)uid txQuality:(AgoraNetworkQuality)txQuality rxQuality:(AgoraNetworkQuality)rxQuality {
-	
-}
-
-- (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel remoteVideoStats:(AgoraRtcRemoteVideoStats* _Nonnull)stats {
 	
 }
 
