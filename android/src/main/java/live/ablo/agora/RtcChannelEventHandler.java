@@ -73,7 +73,7 @@ import static live.ablo.agora.AgoraConst.AGWarning;
 import static live.ablo.agora.AgoraConst.AG_PREFIX;
 import static live.ablo.agora.AgoraConst.AGonFacePositionChanged;
 
-public class RtcEventHandler extends IRtcChannelEventHandler {
+public class RtcChannelEventHandler extends IRtcChannelEventHandler {
 
 	private final ReactApplicationContext reactApplicationContext;
 
