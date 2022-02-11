@@ -36,6 +36,7 @@ public class AgoraManager {
 	private static AgoraManager sAgoraManager;
 
 	private RtcEngine mRtcEngine;
+	private RtcChannelEventHandler rtcChannelEventHandler;
 
 	private int mLocalUid = 0;
 
@@ -195,10 +196,12 @@ public class AgoraManager {
 	/**
 	 * initialize rtc engine
 	 */
-	public int init(Context context, RtcEventHandler rtcEventHandler, ReadableMap options) {
+	public int init(Context context, RtcEventHandler rtcEventHandler, RtcChannelEventHandler channelEventHandler, ReadableMap options) {
 		//create rtcEngine instance and setup rtcEngine eventHandler
 		Log.v("Agora", "init :" + options.toString());
 		try {
+			rtcChannelEventHandler = channelEventHandler;
+
 			RtcEngineConfig rtcEngineConfig = new RtcEngineConfig();
 			rtcEngineConfig.mAppId = options.getString("appid");
 			rtcEngineConfig.mContext = context;
@@ -286,6 +289,7 @@ public class AgoraManager {
 		}
 
 		RtcChannel channel = mRtcEngine.createRtcChannel(channelName);
+		channel.setRtcChannelEventHandler(rtcChannelEventHandler);
 
 		// Store channel reference
 		agoraChannels.put(channelName, channel);

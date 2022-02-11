@@ -134,11 +134,13 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	private static final String AgoraVideoMode = "VideoMode";
 
 	private final RtcEventHandler engineEventHandler;
+	private final RtcChannelEventHandler channelEventHandler;
 	private MediaObserver mediaObserver;
 
 	public AgoraModule(ReactApplicationContext reactContext) {
 		super(reactContext);
 		engineEventHandler = new RtcEventHandler(reactContext);
+		channelEventHandler = new RtcChannelEventHandler(reactContext);
 	}
 
 	@Override
@@ -255,7 +257,7 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 
 	@ReactMethod
 	public void init(ReadableMap options) {
-		AgoraManager.getInstance().init(getReactApplicationContext(), engineEventHandler, options);
+		AgoraManager.getInstance().init(getReactApplicationContext(), engineEventHandler, channelEventHandler, options);
 	}
 
 	@ReactMethod
