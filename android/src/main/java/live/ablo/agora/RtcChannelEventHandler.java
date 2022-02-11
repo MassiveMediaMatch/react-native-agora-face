@@ -77,7 +77,7 @@ public class RtcChannelEventHandler extends IRtcChannelEventHandler {
 
 	private final ReactApplicationContext reactApplicationContext;
 
-	RtcEventHandler(ReactApplicationContext reactApplicationContext) {
+	RtcChannelEventHandler(ReactApplicationContext reactApplicationContext) {
 		this.reactApplicationContext = reactApplicationContext;
 	}
 
