@@ -775,14 +775,18 @@ RCT_EXPORT_METHOD(muteAllRemoteVideoStreams:(BOOL)muted
 RCT_EXPORT_METHOD(muteRemoteVideoStream:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject) {
-  AgoraRtcChannel *channel = [self getOrCreateChannel:options[@"channelName"]];
-  NSInteger uid = (NSUInteger)[options[@"uid"] integerValue];
-  NSInteger res = [channel muteRemoteVideoStream:uid mute:[options[@"mute"] boolValue]];
-  if (res == 0) {
-    resolve(nil);
-  } else {
-    reject(@(-1).stringValue, @(res).stringValue, nil);
-  }
+    NSInteger res = 0;
+    NSInteger uid = (NSUInteger)[options[@"uid"] integerValue];
+    AgoraRtcChannel *channel = [self.channels objectForKey:options[@"channelName"]];
+    if (channel) {
+        res = [channel muteRemoteVideoStream:uid mute:[options[@"mute"] boolValue]];
+    }
+    
+    if (res == 0) {
+        resolve(nil);
+    } else {
+        reject(@(-1).stringValue, @(res).stringValue, nil);
+    }
 }
 
 RCT_EXPORT_METHOD(setDefaultMuteAllRemoteVideoStreams:(BOOL)mute
@@ -865,14 +869,18 @@ RCT_EXPORT_METHOD(muteAllRemoteAudioStreams:(BOOL)mute
 RCT_EXPORT_METHOD(muteRemoteAudioStream:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject) {
-  AgoraRtcChannel *channel = [self getOrCreateChannel:options[@"channelName"]];
-  NSInteger uid = (NSUInteger)[options[@"uid"] integerValue];
-  NSInteger res = [channel muteRemoteAudioStream:uid mute:[options[@"mute"] boolValue]];
-  if (res == 0) {
-    resolve(nil);
-  } else {
-    reject(@(-1).stringValue, @(res).stringValue, nil);
-  }
+    NSInteger res = 0;
+    NSInteger uid = (NSUInteger)[options[@"uid"] integerValue];
+    AgoraRtcChannel *channel = [self.channels objectForKey:options[@"channelName"]];
+    if (channel) {
+        res = [channel muteRemoteAudioStream:uid mute:[options[@"mute"] boolValue]];
+    }
+    
+    if (res == 0) {
+        resolve(nil);
+    } else {
+        reject(@(-1).stringValue, @(res).stringValue, nil);
+    }
 }
 
 // adjust recorcding signal volume
@@ -2915,13 +2923,13 @@ RCT_EXPORT_METHOD(toggleFaceDetectionStatusEvents:(BOOL)enabled resolve:(RCTProm
 }
 
 - (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel videoSizeChangedOfUid:(NSUInteger)uid size:(CGSize)size rotation:(NSInteger)rotation {
-//	[self sendEvent:AGVideoSizeChanged params:@{
-//        @"channel": rtcChannel.getChannelId,
-//		@"uid": @(uid),
-//		@"width": @(size.width),
-//		@"height": @(size.height),
-//		@"rotation": @(rotation)
-//	}];
+	[self sendEvent:AGVideoSizeChanged params:@{
+       @"channel": rtcChannel.getChannelId,
+		@"uid": @(uid),
+		@"width": @(size.width),
+		@"height": @(size.height),
+		@"rotation": @(rotation)
+	}];
 }
 
 - (void)rtcChannel:(AgoraRtcChannel* _Nonnull)rtcChannel remoteVideoStateChangedOfUid:(NSUInteger)uid state:(AgoraVideoRemoteState)state reason:(AgoraVideoRemoteStateReason)reason elapsed:(NSInteger)elapsed {
