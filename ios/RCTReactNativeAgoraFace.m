@@ -391,7 +391,11 @@ RCT_EXPORT_METHOD(destroyChannel:(NSDictionary *)options
 			res = [channel destroy];
 			[self.channels removeObjectForKey:options[@"channelName"]];
 	}
-	return res;
+	if (res == 0) {
+		resolve(nil);
+	} else {
+		reject(@(-1).stringValue, @(res).stringValue, nil);
+	}
 }
 
 // leave channel
