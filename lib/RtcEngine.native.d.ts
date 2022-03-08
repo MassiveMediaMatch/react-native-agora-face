@@ -164,6 +164,12 @@ declare class RtcEngine {
         channelName: string;
     }): Promise<any>;
     /**
+     * Destroy channel instance
+     * @param channelName
+     * @returns
+     */
+    static destroyChannel(channelName: string): Promise<any>;
+    /**
      * destroy
      *
      * This method stops event subscribe and destroy the RtcEngine instance's.

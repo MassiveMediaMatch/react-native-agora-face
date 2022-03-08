@@ -380,6 +380,20 @@ RCT_EXPORT_METHOD(joinChannel:(NSDictionary *)options
     }
 }
 
+// destroy channel
+RCT_EXPORT_METHOD(destroyChannel:(NSDictionary *)options
+				  resolve:(RCTPromiseResolveBlock) resolve
+				  reject:(RCTPromiseRejectBlock) reject)
+{
+	AgoraRtcChannel *channel = [self.channels objectForKey:options[@"channelName"]];
+	NSInteger res = -1;
+	if (channel) {
+			res = [channel destroy];
+			[self.channels removeObjectForKey:options[@"channelName"]];
+	}
+	return res;
+}
+
 // leave channel
 RCT_EXPORT_METHOD(leaveChannel:(NSDictionary *)options
 				  resolve:(RCTPromiseResolveBlock) resolve
@@ -391,7 +405,7 @@ RCT_EXPORT_METHOD(leaveChannel:(NSDictionary *)options
 		res = [channel leaveChannel];
 		
 //		[channel destroy]; --> todo check as destroy might cause leave event nog to be triggered
-		[self.channels removeObjectForKey:options[@"channelName"]];
+		// [self.channels removeObjectForKey:options[@"channelName"]];
 	} else {
 		res = [self.rtcEngine leaveChannel:^(AgoraChannelStats * _Nonnull stats) {
 		[self sendEvent:AGLeaveChannel params:@{
