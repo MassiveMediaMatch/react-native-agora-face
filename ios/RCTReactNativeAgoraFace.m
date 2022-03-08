@@ -381,15 +381,15 @@ RCT_EXPORT_METHOD(joinChannel:(NSDictionary *)options
 }
 
 // destroy channel
-RCT_EXPORT_METHOD(destroyChannel:(NSDictionary *)options
+RCT_EXPORT_METHOD(destroyChannel:(NSString *)channelName
 				  resolve:(RCTPromiseResolveBlock) resolve
 				  reject:(RCTPromiseRejectBlock) reject)
 {
-	AgoraRtcChannel *channel = [self.channels objectForKey:options[@"channelName"]];
+	AgoraRtcChannel *channel = [self.channels objectForKey:channelName];
 	NSInteger res = -1;
 	if (channel) {
 			res = [channel destroy];
-			[self.channels removeObjectForKey:options[@"channelName"]];
+			[self.channels removeObjectForKey:channelName];
 	}
 	if (res == 0) {
 		resolve(nil);
