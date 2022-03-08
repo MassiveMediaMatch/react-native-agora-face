@@ -362,7 +362,9 @@ public class AgoraModule extends ReactContextBaseJavaModule {
 	public void destroyChannel(String channelName, Promise promise) {
 		int res = AgoraManager.getInstance().destroyChannel(channelName);
 		if (res != 0) {
-			sendError(getReactApplicationContext(), res, "leaveChannel Failed");
+			sendError(getReactApplicationContext(), res, "destroyChannel Failed");
+		} else {
+			resolvePromiseFromResolve(res, promise);
 		}
 	}
 
