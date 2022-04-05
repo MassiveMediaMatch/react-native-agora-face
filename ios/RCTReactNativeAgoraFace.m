@@ -338,7 +338,9 @@ RCT_EXPORT_METHOD(setClientRole:(NSDictionary *)options
 	} else {
 		channel = [self.rtcEngine createRtcChannel:channelName];
 		[channel setRtcChannelDelegate:self];
-		[self.channels setObject:channel forKey:channelName];
+		if (channel) {
+			[self.channels setObject:channel forKey:channelName];
+		}
 		return channel;
 	}
 }
